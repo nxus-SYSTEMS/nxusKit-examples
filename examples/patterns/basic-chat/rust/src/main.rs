@@ -28,7 +28,7 @@ use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 use std::env;
 use std::time::Instant;
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse interactive mode flags
     let mut config = InteractiveConfig::from_args();
 

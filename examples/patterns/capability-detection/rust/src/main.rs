@@ -36,7 +36,7 @@ use nxuskit::prelude::*;
 use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 use std::env;
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse interactive mode flags (filter out --verbose and --step from args)
     let mut config = InteractiveConfig::from_args();
 
@@ -103,9 +103,11 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             provider.list_models()?
         }
         _ => {
-            eprintln!("Unknown provider: {}", provider_name);
-            eprintln!("Supported providers: openai, claude, ollama");
-            std::process::exit(1);
+            return Err(format!(
+                "Unknown provider: {}. Supported: openai, claude, ollama",
+                provider_name
+            )
+            .into());
         }
     };
 

@@ -354,8 +354,9 @@ cargo run -- --verbose --step
 
 ## Prerequisites
 
-- **Rust examples**: Rust 1.93+ with Cargo
-- **Go examples**: Go 1.24+
+- **nxusKit SDK** installed at `~/.nxuskit/sdk/current/` (see [top-level README](../README.md))
+- **Rust examples**: Rust 1.93+ with Cargo, plus `./scripts/setup-sdk-symlink.sh` (run once)
+- **Go examples**: Go 1.24+, plus `source ~/.nxuskit/sdk/current/scripts/setup-sdk.sh` (run once)
 - **Python examples**: Python 3.11+
 - **Local LLM**: Ollama running on localhost:11434 (or set `OLLAMA_HOST`)
 
@@ -409,8 +410,16 @@ go test -v ./...
 
 ### Rust
 
-Examples use path dependencies pointing to the local nxuskit crate since it's not
-yet published to crates.io. Once published, examples will use versioned dependencies.
+Rust examples depend on the nxusKit SDK installed at `~/.nxuskit/sdk/current/rust/`.
+Run the setup script once after cloning to generate the Cargo paths override:
+
+```bash
+./scripts/setup-sdk-symlink.sh
+```
+
+This generates `.cargo/config.toml` (git-ignored) which tells Cargo to resolve the
+`nxuskit` crate from your installed SDK. Without this step, builds fail with a clear
+error message pointing to the setup script.
 
 ```bash
 # Build from example directory

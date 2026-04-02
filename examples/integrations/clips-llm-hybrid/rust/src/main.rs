@@ -92,12 +92,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Rules file is in parent directory (shared between Rust and Go implementations)
         let rules_path = Path::new("../ticket-routing.clp");
+        let start = std::time::Instant::now();
         match analyze_ticket(&provider, "llama3", ticket_text, rules_path).await {
             Ok(analysis) => {
+                let elapsed_ms = start.elapsed().as_millis() as u64;
                 // Show response in verbose mode
                 config.print_response(
                     200,
-                    0,
+                    elapsed_ms,
                     &serde_json::json!({
                         "team": &analysis.team,
                         "sla_hours": analysis.sla_hours,

@@ -292,13 +292,15 @@ async fn run_analyze(
         interactive.print_request("POST", "llm://provider/chat", &request);
 
         println!("\n## Narrative Analysis\n");
+        let start = std::time::Instant::now();
         match llm::generate_narrative(&analysis).await {
             Ok(narrative_text) => {
+                let elapsed_ms = start.elapsed().as_millis() as u64;
                 // Verbose mode: show LLM response
                 let response = serde_json::json!({
                     "narrative": narrative_text
                 });
-                interactive.print_response(200, 0, &response);
+                interactive.print_response(200, elapsed_ms, &response);
                 println!("{}", narrative_text);
             }
             Err(e) => eprintln!(
@@ -577,13 +579,15 @@ async fn run_transform(
         });
         interactive.print_request("POST", "llm://provider/chat", &request);
 
+        let start = std::time::Instant::now();
         match llm::transform_with_prompt(&mut sequence, prompt_text).await {
             Ok(description) => {
+                let elapsed_ms = start.elapsed().as_millis() as u64;
                 // Verbose mode: show LLM response
                 let response = serde_json::json!({
                     "description": description
                 });
-                interactive.print_response(200, 0, &response);
+                interactive.print_response(200, elapsed_ms, &response);
                 eprintln!("LLM transformation: {}", description);
             }
             Err(e) => {

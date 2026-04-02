@@ -98,12 +98,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }),
         );
 
+        let start = std::time::Instant::now();
         match provider.chat(request) {
             Ok(response) => {
+                let elapsed_ms = start.elapsed().as_millis() as u64;
                 // Show response in verbose mode
                 config.print_response(
                     200,
-                    0,
+                    elapsed_ms,
                     &serde_json::json!({
                         "content_length": response.content.len(),
                         "type": "CLIPS inference result"

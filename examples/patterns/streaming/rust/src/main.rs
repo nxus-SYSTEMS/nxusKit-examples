@@ -28,7 +28,7 @@ use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 use std::env;
 use std::time::Instant;
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse interactive mode flags
     let mut config = InteractiveConfig::from_args();
 
@@ -118,13 +118,13 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                 chunk_count += 1;
 
                 // Verbose: Show each SSE chunk
-                if !chunk.content.is_empty() {
-                    config.print_stream_chunk(chunk_count, &chunk.content);
+                if !chunk.delta.is_empty() {
+                    config.print_stream_chunk(chunk_count, &chunk.delta);
                 }
 
-                // nxusKit: Normalized chunk structure - content contains new text
-                if !chunk.content.is_empty() {
-                    print!("{}", chunk.content);
+                // nxusKit: Normalized chunk structure - delta contains new text
+                if !chunk.delta.is_empty() {
+                    print!("{}", chunk.delta);
                     use std::io::Write;
                     std::io::stdout().flush()?;
                 }

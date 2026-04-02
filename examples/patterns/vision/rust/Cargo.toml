@@ -6,8 +6,10 @@ publish = false
 
 [dependencies]
 nxuskit-examples-interactive = { path = "../../../shared/rust" }
-nxuskit = { path = "../../../../packages/nxuskit" }
-base64 = "0.22"
+nxuskit = { path = "../../../../sdk/nxuskit-rust" }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }
 
 [profile.release]
 panic = "abort"

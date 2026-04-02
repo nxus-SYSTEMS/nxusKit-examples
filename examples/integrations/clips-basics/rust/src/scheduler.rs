@@ -205,10 +205,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Streaming facts as they are derived:");
     while let Some(Ok(chunk)) = stream.next_chunk() {
-        if !chunk.content.is_empty() {
+        if !chunk.delta.is_empty() {
             fact_count += 1;
             // Parse the fact
-            if let Ok(fact) = serde_json::from_str::<serde_json::Value>(&chunk.content) {
+            if let Ok(fact) = serde_json::from_str::<serde_json::Value>(&chunk.delta) {
                 let template = fact.get("template").and_then(|t| t.as_str()).unwrap_or("?");
                 println!("  Chunk {}: {} fact", fact_count, template);
             } else {
@@ -240,10 +240,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Streaming rule firings:");
     while let Some(Ok(chunk)) = stream.next_chunk() {
-        if !chunk.content.is_empty() {
+        if !chunk.delta.is_empty() {
             rule_count += 1;
             // Parse the rule chunk
-            if let Ok(rule_output) = serde_json::from_str::<serde_json::Value>(&chunk.content) {
+            if let Ok(rule_output) = serde_json::from_str::<serde_json::Value>(&chunk.delta) {
                 let rule_name = rule_output
                     .get("rule_name")
                     .and_then(|r| r.as_str())

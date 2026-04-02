@@ -5,7 +5,7 @@
 - stream_with_callback for real-time streaming with a processing hook
 - Manual stream iteration for fine-grained control
 - Budget-based early cancellation (stop consuming after N tokens)
-- StreamChunk fields: delta, usage, stop_reason
+- StreamChunk fields: delta, usage, finish_reason
 
 ## Interactive Modes
 - `--verbose` or `-v`: Show raw SSE chunks as they arrive

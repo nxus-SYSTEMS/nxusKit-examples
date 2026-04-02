@@ -28,7 +28,7 @@ use nxuskit::prelude::*;
 use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 use std::env;
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse interactive mode flags
     let mut config = InteractiveConfig::from_args();
 
@@ -113,14 +113,22 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
 
     // nxusKit: Unified interface enables easy multi-provider comparison
+    let start = std::time::Instant::now();
     let claude_result = claude.chat(claude_request);
+    let claude_ms = start.elapsed().as_millis() as u64;
+
+    let start = std::time::Instant::now();
     let openai_result = openai.chat(openai_request);
+    let openai_ms = start.elapsed().as_millis() as u64;
+
+    let start = std::time::Instant::now();
     let ollama_result = ollama.chat(ollama_request);
+    let ollama_ms = start.elapsed().as_millis() as u64;
 
     // nxusKit: All providers return Result<ChatResponse, NxuskitError> - same handling code
     match &claude_result {
         Ok(response) => {
-            config.print_response(200, 0, response);
+            config.print_response(200, claude_ms, response);
             println!("\nClaude ({})", response.model);
             println!("{}", response.content);
             let total =
@@ -132,7 +140,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     match &openai_result {
         Ok(response) => {
-            config.print_response(200, 0, response);
+            config.print_response(200, openai_ms, response);
             println!("\nOpenAI ({})", response.model);
             println!("{}", response.content);
             let total =
@@ -144,7 +152,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     match &ollama_result {
         Ok(response) => {
-            config.print_response(200, 0, response);
+            config.print_response(200, ollama_ms, response);
             println!("\nOllama ({})", response.model);
             println!("{}", response.content);
             let total =
@@ -160,18 +168,18 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 }
 
 // nxusKit: Provider creation uses consistent builder pattern
-fn create_claude_provider() -> std::result::Result<NxuskitProvider, Box<dyn std::error::Error>> {
+fn create_claude_provider() -> Result<NxuskitProvider, Box<dyn std::error::Error>> {
     let api_key =
         env::var("ANTHROPIC_API_KEY").map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
     Ok(ClaudeProvider::builder().api_key(api_key).build()?)
 }
 
-fn create_openai_provider() -> std::result::Result<NxuskitProvider, Box<dyn std::error::Error>> {
+fn create_openai_provider() -> Result<NxuskitProvider, Box<dyn std::error::Error>> {
     let api_key =
         env::var("OPENAI_API_KEY").map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
     Ok(OpenAIProvider::builder().api_key(api_key).build()?)
 }
 
-fn create_ollama_provider() -> std::result::Result<NxuskitProvider, Box<dyn std::error::Error>> {
+fn create_ollama_provider() -> Result<NxuskitProvider, Box<dyn std::error::Error>> {
     Ok(OllamaProvider::builder().build()?)
 }

@@ -54,6 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Show request in verbose mode
     config.print_request("POST", "http://localhost:11434/api/chat", &payload);
 
+    let stream_start = std::time::Instant::now();
     let response = client
         .post("http://localhost:11434/api/chat")
         .json(&payload)
@@ -130,9 +131,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Response: {:?}", response_content);
 
     // Show summary in verbose mode
+    let stream_elapsed_ms = stream_start.elapsed().as_millis() as u64;
     config.print_response(
         200,
-        0,
+        stream_elapsed_ms,
         &serde_json::json!({
             "chunks": chunk_count,
             "bytes": total_bytes,

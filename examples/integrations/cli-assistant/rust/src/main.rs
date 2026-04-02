@@ -38,9 +38,9 @@ fn generate_command(
     io::stdout().flush()?;
 
     while let Some(Ok(chunk)) = stream.next_chunk() {
-        print!("{}", chunk.content);
+        print!("{}", chunk.delta);
         io::stdout().flush()?;
-        output.push_str(&chunk.content);
+        output.push_str(&chunk.delta);
     }
     println!();
 
@@ -98,9 +98,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }),
         );
 
+        let start = std::time::Instant::now();
         match generate_command(&provider, query) {
             Ok(output) => {
-                config.print_response(200, 0, &serde_json::json!({ "command": output }));
+                let elapsed_ms = start.elapsed().as_millis() as u64;
+                config.print_response(200, elapsed_ms, &serde_json::json!({ "command": output }));
             }
             Err(e) => println!("Error: {}", e),
         }

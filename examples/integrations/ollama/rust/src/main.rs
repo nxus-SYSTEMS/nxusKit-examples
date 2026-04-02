@@ -106,9 +106,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     config.print_request("POST", "http://localhost:11434/api/chat", &request);
 
+    let start = std::time::Instant::now();
     let response = provider.chat(request)?;
+    let elapsed_ms = start.elapsed().as_millis() as u64;
 
-    config.print_response(200, 0, &response);
+    config.print_response(200, elapsed_ms, &response);
     println!("Response: {}", response.content);
     println!(
         "Tokens: {} input, {} output\n",

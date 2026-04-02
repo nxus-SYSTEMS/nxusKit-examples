@@ -35,7 +35,7 @@ use nxuskit::prelude::*;
 use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 use std::env;
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut config = InteractiveConfig::from_args();
 
     println!("=== LM Studio Provider Example ===\n");
@@ -149,12 +149,14 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                 }),
             );
 
+            let start = std::time::Instant::now();
             match provider.chat(request) {
                 Ok(response) => {
+                    let elapsed_ms = start.elapsed().as_millis() as u64;
                     // Show response in verbose mode
                     config.print_response(
                         200,
-                        0,
+                        elapsed_ms,
                         &serde_json::json!({
                             "model": &response.model,
                             "content_length": response.content.len(),
@@ -216,8 +218,8 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                     for chunk_result in &mut stream {
                         match chunk_result {
                             Ok(chunk) => {
-                                if !chunk.content.is_empty() {
-                                    print!("{}", chunk.content);
+                                if !chunk.delta.is_empty() {
+                                    print!("{}", chunk.delta);
                                     std::io::stdout().flush()?;
                                 }
                             }

@@ -38,7 +38,7 @@ pub fn stream_with_budget(
     let mut budget_reached = false;
 
     while let Some(Ok(chunk)) = stream.next_chunk() {
-        content.push_str(&chunk.content);
+        content.push_str(&chunk.delta);
 
         // Estimate tokens: ~4 characters per token (conservative)
         let estimated_tokens = (content.len() / 4) as u32;

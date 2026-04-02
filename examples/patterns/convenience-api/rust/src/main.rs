@@ -40,7 +40,7 @@
 use nxuskit::prelude::*;
 use nxuskit_examples_interactive::{InteractiveConfig, StepAction};
 
-fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse interactive mode flags
     let mut config = InteractiveConfig::from_args();
 
@@ -159,7 +159,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                     for chunk_result in &mut stream {
                         match chunk_result {
                             Ok(chunk) => {
-                                print!("{}", chunk.content);
+                                print!("{}", chunk.delta);
                                 std::io::stdout().flush()?;
                             }
                             Err(e) => {

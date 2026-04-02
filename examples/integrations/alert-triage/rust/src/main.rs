@@ -83,12 +83,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }),
     );
 
+    let start = std::time::Instant::now();
     match triage_alerts(&provider, "llama3", &alerts).await {
         Ok(results) => {
+            let elapsed_ms = start.elapsed().as_millis() as u64;
             // Show response in verbose mode
             config.print_response(
                 200,
-                0,
+                elapsed_ms,
                 &serde_json::json!({
                     "results_count": results.len(),
                     "alerts_processed": results.iter().map(|r| &r.alertname).collect::<Vec<_>>()

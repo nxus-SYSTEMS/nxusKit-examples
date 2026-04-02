@@ -80,7 +80,7 @@
       "difficulty": "starter",
       "tagline": "Run the same prompt across Claude, OpenAI, and Ollama simultaneously using one unified interface that normalizes responses and token usage.",
       "blurb": "Query multiple LLM providers concurrently and compare responses through a single, normalized API. nxusKit's provider abstraction layer wraps Claude, OpenAI, and Ollama behind a shared interface, so every call returns the same ChatResponse type with consistent token usage data. Implementations in Rust, Go, and Python demonstrate the pattern using concurrent execution — goroutines, ThreadPoolExecutor, or async calls — while provider-agnostic error handling ensures one failing provider never blocks the others.",
-      "content_hash": "7d4d506557e7fe1d078c280c854e0de6e5333219a93bba9f82aac42db06dcca7"
+      "content_hash": "41993861824cbc7795d75b58e12dd2894da22fa06e0c898cbcce4275889c278d"
     },
     {
       "name": "convenience-api",
@@ -153,7 +153,7 @@
       "difficulty": "starter",
       "tagline": "Stop hardcoding model names — query provider capabilities at runtime and let task requirements drive model selection across any LLM backend.",
       "blurb": "Capability Detection gives you a provider-agnostic way to inspect model metadata at runtime and route requests to the right model for the job. nxusKit's ListModels API returns normalized ModelInfo — context window size, vision support, modalities — across OpenAI, Claude, and Ollama through a single consistent interface. Your code filters by what a model can do rather than what it's named, making it straightforward to build adaptive middleware or feature-gated UX that degrades gracefully as your provider lineup changes. Available in Go and Rust.",
-      "content_hash": "498205f03d0796f0c5eff163a31c13ed49dc9ec6f8f779e81a073da803f4220b"
+      "content_hash": "e153b73732492d4d90ca39c56e8f797b36251704fe3e30d30dd664099725c112"
     },
     {
       "name": "cost-routing",
@@ -229,7 +229,7 @@
       "difficulty": "starter",
       "tagline": "Chain multiple LLM providers together so a failed request automatically reroutes to the next available provider without changing your application code.",
       "blurb": "Keep your AI service running even when individual providers fail by automatically routing requests down a prioritized provider chain until one succeeds. The retry-fallback pattern wraps any collection of LLMProvider implementations in a sequential failover loop, aggregating errors and returning the first successful response. Available in Go, Rust, and Python, it works with Claude, OpenAI, Ollama, or any custom provider that implements the LLMProvider interface. Part of the nxusKit Community edition, this starter example requires no additional dependencies beyond the SDK.",
-      "content_hash": "89e0f6927d1eb87e816dd3d3457af19a0b6bedfd0ba6f56ae55f638d3a685da5"
+      "content_hash": "24a786fdf03e69e3d01955c9e3319771407e7778b6e4068d919ee04b87694669"
     },
     {
       "name": "structured-output",
@@ -334,7 +334,7 @@
       "difficulty": "intermediate",
       "tagline": "Send images alongside text to any LLM provider using one consistent API that handles encoding, formatting, and provider differences for you.",
       "blurb": "The vision example shows you how to build multimodal LLM requests—combining text prompts with images—using a single fluent API that works across Claude and OpenAI. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, and Rust, covering use cases from image captioning and visual QA to document understanding.",
-      "content_hash": "d4da263add2cac82851c6384270b16e05ee8745b610e6d2108f9037dd6de765a"
+      "content_hash": "d3e87502dd78c936d3771c0bbe432616e87161867c563969067a7706dbb0a889"
     },
     {
       "name": "auth-helper",
@@ -463,7 +463,7 @@
       "difficulty": "starter",
       "tagline": "Run open-source LLMs on your own hardware using the same nxusKit interface you already use for Claude and OpenAI.",
       "blurb": "The Ollama integration lets you run LLM inference entirely on your own machine, with no API keys, no usage costs, and no data leaving your environment. nxusKit wraps your local Ollama server behind the same provider interface used for cloud models, so switching between local and hosted inference requires no code changes. Available for Go, Rust, and Python, this starter-tier example covers provider setup, model discovery, synchronous chat, and streaming responses, making it a practical foundation for on-premise deployments and air-gapped environments.",
-      "content_hash": "41485e2b2de1c104313ab464497152b90e23af644afa49a7290247c465d243ab"
+      "content_hash": "76abaeb4411d94193c30a5f156155a75d8c80a83640e4219fd78e940652904a2"
     },
     {
       "name": "lmstudio",
@@ -487,7 +487,7 @@
       "difficulty": "starter",
       "tagline": "Run LLM inference on your own machine — connect nxusKit to LM Studio and prototype without cloud dependencies or API keys.",
       "blurb": "The lmstudio example gives developers a working integration between nxusKit and LM Studio, enabling fully local LLM inference without cloud credentials or network dependencies. It connects to LM Studio's OpenAI-compatible HTTP server, discovers loaded models automatically, and runs both synchronous and streaming chat completions. Implementations are available in Go and Rust, making it a practical starting point for offline prototyping or local testing workflows on the Community SDK edition.",
-      "content_hash": "0b1e7444b8fee3b8ecfb15f87fc7975b1bb86fada27a7781d766e816ccc575ac"
+      "content_hash": "cdbfeab09532b467b85592a377a00f006aa17ac3f96a6a4ec0de37df82731b57"
     },
     {
       "name": "alert-triage",
@@ -511,7 +511,7 @@
       "difficulty": "starter",
       "tagline": "Turn alert noise into prioritized action by letting an LLM classify severity, surface root causes, and recommend remediation steps automatically.",
       "blurb": "The alert-triage example gives your observability pipeline an AI-powered second opinion, automatically classifying incoming alerts by priority and generating actionable remediation steps. It sends batches of Alertmanager-format alerts to an LLM and parses the structured JSON response into typed triage results covering priority, likely cause, and suggested actions. Implementations are available in both Go and Rust using the nxusKit community SDK, and a MockProvider makes the logic straightforward to unit test without a live model. It runs against any Ollama-compatible local model or cloud provider.",
-      "content_hash": "34e9cfbfde287ebdf39533206f79e0aadc2997b7bbccb495368b53c9e2a4dace"
+      "content_hash": "e82729ec0cb5ea77996bcf139e3a71a20ecc21a236b61aa907bb7dfee1c1607c"
     },
     {
       "name": "cli-assistant",
@@ -535,7 +535,7 @@
       "difficulty": "starter",
       "tagline": "Turn plain English into shell commands instantly — build a streaming CLI assistant that speaks your language and runs in your terminal.",
       "blurb": "Build a terminal assistant that translates plain English into executable shell commands, complete with real-time streaming output as each command is generated. The example wires an LLM backend — via Ollama locally or a cloud provider — to a lightweight CLI interface, passing natural language queries through a structured system prompt and streaming the response token by token. Implementations are available in both Go and Rust using the nxusKit SDK, making this a practical starting point for developer productivity tools, command-line copilots, or any application that needs conversational shell interaction.",
-      "content_hash": "d1216a098eb7b89d467672e8e98ae63e18fe17beb8c25e66e84e46df2f2bab76"
+      "content_hash": "037da96eda19848561858ff03708059daa7900eeefd716e4f29ef658a156c6ec"
     },
     {
       "name": "clips-basics",
@@ -559,7 +559,7 @@
       "difficulty": "intermediate",
       "tagline": "Bring deterministic rule-based logic to your applications by driving the CLIPS inference engine directly through the nxusKit SDK.",
       "blurb": "Wire a production-grade expert system into your application using CLIPS rules and the nxusKit SDK, with full control over facts, inference, and conclusions. The CLIPS provider accepts structured JSON facts as input and returns derived conclusions after running the rule engine, keeping your business logic declarative and auditable. Examples span animal classification, medical triage, inventory management, task scheduling, and multi-stage pipelines, implemented in Go and Rust with shared wire types. Available on the Community edition.",
-      "content_hash": "2433cedfea0ff4caac94a5fc7cd3737bac9f7e8a086b48d3eb35d10bcd02ccac"
+      "content_hash": "089f4fdd1fc9caaa0d63c170f202e2907a459c247dcd18ab3f74a2560411a4b8"
     },
     {
       "name": "clips-llm-hybrid",
@@ -586,7 +586,7 @@
       "difficulty": "intermediate",
       "tagline": "Combine deterministic CLIPS rules with LLM reasoning to build AI pipelines that are both fluent and auditable.",
       "blurb": "clips-llm-hybrid shows you how to wire CLIPS expert system rules and an LLM together in a single, auditable pipeline — so your AI can understand free-form input and still apply policy-compliant decisions every time. An LLM first classifies unstructured text into structured facts, CLIPS fires deterministic routing rules against those facts, then a second LLM pass generates a human-friendly response. Both Go and Rust implementations share the same ClipsProvider interface, meaning CLIPS and LLM calls are interchangeable at the API level. Practical for regulated industries, support automation, or any workflow where explainability is non-negotiable.",
-      "content_hash": "341176404b979dbf1c84cb7630cb4d37da55d604015f04707c9237259354ff2f"
+      "content_hash": "ff5b0482e05f991db6ef0cb542422c3f9a49b15c0ed8385eba4336c74aa0d11d"
     },
     {
       "name": "bn-solver-clips-pipeline",
@@ -769,7 +769,7 @@
       "difficulty_override_reason": "Extremely high SLOC (4168 avg) and file count (19.5 avg) indicate advanced complexity despite only 2 tech_tags",
       "tagline": "Analyze, score, and transform MIDI and MusicXML sequences using CLIPS rule-based music theory and LLM-powered narrative and transformation.",
       "blurb": "Riffer gives developers a complete pipeline for music sequence analysis and transformation, from key detection to six-dimension musicality scoring to format conversion. It combines a deterministic music theory engine—built on the Krumhansl-Schmuckler algorithm and CLIPS rule-based scoring—with optional LLM integration for natural language transforms and prose narrative output. Available in Rust and Go, Riffer reads and writes MIDI and MusicXML, supports algorithmic operations like transpose, invert, retrograde, augment, and diminish, and serves as a working reference for integrating nxusKit's CLIPS and LLM providers in a Pro-tier application.",
-      "content_hash": "61e6d9849178c59ae190a47638b759bdb2454ebdc3bfd719bdf00c59e07c23da"
+      "content_hash": "757c2d11b7a7dd6da6f727e997a49089e26f2683f0a11a362b2a9cdf531b2a0d"
     },
     {
       "name": "ruler",

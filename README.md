@@ -9,7 +9,8 @@
 ```bash
 # 1. Install the SDK (see nxusKit Getting Started guide)
 # 2. Set up this project
-source ~/.nxuskit/sdk/current/scripts/setup-sdk.sh
+source ~/.nxuskit/sdk/current/scripts/setup-sdk.sh   # Go, env vars, library paths
+./scripts/setup-sdk-symlink.sh                        # Rust Cargo paths override
 
 # 3. Run an example
 cargo run --manifest-path examples/patterns/basic-chat/rust/Cargo.toml    # Rust
@@ -75,17 +76,20 @@ scripts/            Build and test helpers
 
 ## Building
 
-All examples require the nxusKit SDK. Run `setup-sdk.sh` once after cloning:
+All examples require the nxusKit SDK. Run these once after cloning:
 
 ```bash
+# Set up Go workspace, env vars, and native library paths
 source ~/.nxuskit/sdk/current/scripts/setup-sdk.sh
+
+# Set up Rust Cargo paths override (generates .cargo/config.toml)
+./scripts/setup-sdk-symlink.sh
 ```
 
-This creates the necessary symlinks and sets environment variables for Rust (`packages/nxuskit`), Go (`go.work`), and native library paths.
+The first script creates Go workspace files and exports environment variables. The second generates a `.cargo/config.toml` that tells Cargo where to find the installed Rust SDK (the generated file is `.gitignore`d — each developer runs this once).
 
 ### Rust
 ```bash
-export NXUSKIT_SDK_DIR=~/.nxuskit/sdk/current
 cargo run --manifest-path examples/<category>/<name>/rust/Cargo.toml
 ```
 

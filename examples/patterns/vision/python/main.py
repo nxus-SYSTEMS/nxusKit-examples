@@ -3,9 +3,10 @@
 
 ## nxusKit Features Demonstrated
 - Multimodal message construction (text + images)
+- Capability detection (supports_vision, max_images)
+- Per-request model override (model= keyword argument)
 - Fluent image attachment API (with_image_url, with_image_file)
 - Provider-specific image handling abstraction
-- URL-based and file-based image support
 
 ## Interactive Modes
 - `--verbose` or `-v`: Show raw request/response data
@@ -94,6 +95,34 @@ def run_claude_example(config: InteractiveConfig):
 
     # nxusKit: Provider factory creates vision-capable provider
     provider = Provider.claude(model="claude-haiku-4-5-20251001", api_key=api_key)
+
+    # Step: Checking vision capabilities
+    if (
+        config.step_pause(
+            "Checking for vision-capable models...",
+            [
+                "nxusKit: Capability detection - query models before making requests",
+                "supports_vision() checks if a model can handle image inputs",
+            ],
+        )
+        == StepAction.QUIT
+    ):
+        return 0
+
+    # nxusKit: Capability detection - query models before making requests
+    print("Checking for vision-capable models...")
+    models = provider.list_models()
+    vision_models = [m for m in models if m.supports_vision()]
+
+    if not vision_models:
+        print(
+            "No vision-capable models reported. Proceeding with claude-haiku-4-5 (supports vision).\n"
+        )
+    else:
+        print(f"Found {len(vision_models)} vision-capable models:")
+        for m in vision_models:
+            print(f"   - {m.name}")
+        print()
 
     # Step: Single image request
     if (
@@ -211,15 +240,41 @@ def run_openai_example(config: InteractiveConfig):
             "Creating OpenAI provider...",
             [
                 "nxusKit: Same pattern for OpenAI",
-                "Vision models handle images automatically",
+                "Per-request model= override allows one provider for multiple models",
             ],
         )
         == StepAction.QUIT
     ):
         return 0
 
-    # nxusKit: Same pattern for OpenAI - vision models handle images automatically
+    # nxusKit: One provider handles multiple models via per-request model= override
     provider = Provider.openai(model="gpt-4o-mini", api_key=api_key)
+
+    # Step: Checking vision capabilities
+    if (
+        config.step_pause(
+            "Checking for vision-capable models...",
+            [
+                "nxusKit: Capability detection works across providers",
+                "OpenAI's model list may not expose all capabilities",
+            ],
+        )
+        == StepAction.QUIT
+    ):
+        return 0
+
+    print("Checking for vision-capable models...")
+    models = provider.list_models()
+    vision_models = [m for m in models if m.supports_vision()]
+
+    if not vision_models:
+        print("Note: OpenAI model list doesn't expose vision capability metadata.")
+        print("Using gpt-4o which supports vision.\n")
+    else:
+        print(f"Found {len(vision_models)} vision-capable models:")
+        for m in vision_models:
+            print(f"   - {m.name}")
+        print()
 
     # Step: Single image request
     if (
@@ -234,7 +289,7 @@ def run_openai_example(config: InteractiveConfig):
     ):
         return 0
 
-    print("Example 1: Image from URL")
+    print("Example 1: Image from URL (gpt-4o-mini)")
     print("-" * 40)
 
     # nxusKit: Same fluent API works for OpenAI
@@ -248,6 +303,7 @@ def run_openai_example(config: InteractiveConfig):
         "https://api.openai.com/v1/chat/completions",
         {
             "messages": [{"role": "user", "content": "[text + image]"}],
+            "model": "gpt-4o-mini",
             "max_tokens": 300,
         },
     )
@@ -272,8 +328,8 @@ def run_openai_example(config: InteractiveConfig):
         config.step_pause(
             "Example 2: High-detail analysis with GPT-4o...",
             [
-                "Full GPT-4o provides more detailed image analysis",
-                "Better for complex diagrams and fine details",
+                "nxusKit: Per-request model= override switches to gpt-4o",
+                "Same provider, different model — no need to create a second provider",
             ],
         )
         == StepAction.QUIT
@@ -283,9 +339,6 @@ def run_openai_example(config: InteractiveConfig):
     print("Example 2: High-detail analysis (GPT-4o)")
     print("-" * 40)
 
-    # Use full GPT-4o for detailed analysis
-    provider_hd = Provider.openai(model="gpt-4o", api_key=api_key)
-
     msg = Message.user(
         "Analyze this diagram in detail. What elements does it contain?"
     ).with_image_url(
@@ -294,7 +347,8 @@ def run_openai_example(config: InteractiveConfig):
 
     try:
         start = time.time()
-        response = provider_hd.chat([msg], max_tokens=500)
+        # nxusKit: Per-request model override — use gpt-4o for detailed analysis
+        response = provider.chat([msg], max_tokens=500, model="gpt-4o")
         elapsed_ms = int((time.time() - start) * 1000)
 
         config.print_response(200, elapsed_ms, {"content": response.content})

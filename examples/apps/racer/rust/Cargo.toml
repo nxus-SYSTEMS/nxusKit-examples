@@ -6,7 +6,7 @@ description = "Racer pattern example - Benchmark competition between LLM and CLI
 publish = false
 
 [dependencies]
-nxuskit = { path = "../../../../packages/nxuskit" }
+nxuskit = { path = "../../../../sdk/nxuskit-rust" }
 llm-patterns = { path = "../../../shared/rust-support" }
 nxuskit-examples-interactive = { path = "../../../shared/rust" }
 tokio = { version = "1.49", features = ["full"] }

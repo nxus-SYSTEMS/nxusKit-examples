@@ -117,9 +117,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Sending request with 3-provider fallback chain...\n");
 
     // nxusKit: chat_with_fallback tries providers in order until one succeeds
+    let start = std::time::Instant::now();
     match chat_with_fallback(&providers, &request).await {
         Ok(response) => {
-            config.print_response(200, 0, &response);
+            let elapsed_ms = start.elapsed().as_millis() as u64;
+            config.print_response(200, elapsed_ms, &response);
             println!("\n=== Success ===");
             println!("Response: {}", response.content);
         }

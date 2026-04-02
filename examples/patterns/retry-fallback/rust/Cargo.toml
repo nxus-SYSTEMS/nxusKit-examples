@@ -9,7 +9,7 @@ publish = false
 
 [dependencies]
 nxuskit-examples-interactive = { path = "../../../shared/rust" }
-nxuskit = { path = "../../../../packages/nxuskit" }
+nxuskit = { path = "../../../../sdk/nxuskit-rust" }
 tokio = { version = "1.49", features = ["full"] }
 futures = "0.3"
 
