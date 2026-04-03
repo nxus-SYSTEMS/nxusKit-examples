@@ -166,9 +166,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/patterns/cost-routing/rust",
@@ -216,9 +216,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/patterns/retry-fallback/rust",
@@ -242,9 +242,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/patterns/structured-output/rust",
@@ -268,9 +268,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/patterns/timeout-config/rust",
@@ -294,9 +294,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/patterns/token-budget/rust",
@@ -334,7 +334,7 @@
       "difficulty": "intermediate",
       "tagline": "Send images alongside text to any LLM provider using one consistent API that handles encoding, formatting, and provider differences for you.",
       "blurb": "The vision example shows you how to build multimodal LLM requests—combining text prompts with images—using a single fluent API that works across Claude and OpenAI. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, and Rust, covering use cases from image captioning and visual QA to document understanding.",
-      "content_hash": "d3e87502dd78c936d3771c0bbe432616e87161867c563969067a7706dbb0a889"
+      "content_hash": "26ccab0d76243070e8be29620c73d826c884e758f0f9d6d0979bb2e5cf34ef00"
     },
     {
       "name": "auth-helper",
@@ -343,10 +343,26 @@
       "required": false,
       "scenario": "List providers, check auth status, set credentials, initiate OAuth flows",
       "scenarios": [
-        {"name": "status", "cli": "status", "description": "List provider authentication status and stored credentials"},
-        {"name": "set", "cli": "set", "description": "Store an API key for a specific provider"},
-        {"name": "remove", "cli": "remove", "description": "Remove a stored API key for a provider"},
-        {"name": "dashboard", "cli": "dashboard", "description": "Open provider credential dashboard in browser"}
+        {
+          "name": "status",
+          "cli": "status",
+          "description": "List provider authentication status and stored credentials"
+        },
+        {
+          "name": "set",
+          "cli": "set",
+          "description": "Store an API key for a specific provider"
+        },
+        {
+          "name": "remove",
+          "cli": "remove",
+          "description": "Remove a stored API key for a provider"
+        },
+        {
+          "name": "dashboard",
+          "cli": "dashboard",
+          "description": "Open provider credential dashboard in browser"
+        }
       ],
       "real_world_application": "Developer tooling, credential management, multi-provider auth setup",
       "tech_tags": [
@@ -354,8 +370,8 @@
         "OAuth"
       ],
       "languages": [
-        "go",
-        "rust"
+        "rust",
+        "go"
       ],
       "implementations": {
         "go": "examples/patterns/auth-helper/go",
@@ -374,9 +390,21 @@
       "required": true,
       "scenario": "Define and solve constraint satisfaction problems with Z3",
       "scenarios": [
-        {"name": "theme-park", "cli": "--scenario theme-park", "description": "Budget and space planning for a theme park with rides, food courts, and entertainment zones"},
-        {"name": "space-colony", "cli": "--scenario space-colony", "description": "Resource allocation for a space colony dealing with solar storm what-if scenarios"},
-        {"name": "fantasy-draft", "cli": "--scenario fantasy-draft", "description": "Fantasy sports draft optimization under salary cap with injury what-if analysis"}
+        {
+          "name": "theme-park",
+          "cli": "--scenario theme-park",
+          "description": "Budget and space planning for a theme park with rides, food courts, and entertainment zones"
+        },
+        {
+          "name": "space-colony",
+          "cli": "--scenario space-colony",
+          "description": "Resource allocation for a space colony dealing with solar storm what-if scenarios"
+        },
+        {
+          "name": "fantasy-draft",
+          "cli": "--scenario fantasy-draft",
+          "description": "Fantasy sports draft optimization under salary cap with injury what-if analysis"
+        }
       ],
       "real_world_application": "Scheduling optimization, resource allocation, configuration validation",
       "tech_tags": [
@@ -405,9 +433,21 @@
       "required": true,
       "scenario": "Build a Bayesian network and perform probabilistic inference",
       "scenarios": [
-        {"name": "haunted-house", "cli": "--scenario haunted-house", "description": "Investigate a haunted house — is it a ghost or a raccoon?"},
-        {"name": "coffee-shop", "cli": "--scenario coffee-shop", "description": "Diagnose bad espresso from grind size, temperature, and bean age"},
-        {"name": "plant-doctor", "cli": "--scenario plant-doctor", "description": "Diagnose a sick plant from overwatering, nutrient, and disease evidence"}
+        {
+          "name": "haunted-house",
+          "cli": "--scenario haunted-house",
+          "description": "Investigate a haunted house — is it a ghost or a raccoon?"
+        },
+        {
+          "name": "coffee-shop",
+          "cli": "--scenario coffee-shop",
+          "description": "Diagnose bad espresso from grind size, temperature, and bean age"
+        },
+        {
+          "name": "plant-doctor",
+          "cli": "--scenario plant-doctor",
+          "description": "Diagnose a sick plant from overwatering, nutrient, and disease evidence"
+        }
       ],
       "real_world_application": "Risk assessment, medical diagnosis support, fault detection",
       "tech_tags": [
@@ -436,9 +476,21 @@
       "required": true,
       "scenario": "Explore what-if scenarios with solver push/pop constraint scoping",
       "scenarios": [
-        {"name": "wedding", "cli": "--scenario wedding", "description": "Wedding budget planning with $25k constraint and vendor what-if scenarios"},
-        {"name": "mars", "cli": "--scenario mars", "description": "Mars colony resource allocation with dust storm what-if disruptions"},
-        {"name": "recipe", "cli": "--scenario recipe", "description": "Recipe scaling with vegan substitution — may be UNSAT"}
+        {
+          "name": "wedding",
+          "cli": "--scenario wedding",
+          "description": "Wedding budget planning with $25k constraint and vendor what-if scenarios"
+        },
+        {
+          "name": "mars",
+          "cli": "--scenario mars",
+          "description": "Mars colony resource allocation with dust storm what-if disruptions"
+        },
+        {
+          "name": "recipe",
+          "cli": "--scenario recipe",
+          "description": "Recipe scaling with vegan substitution — may be UNSAT"
+        }
       ],
       "real_world_application": "Financial planning, capacity modeling, sensitivity analysis",
       "tech_tags": [
@@ -471,9 +523,9 @@
         "LLM"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/integrations/ollama/rust",
@@ -590,13 +642,13 @@
       "scenario": "Combine deterministic CLIPS rules with LLM-based reasoning",
       "real_world_application": "Explainable AI decisions, regulated industry automation",
       "tech_tags": [
-        "CLIPS",
-        "LLM"
+        "LLM",
+        "CLIPS"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/integrations/clips-llm-hybrid/rust",
@@ -616,15 +668,27 @@
       "required": true,
       "scenario": "Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement",
       "scenarios": [
-        {"name": "festival", "cli": "--scenario festival", "description": "Music festival staging — crowd predictions drive band scheduling and safety"},
-        {"name": "rescue", "cli": "--scenario rescue", "description": "Search and rescue — survivor probability drives team assignment and safety checks"},
-        {"name": "bakery", "cli": "--scenario bakery", "description": "Bakery scheduling — demand forecasts drive oven allocation and allergen separation"}
+        {
+          "name": "festival",
+          "cli": "--scenario festival",
+          "description": "Music festival staging — crowd predictions drive band scheduling and safety"
+        },
+        {
+          "name": "rescue",
+          "cli": "--scenario rescue",
+          "description": "Search and rescue — survivor probability drives team assignment and safety checks"
+        },
+        {
+          "name": "bakery",
+          "cli": "--scenario bakery",
+          "description": "Bakery scheduling — demand forecasts drive oven allocation and allergen separation"
+        }
       ],
       "real_world_application": "Multi-stage decision support, risk-aware optimization with safety validation",
       "tech_tags": [
-        "BN",
+        "CLIPS",
         "Solver",
-        "CLIPS"
+        "BN"
       ],
       "languages": [
         "rust",
@@ -647,9 +711,21 @@
       "required": true,
       "scenario": "Use an LLM to formulate constraints and Z3 to solve them",
       "scenarios": [
-        {"name": "seating", "cli": "--scenario seating", "description": "Wedding dinner seating — 12 guests across 3 tables with constraints"},
-        {"name": "dungeon", "cli": "--scenario dungeon", "description": "Dungeon layout — 5 rooms with boss and treasure placement rules"},
-        {"name": "road-trip", "cli": "--scenario road-trip", "description": "Road trip planning — 14 days across 5 national parks with preferences"}
+        {
+          "name": "seating",
+          "cli": "--scenario seating",
+          "description": "Wedding dinner seating — 12 guests across 3 tables with constraints"
+        },
+        {
+          "name": "dungeon",
+          "cli": "--scenario dungeon",
+          "description": "Dungeon layout — 5 rooms with boss and treasure placement rules"
+        },
+        {
+          "name": "road-trip",
+          "cli": "--scenario road-trip",
+          "description": "Road trip planning — 14 days across 5 national parks with preferences"
+        }
       ],
       "real_world_application": "Natural language optimization, conversational planning",
       "tech_tags": [
@@ -679,18 +755,30 @@
       "required": true,
       "scenario": "Learn Bayesian network structure from observational data",
       "scenarios": [
-        {"name": "golf", "cli": "--scenario golf", "description": "Golf course conditions — weather, soil, and maintenance factor learning"},
-        {"name": "bmx", "cli": "--scenario bmx", "description": "BMX performance — skill level, technique, and jump factor learning"},
-        {"name": "sourdough", "cli": "--scenario sourdough", "description": "Sourdough baking — feeding schedule, flour type, and temperature factor learning"}
+        {
+          "name": "golf",
+          "cli": "--scenario golf",
+          "description": "Golf course conditions — weather, soil, and maintenance factor learning"
+        },
+        {
+          "name": "bmx",
+          "cli": "--scenario bmx",
+          "description": "BMX performance — skill level, technique, and jump factor learning"
+        },
+        {
+          "name": "sourdough",
+          "cli": "--scenario sourdough",
+          "description": "Sourdough baking — feeding schedule, flour type, and temperature factor learning"
+        }
       ],
       "real_world_application": "Causal discovery, epidemiological modeling, root cause analysis",
       "tech_tags": [
         "BN"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/integrations/bn-structure-learning/rust",
@@ -710,18 +798,30 @@
       "required": true,
       "scenario": "Evaluate business decision tables using the ZEN engine",
       "scenarios": [
-        {"name": "maze-rat", "cli": "--scenario maze-rat", "description": "First Hit Policy — route a maze runner through personality-driven decisions"},
-        {"name": "potion", "cli": "--scenario potion", "description": "Collect Hit Policy — match ingredient lists against brewing recipes"},
-        {"name": "food-truck", "cli": "--scenario food-truck", "description": "Expression Nodes — compute dynamic pricing with conditional logic"}
+        {
+          "name": "maze-rat",
+          "cli": "--scenario maze-rat",
+          "description": "First Hit Policy — route a maze runner through personality-driven decisions"
+        },
+        {
+          "name": "potion",
+          "cli": "--scenario potion",
+          "description": "Collect Hit Policy — match ingredient lists against brewing recipes"
+        },
+        {
+          "name": "food-truck",
+          "cli": "--scenario food-truck",
+          "description": "Expression Nodes — compute dynamic pricing with conditional logic"
+        }
       ],
       "real_world_application": "Pricing rules, eligibility determination, policy evaluation",
       "tech_tags": [
         "ZEN"
       ],
       "languages": [
+        "rust",
         "go",
-        "python",
-        "rust"
+        "python"
       ],
       "implementations": {
         "rust": "examples/integrations/zen-decisions/rust",
@@ -741,14 +841,26 @@
       "required": true,
       "scenario": "Compare CLIPS rule-based, LLM reasoning, and hybrid approaches for solving logic puzzles",
       "scenarios": [
-        {"name": "sudoku", "cli": "--game sudoku", "description": "Solve Sudoku puzzles using CLIPS constraint propagation"},
-        {"name": "set-game", "cli": "--game set", "description": "Find valid SET card combinations using CLIPS pattern matching"},
-        {"name": "compare", "cli": "sudoku --compare", "description": "Side-by-side comparison of CLIPS, LLM, and hybrid solvers"}
+        {
+          "name": "sudoku",
+          "cli": "--game sudoku",
+          "description": "Solve Sudoku puzzles using CLIPS constraint propagation"
+        },
+        {
+          "name": "set-game",
+          "cli": "--game set",
+          "description": "Find valid SET card combinations using CLIPS pattern matching"
+        },
+        {
+          "name": "compare",
+          "cli": "sudoku --compare",
+          "description": "Side-by-side comparison of CLIPS, LLM, and hybrid solvers"
+        }
       ],
       "real_world_application": "AI strategy comparison, constraint vs neural solving benchmarks, educational puzzle platforms",
       "tech_tags": [
-        "CLIPS",
         "LLM",
+        "CLIPS",
         "Solver"
       ],
       "languages": [
@@ -772,15 +884,31 @@
       "required": true,
       "scenario": "Race CLIPS rule-based solving against LLM reasoning on logic puzzles",
       "scenarios": [
-        {"name": "race", "cli": "race", "description": "Head-to-head CLIPS vs LLM race on a single problem"},
-        {"name": "benchmark", "cli": "benchmark", "description": "Statistical benchmarking with multiple runs and timing"},
-        {"name": "list", "cli": "list", "description": "List all available problems with difficulty ratings"},
-        {"name": "describe", "cli": "describe", "description": "Show detailed description of a specific problem"}
+        {
+          "name": "race",
+          "cli": "race",
+          "description": "Head-to-head CLIPS vs LLM race on a single problem"
+        },
+        {
+          "name": "benchmark",
+          "cli": "benchmark",
+          "description": "Statistical benchmarking with multiple runs and timing"
+        },
+        {
+          "name": "list",
+          "cli": "list",
+          "description": "List all available problems with difficulty ratings"
+        },
+        {
+          "name": "describe",
+          "cli": "describe",
+          "description": "Show detailed description of a specific problem"
+        }
       ],
       "real_world_application": "AI approach comparison, rule engine vs LLM benchmarking, hybrid strategy selection",
       "tech_tags": [
-        "CLIPS",
-        "LLM"
+        "LLM",
+        "CLIPS"
       ],
       "languages": [
         "rust",
@@ -803,15 +931,31 @@
       "required": true,
       "scenario": "Analyze, score, and transform music sequences with optional CLIPS and LLM enhancements",
       "scenarios": [
-        {"name": "analyze", "cli": "analyze", "description": "Analyze a music sequence for key, intervals, and rhythm patterns"},
-        {"name": "score", "cli": "score", "description": "Score a sequence on six musical dimensions"},
-        {"name": "transform", "cli": "transform", "description": "Transform a sequence — transpose, invert, or retrograde"},
-        {"name": "convert", "cli": "convert", "description": "Convert between MIDI and MusicXML formats"}
+        {
+          "name": "analyze",
+          "cli": "analyze",
+          "description": "Analyze a music sequence for key, intervals, and rhythm patterns"
+        },
+        {
+          "name": "score",
+          "cli": "score",
+          "description": "Score a sequence on six musical dimensions"
+        },
+        {
+          "name": "transform",
+          "cli": "transform",
+          "description": "Transform a sequence — transpose, invert, or retrograde"
+        },
+        {
+          "name": "convert",
+          "cli": "convert",
+          "description": "Convert between MIDI and MusicXML formats"
+        }
       ],
       "real_world_application": "Music theory analysis, algorithmic composition assistance, MIDI/MusicXML processing",
       "tech_tags": [
-        "CLIPS",
-        "LLM"
+        "LLM",
+        "CLIPS"
       ],
       "languages": [
         "rust",
@@ -836,16 +980,36 @@
       "required": true,
       "scenario": "Describe business rules in natural language and generate validated CLIPS code using LLM",
       "scenarios": [
-        {"name": "generate", "cli": "generate", "description": "Generate CLIPS rules from natural language descriptions"},
-        {"name": "validate", "cli": "validate", "description": "Validate CLIPS rule syntax and semantic correctness"},
-        {"name": "save", "cli": "save", "description": "Save generated rules to a file for later use"},
-        {"name": "load", "cli": "load", "description": "Load previously saved rules from a file"},
-        {"name": "examples", "cli": "examples", "description": "Run progressive complexity examples demonstrating rule generation"}
+        {
+          "name": "generate",
+          "cli": "generate",
+          "description": "Generate CLIPS rules from natural language descriptions"
+        },
+        {
+          "name": "validate",
+          "cli": "validate",
+          "description": "Validate CLIPS rule syntax and semantic correctness"
+        },
+        {
+          "name": "save",
+          "cli": "save",
+          "description": "Save generated rules to a file for later use"
+        },
+        {
+          "name": "load",
+          "cli": "load",
+          "description": "Load previously saved rules from a file"
+        },
+        {
+          "name": "examples",
+          "cli": "examples",
+          "description": "Run progressive complexity examples demonstrating rule generation"
+        }
       ],
       "real_world_application": "Low-code rule authoring, natural language business logic, automated CLIPS code generation",
       "tech_tags": [
-        "CLIPS",
-        "LLM"
+        "LLM",
+        "CLIPS"
       ],
       "languages": [
         "rust",
@@ -868,14 +1032,26 @@
       "required": true,
       "scenario": "Submit questions to an LLM and validate answers against CLIPS rules, retrying on validation failure",
       "scenarios": [
-        {"name": "classification", "cli": "--type classification", "description": "Categorize input text into specified categories"},
-        {"name": "extraction", "cli": "--type extraction", "description": "Extract structured information from unstructured text"},
-        {"name": "reasoning", "cli": "--type reasoning", "description": "Perform logical inference and multi-step reasoning"}
+        {
+          "name": "classification",
+          "cli": "--type classification",
+          "description": "Categorize input text into specified categories"
+        },
+        {
+          "name": "extraction",
+          "cli": "--type extraction",
+          "description": "Extract structured information from unstructured text"
+        },
+        {
+          "name": "reasoning",
+          "cli": "--type reasoning",
+          "description": "Perform logical inference and multi-step reasoning"
+        }
       ],
       "real_world_application": "Reliable AI answers with deterministic validation, LLM output verification, hybrid rule+LLM pipelines",
       "tech_tags": [
-        "CLIPS",
-        "LLM"
+        "LLM",
+        "CLIPS"
       ],
       "languages": [
         "rust",

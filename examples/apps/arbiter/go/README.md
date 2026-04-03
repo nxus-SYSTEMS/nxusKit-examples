@@ -12,7 +12,7 @@ A validation framework that uses CLIPS rules to validate LLM outputs and auto-re
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · CLIPS · LLM
+**Difficulty: Advanced** 🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS-validated LLM retry app with rule-based answer verification
 - **Scenario:** Submit questions to an LLM and validate answers against CLIPS rules, retrying on validation failure

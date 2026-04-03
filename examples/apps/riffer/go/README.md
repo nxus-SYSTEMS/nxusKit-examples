@@ -12,7 +12,7 @@ A command-line tool for analyzing and transforming music sequences, implemented 
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · CLIPS · LLM
+**Difficulty: Advanced** 🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS rule-based music composition engine
 - **Scenario:** Generate musical riffs using CLIPS composition rules

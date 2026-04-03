@@ -32,14 +32,14 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [convenience-api](examples/patterns/convenience-api/) | LiteLLM-style convenience API usage | Rust, Go |
 | [blocking-api](examples/patterns/blocking-api/) | Synchronous blocking API for simpler use cases | Rust, Go |
 | [capability-detection](examples/patterns/capability-detection/) | Detecting provider capabilities at runtime | Rust, Go |
-| [cost-routing](examples/patterns/cost-routing/) | Cost-aware provider routing and selection | Go, Python, Rust |
+| [cost-routing](examples/patterns/cost-routing/) | Cost-aware provider routing and selection | Rust, Go, Python |
 | [polymorphic](examples/patterns/polymorphic/) | Polymorphic provider patterns with trait objects | Rust, Go |
-| [retry-fallback](examples/patterns/retry-fallback/) | Retry and fallback strategies across providers | Go, Python, Rust |
-| [structured-output](examples/patterns/structured-output/) | JSON mode and structured output generation | Go, Python, Rust |
-| [timeout-config](examples/patterns/timeout-config/) | Timeout configuration and connection management | Go, Python, Rust |
-| [token-budget](examples/patterns/token-budget/) | Token budget management and cost estimation | Go, Python, Rust |
+| [retry-fallback](examples/patterns/retry-fallback/) | Retry and fallback strategies across providers | Rust, Go, Python |
+| [structured-output](examples/patterns/structured-output/) | JSON mode and structured output generation | Rust, Go, Python |
+| [timeout-config](examples/patterns/timeout-config/) | Timeout configuration and connection management | Rust, Go, Python |
+| [token-budget](examples/patterns/token-budget/) | Token budget management and cost estimation | Rust, Go, Python |
 | [vision](examples/patterns/vision/) | Vision and multimodal capabilities with images | Rust, Go, Python |
-| [auth-helper](examples/patterns/auth-helper/) | OAuth login flow and credential management helper | Go, Rust |
+| [auth-helper](examples/patterns/auth-helper/) | OAuth login flow and credential management helper | Rust, Go |
 | &nbsp;&nbsp;↳ `status` | List provider authentication status and stored credentials | |
 | &nbsp;&nbsp;↳ `set` | Store an API key for a specific provider | |
 | &nbsp;&nbsp;↳ `remove` | Remove a stored API key for a provider | |
@@ -61,12 +61,12 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 
 | Example | Description | Languages |
 |---------|-------------|-----------|
-| [ollama](examples/integrations/ollama/) | Using Ollama for local inference | Go, Python, Rust |
+| [ollama](examples/integrations/ollama/) | Using Ollama for local inference | Rust, Go, Python |
 | [lmstudio](examples/integrations/lmstudio/) | Using LM Studio for local inference | Rust, Go |
 | [alert-triage](examples/integrations/alert-triage/) | Alert triage with LLM-powered analysis | Rust, Go |
 | [cli-assistant](examples/integrations/cli-assistant/) | Interactive CLI assistant with LLM backend | Rust, Go |
 | [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | Rust, Go |
-| [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | Go, Python, Rust |
+| [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | Rust, Go, Python |
 | [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | Rust, Go |
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |
 | &nbsp;&nbsp;↳ `rescue` | Search and rescue — survivor probability drives team assignment and safety checks | |
@@ -75,11 +75,11 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `seating` | Wedding dinner seating — 12 guests across 3 tables with constraints | |
 | &nbsp;&nbsp;↳ `dungeon` | Dungeon layout — 5 rooms with boss and treasure placement rules | |
 | &nbsp;&nbsp;↳ `road-trip` | Road trip planning — 14 days across 5 national parks with preferences | |
-| [bn-structure-learning](examples/integrations/bn-structure-learning/) | Bayesian network structure learning from data | Go, Python, Rust |
+| [bn-structure-learning](examples/integrations/bn-structure-learning/) | Bayesian network structure learning from data | Rust, Go, Python |
 | &nbsp;&nbsp;↳ `golf` | Golf course conditions — weather, soil, and maintenance factor learning | |
 | &nbsp;&nbsp;↳ `bmx` | BMX performance — skill level, technique, and jump factor learning | |
 | &nbsp;&nbsp;↳ `sourdough` | Sourdough baking — feeding schedule, flour type, and temperature factor learning | |
-| [zen-decisions](examples/integrations/zen-decisions/) | ZEN decision table evaluation via nxusKit SDK | Go, Python, Rust |
+| [zen-decisions](examples/integrations/zen-decisions/) | ZEN decision table evaluation via nxusKit SDK | Rust, Go, Python |
 | &nbsp;&nbsp;↳ `maze-rat` | First Hit Policy — route a maze runner through personality-driven decisions | |
 | &nbsp;&nbsp;↳ `potion` | Collect Hit Policy — match ingredient lists against brewing recipes | |
 | &nbsp;&nbsp;↳ `food-truck` | Expression Nodes — compute dynamic pricing with conditional logic | |

@@ -237,7 +237,8 @@ def manifest_demonstrates_prerequisites(
         prereq_block = ""
     else:
         rlink = readme_to_root_rel(readme, root)
-        lang_list = ", ".join(sorted(langs))
+        LANG_ORDER = {"rust": 0, "go": 1, "python": 2}
+        lang_list = ", ".join(sorted(langs, key=lambda l: LANG_ORDER.get(l, 99)))
         prereq_lines = [
             "## Prerequisites",
             "",

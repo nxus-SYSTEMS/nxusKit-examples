@@ -12,7 +12,7 @@ A command-line tool for generating CLIPS rules from natural language description
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · CLIPS · LLM
+**Difficulty: Advanced** 🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS rule authoring and execution app
 - **Scenario:** Author, load, and execute CLIPS rules interactively
