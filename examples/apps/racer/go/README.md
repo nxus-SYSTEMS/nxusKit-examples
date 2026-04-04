@@ -12,7 +12,7 @@ A benchmarking framework that races CLIPS and LLM approaches head-to-head on log
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · LLM · CLIPS
+**Difficulty: Advanced** ♦🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS rule-based racing strategy engine
 - **Scenario:** Simulate racing pit-stop strategy using CLIPS rules

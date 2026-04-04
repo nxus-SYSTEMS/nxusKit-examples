@@ -10,7 +10,7 @@ Stream tokens from a chat completion as they arrive
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · LLM · Streaming
+**Difficulty: Intermediate** 🟦 · LLM · Streaming
 
 - **Summary:** Streaming chat completion with real-time output
 - **Scenario:** Stream tokens from a chat completion as they arrive

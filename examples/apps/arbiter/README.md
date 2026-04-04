@@ -12,7 +12,7 @@ A command-line tool demonstrating the Solver pattern: using CLIPS rules to evalu
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · LLM · CLIPS
+**Difficulty: Advanced** ♦🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS-validated LLM retry app with rule-based answer verification
 - **Scenario:** Submit questions to an LLM and validate answers against CLIPS rules, retrying on validation failure

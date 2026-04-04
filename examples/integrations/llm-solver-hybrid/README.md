@@ -12,7 +12,7 @@ Demonstrates using an LLM to translate natural language constraints into structu
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · LLM · Solver
+**Difficulty: Intermediate** 🟦 · LLM · Solver
 
 - **Summary:** Hybrid LLM + Z3 solver problem solving
 - **Scenario:** Use an LLM to formulate constraints and Z3 to solve them

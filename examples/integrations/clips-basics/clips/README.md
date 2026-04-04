@@ -8,7 +8,7 @@ This directory contains examples demonstrating the CLIPS (C Language Integrated 
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · CLIPS
+**Difficulty: Intermediate** 🟦 · CLIPS
 
 - **Summary:** CLIPS rule engine basics via nxusKit SDK
 - **Scenario:** Load rules, assert facts, and run the CLIPS inference engine

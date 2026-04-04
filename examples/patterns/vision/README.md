@@ -10,7 +10,7 @@ Send images alongside text prompts for multimodal analysis
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · LLM · Vision
+**Difficulty: Intermediate** 🟦 · LLM · Vision
 
 - **Summary:** Vision and multimodal capabilities with images
 - **Scenario:** Send images alongside text prompts for multimodal analysis

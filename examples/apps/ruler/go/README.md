@@ -12,7 +12,7 @@ An LLM-powered tool that generates valid CLIPS rules from natural language descr
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · LLM · CLIPS
+**Difficulty: Advanced** ♦🏁 · LLM · CLIPS
 
 - **Summary:** CLIPS rule authoring and execution app
 - **Scenario:** Author, load, and execute CLIPS rules interactively

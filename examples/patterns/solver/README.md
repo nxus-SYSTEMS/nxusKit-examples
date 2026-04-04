@@ -12,7 +12,7 @@ Demonstrates the full solver lifecycle: satisfaction checking, single- and multi
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · Solver
+**Difficulty: Intermediate** 🟦 · Solver
 
 - **Summary:** Z3 constraint solver integration via nxusKit SDK
 - **Scenario:** Define and solve constraint satisfaction problems with Z3

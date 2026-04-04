@@ -12,7 +12,7 @@ Demonstrates push/pop scoping, assumption-based solving, and what-if analysis us
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · Solver
+**Difficulty: Intermediate** 🟦 · Solver
 
 - **Summary:** What-if scenario analysis with solver streaming
 - **Scenario:** Stream solver results for interactive what-if scenario exploration

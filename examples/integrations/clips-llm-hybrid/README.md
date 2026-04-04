@@ -16,7 +16,7 @@ Schema: `conformance/clips-json-contract.json`. Documentation: nxusKit SDK `sdk-
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · LLM · CLIPS
+**Difficulty: Intermediate** 🟦 · LLM · CLIPS
 
 - **Summary:** Hybrid CLIPS rules + LLM reasoning
 - **Scenario:** Combine deterministic CLIPS rules with LLM-based reasoning

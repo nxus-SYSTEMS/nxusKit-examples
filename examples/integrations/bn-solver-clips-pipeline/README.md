@@ -18,7 +18,7 @@ Schema: `conformance/clips-json-contract.json`. Docs: nxusKit SDK `sdk-packaging
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · CLIPS · Solver · BN
+**Difficulty: Advanced** ♦🏁 · CLIPS · Solver · BN
 
 - **Summary:** Three-stage BN prediction → Solver optimization → CLIPS safety pipeline
 - **Scenario:** Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement

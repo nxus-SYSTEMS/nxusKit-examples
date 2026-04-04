@@ -150,8 +150,8 @@ def usage_body_is_shell_only(text: str) -> bool:
 
 DIFFICULTY_ICONS = {
     "starter": "🟢",
-    "intermediate": "🟡",
-    "advanced": "🏁",
+    "intermediate": "🟦",
+    "advanced": "♦🏁",
 }
 
 

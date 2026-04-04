@@ -12,7 +12,7 @@ Demonstrates Bayesian Network structure learning: discovering causal relationshi
 
 ## What this demonstrates
 
-**Difficulty: Intermediate** 🟡 · BN
+**Difficulty: Intermediate** 🟦 · BN
 
 - **Summary:** Bayesian network structure learning from data
 - **Scenario:** Learn Bayesian network structure from observational data

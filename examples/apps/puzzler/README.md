@@ -12,7 +12,7 @@ A command-line tool for comparing three approaches to solving logic puzzles: CLI
 
 ## What this demonstrates
 
-**Difficulty: Advanced** 🏁 · LLM · CLIPS · Solver
+**Difficulty: Advanced** ♦🏁 · LLM · CLIPS · Solver
 
 - **Summary:** Multi-approach puzzle solver comparing CLIPS, LLM, and hybrid strategies
 - **Scenario:** Compare CLIPS rule-based, LLM reasoning, and hybrid approaches for solving logic puzzles
