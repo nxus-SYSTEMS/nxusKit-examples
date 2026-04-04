@@ -31,14 +31,14 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 |---------|------|----------|----------|----------------------|------|-----------|
 | [Basic Chat](patterns/basic-chat/) | Community | Pattern | Send a single chat message and receive a response | Customer support chatbot, FAQ assistant | LLM | Rust, Go, Python |
 | [Streaming](patterns/streaming/) | Community | Pattern | Stream tokens from a chat completion as they arrive | Real-time chat interface, live transcription display | LLM, Streaming | Rust, Go, Python |
-| [Multi Provider](patterns/multi-provider/) | Community | Pattern | Configure and switch between multiple LLM providers at runtime | Multi-vendor AI gateway, provider comparison tool | LLM | CLI/Bash, Go, Python, Rust |
+| [Multi Provider](patterns/multi-provider/) | Community | Pattern | Configure and switch between multiple LLM providers at runtime | Multi-vendor AI gateway, provider comparison tool | LLM | Rust, Go, Python, CLI/Bash |
 | [Convenience API](patterns/convenience-api/) | Community | Pattern | Use simplified one-liner API for quick LLM calls | Rapid prototyping, scripting with LLM capabilities | LLM | Rust, Go |
 | [Blocking API](patterns/blocking-api/) | Community | Pattern | Make synchronous LLM calls without async runtime | CLI tools, batch processing scripts | LLM | Rust, Go |
-| [Capability Detection](patterns/capability-detection/) | Community | Pattern | Query provider capabilities before dispatching requests | Adaptive AI middleware, feature-gated UX | LLM | CLI/Bash, Go, Rust |
-| [Cost Routing](patterns/cost-routing/) | Community | Pattern | Route requests to cost-appropriate models based on task complexity | Cost-optimized inference, budget-aware model selection, prompt complexity tiering | LLM | CLI/Bash, Go, Python, Rust |
+| [Capability Detection](patterns/capability-detection/) | Community | Pattern | Query provider capabilities before dispatching requests | Adaptive AI middleware, feature-gated UX | LLM | Rust, Go, CLI/Bash |
+| [Cost Routing](patterns/cost-routing/) | Community | Pattern | Route requests to cost-appropriate models based on task complexity | Cost-optimized inference, budget-aware model selection, prompt complexity tiering | LLM | Rust, Go, Python, CLI/Bash |
 | [Polymorphic](patterns/polymorphic/) | Community | Pattern | Use trait objects and interfaces to abstract over providers | Plugin architecture, provider-agnostic application layer | LLM | Rust, Go |
-| [Retry Fallback](patterns/retry-fallback/) | Community | Pattern | Automatically retry failed requests and fall back to alternate providers | High-availability AI service, resilient inference pipeline | LLM | CLI/Bash, Go, Python, Rust |
-| [Structured Output](patterns/structured-output/) | Community | Pattern | Request and parse structured JSON responses from an LLM | Data extraction, form auto-fill, API response generation | LLM | CLI/Bash, Go, Python, Rust |
+| [Retry Fallback](patterns/retry-fallback/) | Community | Pattern | Automatically retry failed requests and fall back to alternate providers | High-availability AI service, resilient inference pipeline | LLM | Rust, Go, Python, CLI/Bash |
+| [Structured Output](patterns/structured-output/) | Community | Pattern | Request and parse structured JSON responses from an LLM | Data extraction, form auto-fill, API response generation | LLM | Rust, Go, Python, CLI/Bash |
 | [Timeout Config](patterns/timeout-config/) | Community | Pattern | Configure request timeouts and connection pool settings | Latency-sensitive services, SLA-bound AI endpoints | LLM | Rust, Go, Python |
 | [Token Budget](patterns/token-budget/) | Community | Pattern | Track and limit token usage across requests | Usage metering, per-user quota enforcement | LLM | Rust, Go, Python |
 | [Vision](patterns/vision/) | Community | Pattern | Send images alongside text prompts for multimodal analysis | Image captioning, visual QA, document understanding | LLM, Vision | Rust, Go, Python |
@@ -47,11 +47,11 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ `set` | | | Store an API key for a specific provider | | | |
 | &nbsp;&nbsp;↳ `remove` | | | Remove a stored API key for a provider | | | |
 | &nbsp;&nbsp;↳ `dashboard` | | | Open provider credential dashboard in browser | | | |
-| [Solver](patterns/solver/) | Pro | Pattern | Define and solve constraint satisfaction problems with Z3 | Scheduling optimization, resource allocation, configuration validation | Solver | CLI/Bash, Go, Python, Rust |
+| [Solver](patterns/solver/) | Pro | Pattern | Define and solve constraint satisfaction problems with Z3 | Scheduling optimization, resource allocation, configuration validation | Solver | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `theme-park` | | | Budget and space planning for a theme park with rides, food courts, and entertainment zones | | | |
 | &nbsp;&nbsp;↳ `space-colony` | | | Resource allocation for a space colony dealing with solar storm what-if scenarios | | | |
 | &nbsp;&nbsp;↳ `fantasy-draft` | | | Fantasy sports draft optimization under salary cap with injury what-if analysis | | | |
-| [Bayesian Inference](patterns/bayesian-inference/) | Community | Pattern | Build a Bayesian network and perform probabilistic inference | Risk assessment, medical diagnosis support, fault detection | BN | CLI/Bash, Go, Python, Rust |
+| [Bayesian Inference](patterns/bayesian-inference/) | Community | Pattern | Build a Bayesian network and perform probabilistic inference | Risk assessment, medical diagnosis support, fault detection | BN | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `haunted-house` | | | Investigate a haunted house — is it a ghost or a raccoon? | | | |
 | &nbsp;&nbsp;↳ `coffee-shop` | | | Diagnose bad espresso from grind size, temperature, and bean age | | | |
 | &nbsp;&nbsp;↳ `plant-doctor` | | | Diagnose a sick plant from overwatering, nutrient, and disease evidence | | | |
@@ -61,15 +61,15 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ `recipe` | | | Recipe scaling with vegan substitution — may be UNSAT | | | |
 | [Ollama](integrations/ollama/) | Community | Integration | Connect to a local Ollama instance for private LLM inference | On-premise AI deployment, air-gapped inference | LLM | Rust, Go, Python |
 | [LM Studio](integrations/lmstudio/) | Community | Integration | Connect to a local LM Studio server for desktop LLM inference | Developer local testing, offline prototyping | LLM | Rust, Go |
-| [Alert Triage](integrations/alert-triage/) | Community | Integration | Classify and prioritize alerts using LLM reasoning | SOC alert triage, IT incident management | LLM | CLI/Bash, Go, Rust |
+| [Alert Triage](integrations/alert-triage/) | Community | Integration | Classify and prioritize alerts using LLM reasoning | SOC alert triage, IT incident management | LLM | Rust, Go, CLI/Bash |
 | [CLI Assistant](integrations/cli-assistant/) | Community | Integration | Build an interactive terminal assistant powered by an LLM | Developer productivity tool, command-line copilot | LLM | Rust, Go |
-| [CLIPS Basics](integrations/clips-basics/) | Community | Integration | Load rules, assert facts, and run the CLIPS inference engine | Business rules engine, compliance checking | CLIPS | CLI/Bash, Go, Rust |
-| [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | Community | Integration | Combine deterministic CLIPS rules with LLM-based reasoning | Explainable AI decisions, regulated industry automation | LLM, CLIPS | CLI/Bash, Go, Python, Rust |
-| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Multi-stage decision support, risk-aware optimization with safety validation | CLIPS, Solver, BN | CLI/Bash, Go, Rust |
+| [CLIPS Basics](integrations/clips-basics/) | Community | Integration | Load rules, assert facts, and run the CLIPS inference engine | Business rules engine, compliance checking | CLIPS | Rust, Go, CLI/Bash |
+| [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | Community | Integration | Combine deterministic CLIPS rules with LLM-based reasoning | Explainable AI decisions, regulated industry automation | LLM, CLIPS | Rust, Go, Python, CLI/Bash |
+| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Multi-stage decision support, risk-aware optimization with safety validation | CLIPS, Solver, BN | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | | | Music festival staging — crowd predictions drive band scheduling and safety | | | |
 | &nbsp;&nbsp;↳ `rescue` | | | Search and rescue — survivor probability drives team assignment and safety checks | | | |
 | &nbsp;&nbsp;↳ `bakery` | | | Bakery scheduling — demand forecasts drive oven allocation and allergen separation | | | |
-| [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | Pro | Integration | Use an LLM to formulate constraints and Z3 to solve them | Natural language optimization, conversational planning | LLM, Solver | CLI/Bash, Go, Python, Rust |
+| [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | Pro | Integration | Use an LLM to formulate constraints and Z3 to solve them | Natural language optimization, conversational planning | LLM, Solver | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `seating` | | | Wedding dinner seating — 12 guests across 3 tables with constraints | | | |
 | &nbsp;&nbsp;↳ `dungeon` | | | Dungeon layout — 5 rooms with boss and treasure placement rules | | | |
 | &nbsp;&nbsp;↳ `road-trip` | | | Road trip planning — 14 days across 5 national parks with preferences | | | |
@@ -77,7 +77,7 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ `golf` | | | Golf course conditions — weather, soil, and maintenance factor learning | | | |
 | &nbsp;&nbsp;↳ `bmx` | | | BMX performance — skill level, technique, and jump factor learning | | | |
 | &nbsp;&nbsp;↳ `sourdough` | | | Sourdough baking — feeding schedule, flour type, and temperature factor learning | | | |
-| [ZEN Decisions](integrations/zen-decisions/) | Pro | Integration | Evaluate business decision tables using the ZEN engine | Pricing rules, eligibility determination, policy evaluation | ZEN | CLI/Bash, Go, Python, Rust |
+| [ZEN Decisions](integrations/zen-decisions/) | Pro | Integration | Evaluate business decision tables using the ZEN engine | Pricing rules, eligibility determination, policy evaluation | ZEN | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `maze-rat` | | | First Hit Policy — route a maze runner through personality-driven decisions | | | |
 | &nbsp;&nbsp;↳ `potion` | | | Collect Hit Policy — match ingredient lists against brewing recipes | | | |
 | &nbsp;&nbsp;↳ `food-truck` | | | Expression Nodes — compute dynamic pricing with conditional logic | | | |
@@ -95,13 +95,13 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ `score` | | | Score a sequence on six musical dimensions | | | |
 | &nbsp;&nbsp;↳ `transform` | | | Transform a sequence — transpose, invert, or retrograde | | | |
 | &nbsp;&nbsp;↳ `convert` | | | Convert between MIDI and MusicXML formats | | | |
-| [Ruler](apps/ruler/) | Pro | App | Describe business rules in natural language and generate validated CLIPS code using LLM | Low-code rule authoring, natural language business logic, automated CLIPS code generation | LLM, CLIPS | CLI/Bash, Go, Rust |
+| [Ruler](apps/ruler/) | Pro | App | Describe business rules in natural language and generate validated CLIPS code using LLM | Low-code rule authoring, natural language business logic, automated CLIPS code generation | LLM, CLIPS | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `generate` | | | Generate CLIPS rules from natural language descriptions | | | |
 | &nbsp;&nbsp;↳ `validate` | | | Validate CLIPS rule syntax and semantic correctness | | | |
 | &nbsp;&nbsp;↳ `save` | | | Save generated rules to a file for later use | | | |
 | &nbsp;&nbsp;↳ `load` | | | Load previously saved rules from a file | | | |
 | &nbsp;&nbsp;↳ `examples` | | | Run progressive complexity examples demonstrating rule generation | | | |
-| [Arbiter](apps/arbiter/) | Pro | App | Submit questions to an LLM and validate answers against CLIPS rules, retrying on validation failure | Reliable AI answers with deterministic validation, LLM output verification, hybrid rule+LLM pipelines | LLM, CLIPS | CLI/Bash, Go, Rust |
+| [Arbiter](apps/arbiter/) | Pro | App | Submit questions to an LLM and validate answers against CLIPS rules, retrying on validation failure | Reliable AI answers with deterministic validation, LLM output verification, hybrid rule+LLM pipelines | LLM, CLIPS | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `classification` | | | Categorize input text into specified categories | | | |
 | &nbsp;&nbsp;↳ `extraction` | | | Extract structured information from unstructured text | | | |
 | &nbsp;&nbsp;↳ `reasoning` | | | Perform logical inference and multi-step reasoning | | | |

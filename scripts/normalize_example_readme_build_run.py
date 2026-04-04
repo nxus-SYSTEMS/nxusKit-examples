@@ -237,8 +237,8 @@ def manifest_demonstrates_prerequisites(
         prereq_block = ""
     else:
         rlink = readme_to_root_rel(readme, root)
-        LANG_ORDER = {"rust": 0, "go": 1, "python": 2}
-        lang_list = ", ".join(sorted(langs, key=lambda l: LANG_ORDER.get(l, 99)))
+        LANG_ORDER = {"rust": 0, "go": 1, "python": 2, "bash": 3}
+        lang_list = ", ".join(sorted(langs, key=lambda lang: LANG_ORDER.get(lang, 99)))
         prereq_lines = [
             "## Prerequisites",
             "",
@@ -416,7 +416,9 @@ def insert_scenarios_line(text: str, scenarios: list[dict]) -> str:
         new_lines.insert(insert_idx, scenarios_line)
 
     # Ensure blank line before H2
-    while new_lines and new_lines[-1].strip() == "" and len(new_lines) > region_start + 1:
+    while (
+        new_lines and new_lines[-1].strip() == "" and len(new_lines) > region_start + 1
+    ):
         new_lines.pop()
     new_lines.append("")
 
