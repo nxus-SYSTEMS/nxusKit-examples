@@ -1,0 +1,15 @@
+{
+  "max_tokens": 500,
+  "messages": [
+    {
+      "content": "You are an alert triage system. Analyze the alert and respond with ONLY a JSON object:\n- priority: integer 1-5 (1=critical, 5=informational)\n- summary: one sentence summary\n- root_cause: likely root cause\n- suggested_actions: array of 1-3 recommended actions",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER",
+      "role": "user"
+    }
+  ],
+  "model": "granite4:micro-h",
+  "temperature": 0.1
+}

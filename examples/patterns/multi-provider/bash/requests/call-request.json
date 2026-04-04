@@ -1,0 +1,11 @@
+{
+  "max_tokens": 200,
+  "messages": [
+    {
+      "content": "Explain recursion in one sentence.",
+      "role": "user"
+    }
+  ],
+  "model": "granite4:micro-h",
+  "temperature": 0.7
+}

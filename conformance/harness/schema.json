@@ -26,6 +26,13 @@
         "$ref": "#/$defs/example"
       }
     },
+    "language_display_names": {
+      "type": "object",
+      "description": "Maps machine-facing language keys to human-facing display names (e.g., bash → CLI/Bash)",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "categories": {
       "type": "object",
       "description": "Category definitions",

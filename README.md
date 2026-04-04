@@ -28,7 +28,7 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 |---------|-------------|-----------|
 | [basic-chat](examples/patterns/basic-chat/) | Basic chat completion with a simple prompt | Rust, Go, Python |
 | [streaming](examples/patterns/streaming/) | Streaming chat completion with real-time output | Rust, Go, Python |
-| [multi-provider](examples/patterns/multi-provider/) | Using multiple providers in one application | Rust, Go, Python |
+| [multi-provider](examples/patterns/multi-provider/) | Using multiple providers in one application | CLI/Bash, Go, Python, Rust |
 | [convenience-api](examples/patterns/convenience-api/) | LiteLLM-style convenience API usage | Rust, Go |
 | [blocking-api](examples/patterns/blocking-api/) | Synchronous blocking API for simpler use cases | Rust, Go |
 | [capability-detection](examples/patterns/capability-detection/) | Detecting provider capabilities at runtime | CLI/Bash, Go, Rust |
@@ -48,7 +48,7 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `theme-park` | Budget and space planning for a theme park with rides, food courts, and entertainment zones | |
 | &nbsp;&nbsp;↳ `space-colony` | Resource allocation for a space colony dealing with solar storm what-if scenarios | |
 | &nbsp;&nbsp;↳ `fantasy-draft` | Fantasy sports draft optimization under salary cap with injury what-if analysis | |
-| [bayesian-inference](examples/patterns/bayesian-inference/) | Bayesian network inference via nxusKit SDK | Rust, Go, Python |
+| [bayesian-inference](examples/patterns/bayesian-inference/) | Bayesian network inference via nxusKit SDK | CLI/Bash, Go, Python, Rust |
 | &nbsp;&nbsp;↳ `haunted-house` | Investigate a haunted house — is it a ghost or a raccoon? | |
 | &nbsp;&nbsp;↳ `coffee-shop` | Diagnose bad espresso from grind size, temperature, and bean age | |
 | &nbsp;&nbsp;↳ `plant-doctor` | Diagnose a sick plant from overwatering, nutrient, and disease evidence | |
@@ -63,9 +63,9 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 |---------|-------------|-----------|
 | [ollama](examples/integrations/ollama/) | Using Ollama for local inference | Rust, Go, Python |
 | [lmstudio](examples/integrations/lmstudio/) | Using LM Studio for local inference | Rust, Go |
-| [alert-triage](examples/integrations/alert-triage/) | Alert triage with LLM-powered analysis | Rust, Go |
+| [alert-triage](examples/integrations/alert-triage/) | Alert triage with LLM-powered analysis | CLI/Bash, Go, Rust |
 | [cli-assistant](examples/integrations/cli-assistant/) | Interactive CLI assistant with LLM backend | Rust, Go |
-| [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | Rust, Go |
+| [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | CLI/Bash, Go, Rust |
 | [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | CLI/Bash, Go, Python, Rust |
 | [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | CLI/Bash, Go, Rust |
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |

@@ -2,6 +2,13 @@
   "$schema": "./harness/schema.json",
   "version": "4.0.0",
   "description": "Cross-language example parity manifest for nxusKit",
+  "language_display_names": {
+    "bash": "CLI/Bash",
+    "go": "Go",
+    "python": "Python",
+    "rust": "Rust",
+    "typescript": "TypeScript"
+  },
   "examples": [
     {
       "name": "basic-chat",
@@ -67,20 +74,22 @@
         "LLM"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/multi-provider/rust",
         "go": "examples/patterns/multi-provider/go",
-        "python": "examples/patterns/multi-provider/python"
+        "python": "examples/patterns/multi-provider/python",
+        "bash": "examples/patterns/multi-provider/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Run the same prompt across Claude, OpenAI, and Ollama simultaneously using one unified interface that normalizes responses and token usage.",
       "blurb": "Query multiple LLM providers concurrently and compare responses through a single, normalized API. nxusKit's provider abstraction layer wraps Claude, OpenAI, and Ollama behind a shared interface, so every call returns the same ChatResponse type with consistent token usage data. Implementations in Rust, Go, and Python demonstrate the pattern using concurrent execution \u2014 goroutines, ThreadPoolExecutor, or async calls \u2014 while provider-agnostic error handling ensures one failing provider never blocks the others.",
-      "content_hash": "41993861824cbc7795d75b58e12dd2894da22fa06e0c898cbcce4275889c278d"
+      "content_hash": "f19b03f2630f69b232e60ba95c4eddef1a5e5aa048f2f1e682e63540e4d68183"
     },
     {
       "name": "convenience-api",
@@ -464,20 +473,22 @@
         "BN"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/bayesian-inference/rust",
         "go": "examples/patterns/bayesian-inference/go",
-        "python": "examples/patterns/bayesian-inference/python"
+        "python": "examples/patterns/bayesian-inference/python",
+        "bash": "examples/patterns/bayesian-inference/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Run exact and approximate Bayesian inference on real-world diagnostic models using four algorithms and three themed scenarios \u2014 all from a single SDK call.",
       "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms \u2014 exact and approximate \u2014 through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, and Python are included, and no LLM provider is required.",
-      "content_hash": "7971b8aeb0061595c61e4590f92c48d3ea9a9c5ca217925576b9d9a4d5e3d111"
+      "content_hash": "8f9ffecd2acd21be20e0d427826454c8bfba909cc8a004d29b49c61a65e9f4a0"
     },
     {
       "name": "solver-what-if",
@@ -583,18 +594,20 @@
         "LLM"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/alert-triage/rust",
-        "go": "examples/integrations/alert-triage/go"
+        "go": "examples/integrations/alert-triage/go",
+        "bash": "examples/integrations/alert-triage/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Turn alert noise into prioritized action by letting an LLM classify severity, surface root causes, and recommend remediation steps automatically.",
       "blurb": "The alert-triage example gives your observability pipeline an AI-powered second opinion, automatically classifying incoming alerts by priority and generating actionable remediation steps. It sends batches of Alertmanager-format alerts to an LLM and parses the structured JSON response into typed triage results covering priority, likely cause, and suggested actions. Implementations are available in both Go and Rust using the nxusKit community SDK, and a MockProvider makes the logic straightforward to unit test without a live model. It runs against any Ollama-compatible local model or cloud provider.",
-      "content_hash": "e82729ec0cb5ea77996bcf139e3a71a20ecc21a236b61aa907bb7dfee1c1607c"
+      "content_hash": "c099cfd7636d6df2b2046db02d50640d243834bb531d740a9e062bf3ebeef81f"
     },
     {
       "name": "cli-assistant",
@@ -631,18 +644,20 @@
         "CLIPS"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/clips-basics/rust",
-        "go": "examples/integrations/clips-basics/go"
+        "go": "examples/integrations/clips-basics/go",
+        "bash": "examples/integrations/clips-basics/bash"
       },
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Bring deterministic rule-based logic to your applications by driving the CLIPS inference engine directly through the nxusKit SDK.",
       "blurb": "Wire a production-grade expert system into your application using CLIPS rules and the nxusKit SDK, with full control over facts, inference, and conclusions. The CLIPS provider accepts structured JSON facts as input and returns derived conclusions after running the rule engine, keeping your business logic declarative and auditable. Examples span animal classification, medical triage, inventory management, task scheduling, and multi-stage pipelines, implemented in Go and Rust with shared wire types. Available on the Community edition.",
-      "content_hash": "089f4fdd1fc9caaa0d63c170f202e2907a459c247dcd18ab3f74a2560411a4b8"
+      "content_hash": "b68007e2f4975ba6173d51f09e3116f4fe2a58db3c1b5b6207bd2dec9fb31e5b"
     },
     {
       "name": "clips-llm-hybrid",

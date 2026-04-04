@@ -5,6 +5,7 @@
       "category": "integrations",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "rust"
       ],
@@ -80,6 +81,7 @@
       "category": "patterns",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "python",
         "rust"
@@ -182,6 +184,7 @@
       "category": "integrations",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "rust"
       ],
@@ -287,6 +290,7 @@
       "category": "patterns",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "python",
         "rust"
