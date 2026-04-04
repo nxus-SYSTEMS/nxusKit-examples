@@ -131,7 +131,7 @@ TAGKEY
     echo "| Example | Tier | Category | Scenario | Real-World Application | Tags | Languages |"
     echo "|---------|------|----------|----------|----------------------|------|-----------|"
 
-    jq -r '.examples[] | [.name, .category, (.tier // "community"), .scenario, .real_world_application, (.tech_tags | join(", ")), (.languages | join(", "))] | @tsv' "$manifest" | \
+    jq -r '.examples[] | [.name, .category, (.tier // "community"), .scenario, .real_world_application, (.tech_tags | join(", ")), (.languages | map(gsub("^bash$";"CLI/Bash")) | join(", "))] | @tsv' "$manifest" | \
     while IFS=$'\t' read -r name category tier scenario app tags langs; do
         local display_name
         display_name=$(title_case "$name")
@@ -360,7 +360,7 @@ generate_root_table_rows() {
     local manifest="$1"
     local category="$2"
 
-    jq -r --arg cat "$category" '.examples[] | select(.category == $cat) | [.name, .description, (.languages | map(. | gsub("^r";"R") | gsub("^g";"G") | gsub("^p";"P")) | join(", "))] | @tsv' "$manifest" | \
+    jq -r --arg cat "$category" '.examples[] | select(.category == $cat) | [.name, .description, (.languages | map(. | gsub("^bash$";"CLI/Bash") | gsub("^r";"R") | gsub("^g";"G") | gsub("^p";"P")) | join(", "))] | @tsv' "$manifest" | \
     while IFS=$'\t' read -r name desc langs; do
         echo "| [${name}](examples/${category}/${name}/) | ${desc} | ${langs} |"
         # Scenario sub-rows

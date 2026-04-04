@@ -44,7 +44,7 @@ rm -f "${JSONL}"
 
 usage() {
   cat <<'EOF' >&2
-usage: test-examples.sh --sdk-dir <path> --lang rust|go|python|all [options]
+usage: test-examples.sh --sdk-dir <path> --lang rust|go|python|bash|all [options]
        test-examples.sh --tarball <file.tar.gz> --lang <same> [options]
 
 Options:
@@ -570,6 +570,42 @@ python_phase() {
   fi
 }
 
+bash_phase() {
+  if ! command -v nxuskit-cli &>/dev/null; then
+    echo "skip: Bash examples need nxuskit-cli on PATH" >&2
+    return 0
+  fi
+  if ! command -v jq &>/dev/null; then
+    echo "skip: Bash examples need jq" >&2
+    return 0
+  fi
+  local failed="" dir name start elapsed
+  while IFS= read -r rel; do
+    dir="${REPO_ROOT}/${rel}"
+    [[ -d "$dir" ]] || continue
+    name="$rel"
+    start="$(_ms)"
+    if (cd "$dir" && make test >/dev/null 2>&1); then
+      elapsed=$(( $(_ms) - start ))
+      echo "OK bash test: $dir" >&2
+      emit_jsonl "$name" bash test ok "$elapsed" ""
+    else
+      elapsed=$(( $(_ms) - start ))
+      echo "FAIL bash test: $dir" >&2
+      emit_jsonl "$name" bash test fail "$elapsed" "make test"
+      failed="$failed $dir"
+    fi
+  done < <(jq -r --arg t "$TIER" '
+    .examples[] |
+    select(.implementations.bash != null) |
+    select($t == "all" or .tier == $t) |
+    .implementations.bash' "$MANIFEST")
+  if [[ -n "$failed" ]]; then
+    echo "error: Bash failures:$failed" >&2
+    return 1
+  fi
+}
+
 FAIL=0
 case "$LANG" in
   rust)
@@ -585,8 +621,12 @@ case "$LANG" in
     rust_build || FAIL=1
     go_build || FAIL=1
     python_phase || FAIL=1
+    bash_phase || FAIL=1
     ;;
-  *) echo "error: --lang must be rust, go, python, or all" >&2; exit 1 ;;
+  bash)
+    bash_phase || FAIL=1
+    ;;
+  *) echo "error: --lang must be rust, go, python, bash, or all" >&2; exit 1 ;;
 esac
 
 if [[ "$SMOKE_RUN" -eq 1 && "$BUILD_ONLY" -eq 0 && "$FAIL" -eq 0 ]]; then

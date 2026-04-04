@@ -1,0 +1,15 @@
+{
+  "max_tokens": 200,
+  "messages": [
+    {
+      "content": "You are a text classifier. Classify the given text and respond with ONLY a JSON object:\n- classification: the category label\n- confidence: a float between 0.0 and 1.0\n- reasoning: one sentence explaining why",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.5
+}

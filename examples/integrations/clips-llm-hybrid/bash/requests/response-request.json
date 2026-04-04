@@ -1,0 +1,15 @@
+{
+  "max_tokens": 300,
+  "messages": [
+    {
+      "content": "You are a support agent. Generate an empathetic response to the customer ticket. Consider the routing information provided (team, SLA, escalation level). Keep the response professional and helpful.",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.7
+}

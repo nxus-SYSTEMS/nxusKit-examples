@@ -1,0 +1,15 @@
+{
+  "max_tokens": 1000,
+  "messages": [
+    {
+      "content": "PLACEHOLDER_SYSTEM",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER_USER",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.1
+}

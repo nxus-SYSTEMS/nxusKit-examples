@@ -1,0 +1,32 @@
+# Makefile template for nxusKit Bash CLI examples
+#
+# Copy to your example's bash/ directory and set SCRIPT and EXAMPLE_NAME.
+#
+# Usage:
+#   make run                    # Run the example
+#   make run ARGS="--verbose"   # Run with verbose output
+#   make run ARGS="--step"      # Run with step-through mode
+#   make test                   # Run structural tests
+#   make build                  # Syntax check only
+#   make clean                  # Remove temp files
+
+SCRIPT       ?= main.sh
+EXAMPLE_NAME ?= example
+ARGS         ?=
+
+.PHONY: build run test clean
+
+build:
+	@bash -n $(SCRIPT) && echo "$(EXAMPLE_NAME): syntax OK"
+
+run: build
+	@bash $(SCRIPT) $(ARGS)
+
+test: build
+	@echo "$(EXAMPLE_NAME): running structural tests..."
+	@# Override this target in your Makefile with example-specific test logic
+	@echo "$(EXAMPLE_NAME): PASS (no tests defined — override test target)"
+
+clean:
+	@rm -rf .tmp/
+	@echo "$(EXAMPLE_NAME): cleaned"

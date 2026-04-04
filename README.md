@@ -2,7 +2,7 @@
 
 **[nxus.SYSTEMS](https://nxus.systems)** · **[Examples Portfolio](https://nxus.systems/examples)** · **[nxusKit SDK](https://github.com/nxus-SYSTEMS/nxusKit)**
 
-32 production examples for the nxusKit SDK in Rust, Go, and Python — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
+32 production examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
 
 ## Quick Start
 
@@ -31,11 +31,11 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [multi-provider](examples/patterns/multi-provider/) | Using multiple providers in one application | Rust, Go, Python |
 | [convenience-api](examples/patterns/convenience-api/) | LiteLLM-style convenience API usage | Rust, Go |
 | [blocking-api](examples/patterns/blocking-api/) | Synchronous blocking API for simpler use cases | Rust, Go |
-| [capability-detection](examples/patterns/capability-detection/) | Detecting provider capabilities at runtime | Rust, Go |
-| [cost-routing](examples/patterns/cost-routing/) | Cost-aware provider routing and selection | Rust, Go, Python |
+| [capability-detection](examples/patterns/capability-detection/) | Detecting provider capabilities at runtime | CLI/Bash, Go, Rust |
+| [cost-routing](examples/patterns/cost-routing/) | Cost-aware provider routing and selection | CLI/Bash, Go, Python, Rust |
 | [polymorphic](examples/patterns/polymorphic/) | Polymorphic provider patterns with trait objects | Rust, Go |
-| [retry-fallback](examples/patterns/retry-fallback/) | Retry and fallback strategies across providers | Rust, Go, Python |
-| [structured-output](examples/patterns/structured-output/) | JSON mode and structured output generation | Rust, Go, Python |
+| [retry-fallback](examples/patterns/retry-fallback/) | Retry and fallback strategies across providers | CLI/Bash, Go, Python, Rust |
+| [structured-output](examples/patterns/structured-output/) | JSON mode and structured output generation | CLI/Bash, Go, Python, Rust |
 | [timeout-config](examples/patterns/timeout-config/) | Timeout configuration and connection management | Rust, Go, Python |
 | [token-budget](examples/patterns/token-budget/) | Token budget management and cost estimation | Rust, Go, Python |
 | [vision](examples/patterns/vision/) | Vision and multimodal capabilities with images | Rust, Go, Python |
@@ -44,7 +44,7 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `set` | Store an API key for a specific provider | |
 | &nbsp;&nbsp;↳ `remove` | Remove a stored API key for a provider | |
 | &nbsp;&nbsp;↳ `dashboard` | Open provider credential dashboard in browser | |
-| [solver](examples/patterns/solver/) | Z3 constraint solver integration via nxusKit SDK | Rust, Go, Python |
+| [solver](examples/patterns/solver/) | Z3 constraint solver integration via nxusKit SDK | CLI/Bash, Go, Python, Rust |
 | &nbsp;&nbsp;↳ `theme-park` | Budget and space planning for a theme park with rides, food courts, and entertainment zones | |
 | &nbsp;&nbsp;↳ `space-colony` | Resource allocation for a space colony dealing with solar storm what-if scenarios | |
 | &nbsp;&nbsp;↳ `fantasy-draft` | Fantasy sports draft optimization under salary cap with injury what-if analysis | |
@@ -66,12 +66,12 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [alert-triage](examples/integrations/alert-triage/) | Alert triage with LLM-powered analysis | Rust, Go |
 | [cli-assistant](examples/integrations/cli-assistant/) | Interactive CLI assistant with LLM backend | Rust, Go |
 | [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | Rust, Go |
-| [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | Rust, Go, Python |
-| [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | Rust, Go |
+| [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | CLI/Bash, Go, Python, Rust |
+| [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | CLI/Bash, Go, Rust |
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |
 | &nbsp;&nbsp;↳ `rescue` | Search and rescue — survivor probability drives team assignment and safety checks | |
 | &nbsp;&nbsp;↳ `bakery` | Bakery scheduling — demand forecasts drive oven allocation and allergen separation | |
-| [llm-solver-hybrid](examples/integrations/llm-solver-hybrid/) | Hybrid LLM + Z3 solver problem solving | Rust, Go, Python |
+| [llm-solver-hybrid](examples/integrations/llm-solver-hybrid/) | Hybrid LLM + Z3 solver problem solving | CLI/Bash, Go, Python, Rust |
 | &nbsp;&nbsp;↳ `seating` | Wedding dinner seating — 12 guests across 3 tables with constraints | |
 | &nbsp;&nbsp;↳ `dungeon` | Dungeon layout — 5 rooms with boss and treasure placement rules | |
 | &nbsp;&nbsp;↳ `road-trip` | Road trip planning — 14 days across 5 national parks with preferences | |
@@ -79,7 +79,7 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `golf` | Golf course conditions — weather, soil, and maintenance factor learning | |
 | &nbsp;&nbsp;↳ `bmx` | BMX performance — skill level, technique, and jump factor learning | |
 | &nbsp;&nbsp;↳ `sourdough` | Sourdough baking — feeding schedule, flour type, and temperature factor learning | |
-| [zen-decisions](examples/integrations/zen-decisions/) | ZEN decision table evaluation via nxusKit SDK | Rust, Go, Python |
+| [zen-decisions](examples/integrations/zen-decisions/) | ZEN decision table evaluation via nxusKit SDK | CLI/Bash, Go, Python, Rust |
 | &nbsp;&nbsp;↳ `maze-rat` | First Hit Policy — route a maze runner through personality-driven decisions | |
 | &nbsp;&nbsp;↳ `potion` | Collect Hit Policy — match ingredient lists against brewing recipes | |
 | &nbsp;&nbsp;↳ `food-truck` | Expression Nodes — compute dynamic pricing with conditional logic | |
@@ -102,13 +102,13 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `score` | Score a sequence on six musical dimensions | |
 | &nbsp;&nbsp;↳ `transform` | Transform a sequence — transpose, invert, or retrograde | |
 | &nbsp;&nbsp;↳ `convert` | Convert between MIDI and MusicXML formats | |
-| [ruler](examples/apps/ruler/) | LLM-powered CLIPS rule generator with automatic validation | Rust, Go |
+| [ruler](examples/apps/ruler/) | LLM-powered CLIPS rule generator with automatic validation | CLI/Bash, Go, Rust |
 | &nbsp;&nbsp;↳ `generate` | Generate CLIPS rules from natural language descriptions | |
 | &nbsp;&nbsp;↳ `validate` | Validate CLIPS rule syntax and semantic correctness | |
 | &nbsp;&nbsp;↳ `save` | Save generated rules to a file for later use | |
 | &nbsp;&nbsp;↳ `load` | Load previously saved rules from a file | |
 | &nbsp;&nbsp;↳ `examples` | Run progressive complexity examples demonstrating rule generation | |
-| [arbiter](examples/apps/arbiter/) | CLIPS-validated LLM retry app with rule-based answer verification | Rust, Go |
+| [arbiter](examples/apps/arbiter/) | CLIPS-validated LLM retry app with rule-based answer verification | CLI/Bash, Go, Rust |
 | &nbsp;&nbsp;↳ `classification` | Categorize input text into specified categories | |
 | &nbsp;&nbsp;↳ `extraction` | Extract structured information from unstructured text | |
 | &nbsp;&nbsp;↳ `reasoning` | Perform logical inference and multi-step reasoning | |

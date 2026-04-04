@@ -55,18 +55,18 @@
           "rhs": 4
         },
         "variables": [
-          "guest_martha_t1",
-          "guest_bob_t1",
-          "guest_mom_bride_t1",
-          "guest_dad_bride_t1",
-          "guest_lisa_t1",
-          "guest_mark_t1",
-          "guest_anna_t1",
-          "guest_james_t1",
-          "guest_chen_t1",
-          "guest_priya_t1",
-          "guest_omar_t1",
-          "guest_sofia_t1"
+          "guest_martha_table",
+          "guest_bob_table",
+          "guest_mom_bride_table",
+          "guest_dad_bride_table",
+          "guest_lisa_table",
+          "guest_mark_table",
+          "guest_anna_table",
+          "guest_james_table",
+          "guest_chen_table",
+          "guest_priya_table",
+          "guest_omar_table",
+          "guest_sofia_table"
         ]
       }
     ],

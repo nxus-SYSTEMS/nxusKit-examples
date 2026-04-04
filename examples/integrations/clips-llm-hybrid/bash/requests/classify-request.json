@@ -1,0 +1,15 @@
+{
+  "max_tokens": 200,
+  "messages": [
+    {
+      "content": "You are a support ticket classifier. Analyze the ticket and respond with ONLY a JSON object:\n- category: one of \"billing\", \"technical\", \"security\", \"general\"\n- priority: one of \"low\", \"medium\", \"high\", \"critical\"\n- sentiment: one of \"positive\", \"neutral\", \"negative\", \"angry\"\n- entities: array of key entities mentioned",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.1
+}

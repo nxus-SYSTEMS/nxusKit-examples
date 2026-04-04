@@ -1,0 +1,11 @@
+{
+  "max_tokens": 50,
+  "messages": [
+    {
+      "content": "What is 2 + 2? Reply with just the number.",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.1
+}

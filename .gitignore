@@ -42,3 +42,5 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+# Bash example temp files
+examples/**/.tmp/

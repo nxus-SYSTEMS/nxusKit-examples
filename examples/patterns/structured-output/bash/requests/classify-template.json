@@ -1,0 +1,15 @@
+{
+  "max_tokens": 200,
+  "messages": [
+    {
+      "content": "You are a log classifier. Analyze the given log entry and respond with ONLY a JSON object (no markdown, no explanation) with these fields:\n- severity: one of \"low\", \"medium\", \"high\", \"critical\"\n- category: one of \"security\", \"performance\", \"operational\", \"application\"\n- summary: one sentence summary of the issue\n- actionable: true or false",
+      "role": "system"
+    },
+    {
+      "content": "PLACEHOLDER",
+      "role": "user"
+    }
+  ],
+  "model": "qwen3:4b",
+  "temperature": 0.1
+}

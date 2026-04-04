@@ -53,7 +53,7 @@
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Stream LLM responses token by token with a unified async interface that works across Claude, OpenAI, and Ollama without changing your code.",
-      "blurb": "Display LLM responses in real time without waiting for the full completion to arrive. nxusKit normalizes the Server-Sent Event formats from Claude, OpenAI, and Ollama into a single consistent streaming interface, so you write one pattern and swap providers freely. Implementations are available in Rust, Go, and Python, each using the idiomatic concurrency primitive for that language—async Stream, channels, and iterators respectively. Structured chunk types carry delta content and finish-reason metadata, and a built-in stream_with_callback utility handles content accumulation when you need the full response alongside live output.",
+      "blurb": "Display LLM responses in real time without waiting for the full completion to arrive. nxusKit normalizes the Server-Sent Event formats from Claude, OpenAI, and Ollama into a single consistent streaming interface, so you write one pattern and swap providers freely. Implementations are available in Rust, Go, and Python, each using the idiomatic concurrency primitive for that language\u2014async Stream, channels, and iterators respectively. Structured chunk types carry delta content and finish-reason metadata, and a built-in stream_with_callback utility handles content accumulation when you need the full response alongside live output.",
       "content_hash": "0cf9c2c9d29c07beffb12eb4ab69e9c41b2645a9cd1696bf41b5e630cbdc0c55"
     },
     {
@@ -79,7 +79,7 @@
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Run the same prompt across Claude, OpenAI, and Ollama simultaneously using one unified interface that normalizes responses and token usage.",
-      "blurb": "Query multiple LLM providers concurrently and compare responses through a single, normalized API. nxusKit's provider abstraction layer wraps Claude, OpenAI, and Ollama behind a shared interface, so every call returns the same ChatResponse type with consistent token usage data. Implementations in Rust, Go, and Python demonstrate the pattern using concurrent execution — goroutines, ThreadPoolExecutor, or async calls — while provider-agnostic error handling ensures one failing provider never blocks the others.",
+      "blurb": "Query multiple LLM providers concurrently and compare responses through a single, normalized API. nxusKit's provider abstraction layer wraps Claude, OpenAI, and Ollama behind a shared interface, so every call returns the same ChatResponse type with consistent token usage data. Implementations in Rust, Go, and Python demonstrate the pattern using concurrent execution \u2014 goroutines, ThreadPoolExecutor, or async calls \u2014 while provider-agnostic error handling ensures one failing provider never blocks the others.",
       "content_hash": "41993861824cbc7795d75b58e12dd2894da22fa06e0c898cbcce4275889c278d"
     },
     {
@@ -103,7 +103,7 @@
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Skip the boilerplate: call any LLM with a single line, letting nxusKit detect your provider and credentials automatically.",
-      "blurb": "The convenience API gives you immediate LLM access without writing provider setup code — one function call handles routing, authentication, and streaming across OpenAI, Anthropic, and Ollama. nxusKit infers the provider from the model name, reads credentials from environment variables, and returns a response or live-streaming chunks with no additional configuration. Available in both Go and Rust, this pattern is designed for scripts, prototypes, and any context where getting to a working LLM call matters more than fine-grained provider control.",
+      "blurb": "The convenience API gives you immediate LLM access without writing provider setup code \u2014 one function call handles routing, authentication, and streaming across OpenAI, Anthropic, and Ollama. nxusKit infers the provider from the model name, reads credentials from environment variables, and returns a response or live-streaming chunks with no additional configuration. Available in both Go and Rust, this pattern is designed for scripts, prototypes, and any context where getting to a working LLM call matters more than fine-grained provider control.",
       "content_hash": "00eb6ea66328a643f0e72b8b55b7cc04a2272741be4533b26b1462e930019ede"
     },
     {
@@ -127,8 +127,8 @@
       "notes": "Rust-specific feature; Go is synchronous by default",
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Call LLMs synchronously from any Rust code — no async runtime required, no await syntax, no tokio dependency to manage.",
-      "blurb": "Skip the async runtime entirely and call LLMs with plain synchronous code. nxusKit's BlockingProvider wraps any provider behind a standard blocking interface, while NxuskitProvider goes further with direct C ABI calls that need no runtime whatsoever. This pattern is purpose-built for Rust, where async requires an explicit runtime — making it ideal for CLI tools, batch scripts, immediate-mode UIs, and legacy codebases. Go developers get synchronous APIs natively and can reference the basic-chat example instead.",
+      "tagline": "Call LLMs synchronously from any Rust code \u2014 no async runtime required, no await syntax, no tokio dependency to manage.",
+      "blurb": "Skip the async runtime entirely and call LLMs with plain synchronous code. nxusKit's BlockingProvider wraps any provider behind a standard blocking interface, while NxuskitProvider goes further with direct C ABI calls that need no runtime whatsoever. This pattern is purpose-built for Rust, where async requires an explicit runtime \u2014 making it ideal for CLI tools, batch scripts, immediate-mode UIs, and legacy codebases. Go developers get synchronous APIs natively and can reference the basic-chat example instead.",
       "content_hash": "205d680730bf94b756e2e409e580f57f7ba5005f3fd08761abd984c26a743d62"
     },
     {
@@ -142,18 +142,20 @@
         "LLM"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/capability-detection/rust",
-        "go": "examples/patterns/capability-detection/go"
+        "go": "examples/patterns/capability-detection/go",
+        "bash": "examples/patterns/capability-detection/bash"
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Stop hardcoding model names — query provider capabilities at runtime and let task requirements drive model selection across any LLM backend.",
-      "blurb": "Capability Detection gives you a provider-agnostic way to inspect model metadata at runtime and route requests to the right model for the job. nxusKit's ListModels API returns normalized ModelInfo — context window size, vision support, modalities — across OpenAI, Claude, and Ollama through a single consistent interface. Your code filters by what a model can do rather than what it's named, making it straightforward to build adaptive middleware or feature-gated UX that degrades gracefully as your provider lineup changes. Available in Go and Rust.",
-      "content_hash": "e153b73732492d4d90ca39c56e8f797b36251704fe3e30d30dd664099725c112"
+      "tagline": "Stop hardcoding model names \u2014 query provider capabilities at runtime and let task requirements drive model selection across any LLM backend.",
+      "blurb": "Capability Detection gives you a provider-agnostic way to inspect model metadata at runtime and route requests to the right model for the job. nxusKit's ListModels API returns normalized ModelInfo \u2014 context window size, vision support, modalities \u2014 across OpenAI, Claude, and Ollama through a single consistent interface. Your code filters by what a model can do rather than what it's named, making it straightforward to build adaptive middleware or feature-gated UX that degrades gracefully as your provider lineup changes. Available in Go and Rust.",
+      "content_hash": "6db10c68e2a63d5910d8de8b0f07e9b99781d84da8c3cec70bdea3eeff6d323b"
     },
     {
       "name": "cost-routing",
@@ -166,20 +168,22 @@
         "LLM"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/cost-routing/rust",
         "go": "examples/patterns/cost-routing/go",
-        "python": "examples/patterns/cost-routing/python"
+        "python": "examples/patterns/cost-routing/python",
+        "bash": "examples/patterns/cost-routing/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Route every LLM request to the right model for the job, so you stop paying premium prices for economy-grade tasks.",
       "blurb": "The cost-routing pattern gives you automatic, complexity-driven model selection so your inference budget goes further without sacrificing quality where it counts. A lightweight classifier inspects each prompt for length and keyword signals, then dispatches the request to an economy, standard, or premium model tier through nxusKit's unified provider interface. Because the same ChatRequest abstraction works across all tiers, swapping models requires no changes to request or response handling code. Available in Go, Rust, and Python, this starter-level example runs against OpenAI, Anthropic, or a local Ollama instance.",
-      "content_hash": "99dcb8d67d5ffc537c693f385541e3b4e5bd64b3fa888c937f7a2bf09b3d4880"
+      "content_hash": "e05b96a5fee5b813c5aef882e2bf57005ae2d6543ca0676ad39faeec06345c20"
     },
     {
       "name": "polymorphic",
@@ -201,8 +205,8 @@
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Swap LLM providers at runtime without touching your application logic — nxusKit's polymorphic patterns keep your code provider-agnostic from day one.",
-      "blurb": "Write application logic once and route it to any LLM provider at runtime, no rewrites required. nxusKit's polymorphic provider pattern uses trait objects in Rust and implicit interfaces in Go to let your registry hold, discover, and dispatch across providers interchangeably. Register a mock for testing, a loopback for local development, or a cloud provider for production — the call sites never change. Available in both Go and Rust at the community tier, this starter example gives you the scaffolding for plugin architectures and provider-agnostic application layers.",
+      "tagline": "Swap LLM providers at runtime without touching your application logic \u2014 nxusKit's polymorphic patterns keep your code provider-agnostic from day one.",
+      "blurb": "Write application logic once and route it to any LLM provider at runtime, no rewrites required. nxusKit's polymorphic provider pattern uses trait objects in Rust and implicit interfaces in Go to let your registry hold, discover, and dispatch across providers interchangeably. Register a mock for testing, a loopback for local development, or a cloud provider for production \u2014 the call sites never change. Available in both Go and Rust at the community tier, this starter example gives you the scaffolding for plugin architectures and provider-agnostic application layers.",
       "content_hash": "ec5756b9e542ffd2ac80e9d3df4e70916934d7f810486d7ae523db82f767b5d4"
     },
     {
@@ -216,20 +220,22 @@
         "LLM"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/retry-fallback/rust",
         "go": "examples/patterns/retry-fallback/go",
-        "python": "examples/patterns/retry-fallback/python"
+        "python": "examples/patterns/retry-fallback/python",
+        "bash": "examples/patterns/retry-fallback/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Chain multiple LLM providers together so a failed request automatically reroutes to the next available provider without changing your application code.",
       "blurb": "Keep your AI service running even when individual providers fail by automatically routing requests down a prioritized provider chain until one succeeds. The retry-fallback pattern wraps any collection of LLMProvider implementations in a sequential failover loop, aggregating errors and returning the first successful response. Available in Go, Rust, and Python, it works with Claude, OpenAI, Ollama, or any custom provider that implements the LLMProvider interface. Part of the nxusKit Community edition, this starter example requires no additional dependencies beyond the SDK.",
-      "content_hash": "24a786fdf03e69e3d01955c9e3319771407e7778b6e4068d919ee04b87694669"
+      "content_hash": "5fb2861d65d18809a56214169b4c8d88fd0faf67482973b5f14f156e6374994a"
     },
     {
       "name": "structured-output",
@@ -242,20 +248,22 @@
         "LLM"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/structured-output/rust",
         "go": "examples/patterns/structured-output/go",
-        "python": "examples/patterns/structured-output/python"
+        "python": "examples/patterns/structured-output/python",
+        "bash": "examples/patterns/structured-output/bash"
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Stop parsing free-form LLM text — get typed, validated JSON structs back every time, across every provider.",
-      "blurb": "The structured-output example shows you how to get reliable, typed data out of any LLM instead of brittle text you have to scrape yourself. nxusKit abstracts each provider's JSON mode mechanism — OpenAI's response_format, Claude's tool use, Ollama's format parameter — behind a single ResponseFormat flag. You parse the response directly into your own structs using serde in Rust, json.Unmarshal in Go, or Pydantic in Python, with field validation included. Starter-level implementations in all three languages make this a practical drop-in reference for data extraction, form auto-fill, and API response generation.",
-      "content_hash": "9448c3e74423f4ff5be4bf66adb8b1eb217dad18d7c15ed6b5a9f79c1c55c759"
+      "tagline": "Stop parsing free-form LLM text \u2014 get typed, validated JSON structs back every time, across every provider.",
+      "blurb": "The structured-output example shows you how to get reliable, typed data out of any LLM instead of brittle text you have to scrape yourself. nxusKit abstracts each provider's JSON mode mechanism \u2014 OpenAI's response_format, Claude's tool use, Ollama's format parameter \u2014 behind a single ResponseFormat flag. You parse the response directly into your own structs using serde in Rust, json.Unmarshal in Go, or Pydantic in Python, with field validation included. Starter-level implementations in all three languages make this a practical drop-in reference for data extraction, form auto-fill, and API response generation.",
+      "content_hash": "8d6ee862d130639facc4acc0f9d56e2066e5bb7a5fe9a19b7ae5753c73de38de"
     },
     {
       "name": "timeout-config",
@@ -305,8 +313,8 @@
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Stop paying for tokens you don't need — enforce real-time streaming budgets and cancel LLM requests the moment your limit is reached.",
-      "blurb": "The token-budget pattern gives you precise cost control over streaming LLM responses by cancelling generation the moment an estimated token limit is hit. It works by counting characters in real time as chunks arrive — using a simple four-characters-per-token heuristic — and gracefully terminating the stream when the budget is exhausted. The result includes the partial content, estimated token count, and a flag indicating whether the budget was reached. Implementations are available in Go and Rust, and the pattern works with any streaming-capable provider including Claude, OpenAI, and Ollama.",
+      "tagline": "Stop paying for tokens you don't need \u2014 enforce real-time streaming budgets and cancel LLM requests the moment your limit is reached.",
+      "blurb": "The token-budget pattern gives you precise cost control over streaming LLM responses by cancelling generation the moment an estimated token limit is hit. It works by counting characters in real time as chunks arrive \u2014 using a simple four-characters-per-token heuristic \u2014 and gracefully terminating the stream when the budget is exhausted. The result includes the partial content, estimated token count, and a flag indicating whether the budget was reached. Implementations are available in Go and Rust, and the pattern works with any streaming-capable provider including Claude, OpenAI, and Ollama.",
       "content_hash": "79627018586c236fa05557805a05a08da3959b4b445bdd20d7d4e65c60192787"
     },
     {
@@ -333,7 +341,7 @@
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Send images alongside text to any LLM provider using one consistent API that handles encoding, formatting, and provider differences for you.",
-      "blurb": "The vision example shows you how to build multimodal LLM requests—combining text prompts with images—using a single fluent API that works across Claude and OpenAI. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, and Rust, covering use cases from image captioning and visual QA to document understanding.",
+      "blurb": "The vision example shows you how to build multimodal LLM requests\u2014combining text prompts with images\u2014using a single fluent API that works across Claude and OpenAI. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, and Rust, covering use cases from image captioning and visual QA to document understanding.",
       "content_hash": "26ccab0d76243070e8be29620c73d826c884e758f0f9d6d0979bb2e5cf34ef00"
     },
     {
@@ -411,20 +419,22 @@
         "Solver"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/patterns/solver/rust",
         "go": "examples/patterns/solver/go",
-        "python": "examples/patterns/solver/python"
+        "python": "examples/patterns/solver/python",
+        "bash": "examples/patterns/solver/bash"
       },
       "tier": "pro",
       "difficulty": "intermediate",
-      "tagline": "Define variables, add constraints, and solve complex planning problems with Z3 — without leaving your nxusKit workflow.",
-      "blurb": "The solver example gives you a complete, runnable constraint solver integrated directly into nxusKit — covering satisfaction checking, single- and multi-objective optimization, soft constraints, and reversible what-if analysis. It works by wrapping a Z3 solver session through the nxusKit SDK, letting you build and query constraint models incrementally without managing solver state manually. Three scenario-driven problem definitions — theme park planning, space colony design, and fantasy sports drafting — demonstrate each technique against realistic decision variables. Implementations are available in Go, Rust, and Python, and no LLM provider is required.",
-      "content_hash": "4d8b1d69ce5ae2b52e0dd7fff276cf39c9da1f6f09203cdab04825979a9b3ab8"
+      "tagline": "Define variables, add constraints, and solve complex planning problems with Z3 \u2014 without leaving your nxusKit workflow.",
+      "blurb": "The solver example gives you a complete, runnable constraint solver integrated directly into nxusKit \u2014 covering satisfaction checking, single- and multi-objective optimization, soft constraints, and reversible what-if analysis. It works by wrapping a Z3 solver session through the nxusKit SDK, letting you build and query constraint models incrementally without managing solver state manually. Three scenario-driven problem definitions \u2014 theme park planning, space colony design, and fantasy sports drafting \u2014 demonstrate each technique against realistic decision variables. Implementations are available in Go, Rust, and Python, and no LLM provider is required.",
+      "content_hash": "d5853504bf3af76ceb8fbbae3dfd7e3a85bb08b6916ea2c081bb64b5586cc8c4"
     },
     {
       "name": "bayesian-inference",
@@ -436,7 +446,7 @@
         {
           "name": "haunted-house",
           "cli": "--scenario haunted-house",
-          "description": "Investigate a haunted house — is it a ghost or a raccoon?"
+          "description": "Investigate a haunted house \u2014 is it a ghost or a raccoon?"
         },
         {
           "name": "coffee-shop",
@@ -465,8 +475,8 @@
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Run exact and approximate Bayesian inference on real-world diagnostic models using four algorithms and three themed scenarios — all from a single SDK call.",
-      "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms — exact and approximate — through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, and Python are included, and no LLM provider is required.",
+      "tagline": "Run exact and approximate Bayesian inference on real-world diagnostic models using four algorithms and three themed scenarios \u2014 all from a single SDK call.",
+      "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms \u2014 exact and approximate \u2014 through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, and Python are included, and no LLM provider is required.",
       "content_hash": "7971b8aeb0061595c61e4590f92c48d3ea9a9c5ca217925576b9d9a4d5e3d111"
     },
     {
@@ -489,7 +499,7 @@
         {
           "name": "recipe",
           "cli": "--scenario recipe",
-          "description": "Recipe scaling with vegan substitution — may be UNSAT"
+          "description": "Recipe scaling with vegan substitution \u2014 may be UNSAT"
         }
       ],
       "real_world_application": "Financial planning, capacity modeling, sensitivity analysis",
@@ -508,8 +518,8 @@
       },
       "tier": "pro",
       "difficulty": "intermediate",
-      "tagline": "Explore alternative outcomes without rebuilding your model — push constraints, solve, compare, and pop back to baseline in one clean pattern.",
-      "blurb": "The solver-what-if example gives developers a reusable pattern for exploring how constraint changes affect optimal solutions — without ever rebuilding the model from scratch. It works by wrapping each alternative scenario in a push/pop scope: push the current solver state, inject temporary constraints, solve, diff the results against the baseline, then pop back to restore the original model. When a scenario is infeasible, the unsat core surfaces the exact constraint labels causing the conflict. Three themed scenarios — wedding budget, Mars colony resource allocation, and recipe scaling — provide concrete starting points. Available in Go, Rust, and Python.",
+      "tagline": "Explore alternative outcomes without rebuilding your model \u2014 push constraints, solve, compare, and pop back to baseline in one clean pattern.",
+      "blurb": "The solver-what-if example gives developers a reusable pattern for exploring how constraint changes affect optimal solutions \u2014 without ever rebuilding the model from scratch. It works by wrapping each alternative scenario in a push/pop scope: push the current solver state, inject temporary constraints, solve, diff the results against the baseline, then pop back to restore the original model. When a scenario is infeasible, the unsat core surfaces the exact constraint labels causing the conflict. Three themed scenarios \u2014 wedding budget, Mars colony resource allocation, and recipe scaling \u2014 provide concrete starting points. Available in Go, Rust, and Python.",
       "content_hash": "19ce9be26dc50e29fe915da456bde7f55c82742fa4c2a14bf8b3f7adc87357d6"
     },
     {
@@ -558,7 +568,7 @@
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Run LLM inference on your own machine — connect nxusKit to LM Studio and prototype without cloud dependencies or API keys.",
+      "tagline": "Run LLM inference on your own machine \u2014 connect nxusKit to LM Studio and prototype without cloud dependencies or API keys.",
       "blurb": "The lmstudio example gives developers a working integration between nxusKit and LM Studio, enabling fully local LLM inference without cloud credentials or network dependencies. It connects to LM Studio's OpenAI-compatible HTTP server, discovers loaded models automatically, and runs both synchronous and streaming chat completions. Implementations are available in Go and Rust, making it a practical starting point for offline prototyping or local testing workflows on the Community SDK edition.",
       "content_hash": "cdbfeab09532b467b85592a377a00f006aa17ac3f96a6a4ec0de37df82731b57"
     },
@@ -606,8 +616,8 @@
       },
       "tier": "community",
       "difficulty": "starter",
-      "tagline": "Turn plain English into shell commands instantly — build a streaming CLI assistant that speaks your language and runs in your terminal.",
-      "blurb": "Build a terminal assistant that translates plain English into executable shell commands, complete with real-time streaming output as each command is generated. The example wires an LLM backend — via Ollama locally or a cloud provider — to a lightweight CLI interface, passing natural language queries through a structured system prompt and streaming the response token by token. Implementations are available in both Go and Rust using the nxusKit SDK, making this a practical starting point for developer productivity tools, command-line copilots, or any application that needs conversational shell interaction.",
+      "tagline": "Turn plain English into shell commands instantly \u2014 build a streaming CLI assistant that speaks your language and runs in your terminal.",
+      "blurb": "Build a terminal assistant that translates plain English into executable shell commands, complete with real-time streaming output as each command is generated. The example wires an LLM backend \u2014 via Ollama locally or a cloud provider \u2014 to a lightweight CLI interface, passing natural language queries through a structured system prompt and streaming the response token by token. Implementations are available in both Go and Rust using the nxusKit SDK, making this a practical starting point for developer productivity tools, command-line copilots, or any application that needs conversational shell interaction.",
       "content_hash": "037da96eda19848561858ff03708059daa7900eeefd716e4f29ef658a156c6ec"
     },
     {
@@ -646,24 +656,26 @@
         "CLIPS"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/clips-llm-hybrid/rust",
         "go": "examples/integrations/clips-llm-hybrid/go",
-        "python": "examples/integrations/clips-llm-hybrid/python"
+        "python": "examples/integrations/clips-llm-hybrid/python",
+        "bash": "examples/integrations/clips-llm-hybrid/bash"
       },
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Combine deterministic CLIPS rules with LLM reasoning to build AI pipelines that are both fluent and auditable.",
-      "blurb": "clips-llm-hybrid shows you how to wire CLIPS expert system rules and an LLM together in a single, auditable pipeline — so your AI can understand free-form input and still apply policy-compliant decisions every time. An LLM first classifies unstructured text into structured facts, CLIPS fires deterministic routing rules against those facts, then a second LLM pass generates a human-friendly response. Both Go and Rust implementations share the same ClipsProvider interface, meaning CLIPS and LLM calls are interchangeable at the API level. Practical for regulated industries, support automation, or any workflow where explainability is non-negotiable.",
-      "content_hash": "ff5b0482e05f991db6ef0cb542422c3f9a49b15c0ed8385eba4336c74aa0d11d"
+      "blurb": "clips-llm-hybrid shows you how to wire CLIPS expert system rules and an LLM together in a single, auditable pipeline \u2014 so your AI can understand free-form input and still apply policy-compliant decisions every time. An LLM first classifies unstructured text into structured facts, CLIPS fires deterministic routing rules against those facts, then a second LLM pass generates a human-friendly response. Both Go and Rust implementations share the same ClipsProvider interface, meaning CLIPS and LLM calls are interchangeable at the API level. Practical for regulated industries, support automation, or any workflow where explainability is non-negotiable.",
+      "content_hash": "1cfb20f70bd3ce4ca8a9e173b42b213c133da0ccec71b9221aa5a1b24d8f7453"
     },
     {
       "name": "bn-solver-clips-pipeline",
-      "description": "Three-stage BN prediction → Solver optimization → CLIPS safety pipeline",
+      "description": "Three-stage BN prediction \u2192 Solver optimization \u2192 CLIPS safety pipeline",
       "category": "integrations",
       "required": true,
       "scenario": "Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement",
@@ -671,17 +683,17 @@
         {
           "name": "festival",
           "cli": "--scenario festival",
-          "description": "Music festival staging — crowd predictions drive band scheduling and safety"
+          "description": "Music festival staging \u2014 crowd predictions drive band scheduling and safety"
         },
         {
           "name": "rescue",
           "cli": "--scenario rescue",
-          "description": "Search and rescue — survivor probability drives team assignment and safety checks"
+          "description": "Search and rescue \u2014 survivor probability drives team assignment and safety checks"
         },
         {
           "name": "bakery",
           "cli": "--scenario bakery",
-          "description": "Bakery scheduling — demand forecasts drive oven allocation and allergen separation"
+          "description": "Bakery scheduling \u2014 demand forecasts drive oven allocation and allergen separation"
         }
       ],
       "real_world_application": "Multi-stage decision support, risk-aware optimization with safety validation",
@@ -691,18 +703,20 @@
         "BN"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/bn-solver-clips-pipeline/rust",
-        "go": "examples/integrations/bn-solver-clips-pipeline/go"
+        "go": "examples/integrations/bn-solver-clips-pipeline/go",
+        "bash": "examples/integrations/bn-solver-clips-pipeline/bash"
       },
       "tier": "pro",
       "difficulty": "advanced",
       "tagline": "Chain probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single production-ready pipeline using one unified SDK.",
       "blurb": "Wire probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single coherent pipeline without managing three separate integrations. nxusKit threads a Bayesian Network's posterior outputs into a Z3 solver, then feeds the solver's assignments directly into a CLIPS rule engine that fires domain-specific safety alerts. The example ships runnable festival, rescue, and bakery scenarios in both Go and Rust, demonstrating that the same three-stage data flow works whether you prefer the Session API or provider chat.",
-      "content_hash": "d8d1edd16d5ec60ef60d625a1baf80c5d1cf23f3c52d7586e8a3cb66d4f194fd"
+      "content_hash": "900eda5aba1ba69cdfd28c1c8cac4bacc2f13489ce6dc83236c2e75be460af26"
     },
     {
       "name": "llm-solver-hybrid",
@@ -714,17 +728,17 @@
         {
           "name": "seating",
           "cli": "--scenario seating",
-          "description": "Wedding dinner seating — 12 guests across 3 tables with constraints"
+          "description": "Wedding dinner seating \u2014 12 guests across 3 tables with constraints"
         },
         {
           "name": "dungeon",
           "cli": "--scenario dungeon",
-          "description": "Dungeon layout — 5 rooms with boss and treasure placement rules"
+          "description": "Dungeon layout \u2014 5 rooms with boss and treasure placement rules"
         },
         {
           "name": "road-trip",
           "cli": "--scenario road-trip",
-          "description": "Road trip planning — 14 days across 5 national parks with preferences"
+          "description": "Road trip planning \u2014 14 days across 5 national parks with preferences"
         }
       ],
       "real_world_application": "Natural language optimization, conversational planning",
@@ -733,20 +747,22 @@
         "Solver"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/llm-solver-hybrid/rust",
         "go": "examples/integrations/llm-solver-hybrid/go",
-        "python": "examples/integrations/llm-solver-hybrid/python"
+        "python": "examples/integrations/llm-solver-hybrid/python",
+        "bash": "examples/integrations/llm-solver-hybrid/bash"
       },
       "tier": "pro",
       "difficulty": "intermediate",
-      "tagline": "Bridge natural language and constraint solvers — let an LLM parse human intent, let Z3 find the optimal answer.",
+      "tagline": "Bridge natural language and constraint solvers \u2014 let an LLM parse human intent, let Z3 find the optimal answer.",
       "blurb": "Connect a language model to a constraint solver so that plain-English problem descriptions produce mathematically optimized solutions. The pipeline prompts an LLM to extract typed variables and constraints as structured JSON, validates them, then feeds them directly into a Z3 solver session. Automatic retry logic re-prompts the model on parse failures, and a mock mode lets you develop and test the full pipeline without an API key. Available in Go, Rust, and Python, with provider-agnostic support for Ollama, OpenAI, Claude, and Groq.",
-      "content_hash": "dba62aca7bc1670ad3cffadf1064ec4ee761456ebf4a42b033b6d5f5e4674d9f"
+      "content_hash": "1834f8b88e4962e1ca671cb59f6a58c68b320def389477c339b853a387db3a78"
     },
     {
       "name": "bn-structure-learning",
@@ -758,17 +774,17 @@
         {
           "name": "golf",
           "cli": "--scenario golf",
-          "description": "Golf course conditions — weather, soil, and maintenance factor learning"
+          "description": "Golf course conditions \u2014 weather, soil, and maintenance factor learning"
         },
         {
           "name": "bmx",
           "cli": "--scenario bmx",
-          "description": "BMX performance — skill level, technique, and jump factor learning"
+          "description": "BMX performance \u2014 skill level, technique, and jump factor learning"
         },
         {
           "name": "sourdough",
           "cli": "--scenario sourdough",
-          "description": "Sourdough baking — feeding schedule, flour type, and temperature factor learning"
+          "description": "Sourdough baking \u2014 feeding schedule, flour type, and temperature factor learning"
         }
       ],
       "real_world_application": "Causal discovery, epidemiological modeling, root cause analysis",
@@ -787,8 +803,8 @@
       },
       "tier": "community",
       "difficulty": "intermediate",
-      "tagline": "Discover causal structure hidden in your data — learn Bayesian network topology and parameters directly from CSV observations using Hill-Climb and K2 search algorithms.",
-      "blurb": "Automatically recover causal graph structure from raw observational data and run inference on the result — no hand-coded network topology required. nxusKit's BN structure learning pipeline reads a CSV file, discovers directed edges using Hill-Climb and K2 search algorithms, fits conditional probability tables via Maximum Likelihood Estimation, and evaluates model fit with log-likelihood scoring. Edges agreed upon by both algorithms surface as high-confidence causal relationships. Available in Go, Rust, and Python on the Community edition SDK.",
+      "tagline": "Discover causal structure hidden in your data \u2014 learn Bayesian network topology and parameters directly from CSV observations using Hill-Climb and K2 search algorithms.",
+      "blurb": "Automatically recover causal graph structure from raw observational data and run inference on the result \u2014 no hand-coded network topology required. nxusKit's BN structure learning pipeline reads a CSV file, discovers directed edges using Hill-Climb and K2 search algorithms, fits conditional probability tables via Maximum Likelihood Estimation, and evaluates model fit with log-likelihood scoring. Edges agreed upon by both algorithms surface as high-confidence causal relationships. Available in Go, Rust, and Python on the Community edition SDK.",
       "content_hash": "2c175270894c3a1176c55bc08077d21e9be2624d129ec6795a8c933e0b3ebc32"
     },
     {
@@ -801,17 +817,17 @@
         {
           "name": "maze-rat",
           "cli": "--scenario maze-rat",
-          "description": "First Hit Policy — route a maze runner through personality-driven decisions"
+          "description": "First Hit Policy \u2014 route a maze runner through personality-driven decisions"
         },
         {
           "name": "potion",
           "cli": "--scenario potion",
-          "description": "Collect Hit Policy — match ingredient lists against brewing recipes"
+          "description": "Collect Hit Policy \u2014 match ingredient lists against brewing recipes"
         },
         {
           "name": "food-truck",
           "cli": "--scenario food-truck",
-          "description": "Expression Nodes — compute dynamic pricing with conditional logic"
+          "description": "Expression Nodes \u2014 compute dynamic pricing with conditional logic"
         }
       ],
       "real_world_application": "Pricing rules, eligibility determination, policy evaluation",
@@ -819,20 +835,22 @@
         "ZEN"
       ],
       "languages": [
-        "rust",
+        "bash",
         "go",
-        "python"
+        "python",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/integrations/zen-decisions/rust",
         "go": "examples/integrations/zen-decisions/go",
-        "python": "examples/integrations/zen-decisions/python"
+        "python": "examples/integrations/zen-decisions/python",
+        "bash": "examples/integrations/zen-decisions/bash"
       },
       "tier": "pro",
       "difficulty": "starter",
-      "tagline": "Evaluate business decision tables in Go, Rust, and Python using the ZEN engine — from pricing rules to eligibility checks, with first-hit and collect hit policies.",
-      "blurb": "zen-decisions gives you a working blueprint for evaluating JSON Decision Models against live business inputs — pricing rules, eligibility checks, or policy logic — without hand-rolling conditional logic. It calls nxusKit's ZEN evaluate API to run stateless JDM evaluation across three scenarios: a maze-navigating rat that swaps personality variants via first-hit policy, a potion selector that returns every matching recipe using collect hit policy, and a food-truck planner that chains decision tables with expression nodes. Implementations are provided in Go, Rust, and Python, all driven by the same shared scenario data.",
-      "content_hash": "6509552e0328a8f22f95ebc6bf1ac74c0eeae00862e7ab68045d9e56a4e8e224"
+      "tagline": "Evaluate business decision tables in Go, Rust, and Python using the ZEN engine \u2014 from pricing rules to eligibility checks, with first-hit and collect hit policies.",
+      "blurb": "zen-decisions gives you a working blueprint for evaluating JSON Decision Models against live business inputs \u2014 pricing rules, eligibility checks, or policy logic \u2014 without hand-rolling conditional logic. It calls nxusKit's ZEN evaluate API to run stateless JDM evaluation across three scenarios: a maze-navigating rat that swaps personality variants via first-hit policy, a potion selector that returns every matching recipe using collect hit policy, and a food-truck planner that chains decision tables with expression nodes. Implementations are provided in Go, Rust, and Python, all driven by the same shared scenario data.",
+      "content_hash": "f43a0ff908efa8bc9b0c4e1bcb54f3cfddd8989e653f5e4b9be1b718be66f365"
     },
     {
       "name": "puzzler",
@@ -921,7 +939,7 @@
       "tier": "pro",
       "difficulty": "advanced",
       "tagline": "Race CLIPS rule engines against LLMs on logic puzzles and let the data choose your AI strategy.",
-      "blurb": "Racer gives you empirical evidence for choosing between CLIPS rule-based solving and LLM reasoning before you commit to an architecture. It runs both approaches concurrently on the same logic problems, then scores the results by speed, accuracy, or a weighted composite—producing machine-readable JSON for downstream analysis. Available in Go and Rust, Racer ships with a built-in problem library covering logic puzzles, classification tasks, and constraint satisfaction challenges, and supports multi-run benchmarking with statistical aggregation.",
+      "blurb": "Racer gives you empirical evidence for choosing between CLIPS rule-based solving and LLM reasoning before you commit to an architecture. It runs both approaches concurrently on the same logic problems, then scores the results by speed, accuracy, or a weighted composite\u2014producing machine-readable JSON for downstream analysis. Available in Go and Rust, Racer ships with a built-in problem library covering logic puzzles, classification tasks, and constraint satisfaction challenges, and supports multi-run benchmarking with statistical aggregation.",
       "content_hash": "e82c6e39840d0b85800dfff2b3b0b02ff71610c556f51189a03c2f7d263de079"
     },
     {
@@ -944,7 +962,7 @@
         {
           "name": "transform",
           "cli": "transform",
-          "description": "Transform a sequence — transpose, invert, or retrograde"
+          "description": "Transform a sequence \u2014 transpose, invert, or retrograde"
         },
         {
           "name": "convert",
@@ -970,7 +988,7 @@
       "difficulty_override": true,
       "difficulty_override_reason": "Extremely high SLOC (4168 avg) and file count (19.5 avg) indicate advanced complexity despite only 2 tech_tags",
       "tagline": "Analyze, score, and transform MIDI and MusicXML sequences using CLIPS rule-based music theory and LLM-powered narrative and transformation.",
-      "blurb": "Riffer gives developers a complete pipeline for music sequence analysis and transformation, from key detection to six-dimension musicality scoring to format conversion. It combines a deterministic music theory engine—built on the Krumhansl-Schmuckler algorithm and CLIPS rule-based scoring—with optional LLM integration for natural language transforms and prose narrative output. Available in Rust and Go, Riffer reads and writes MIDI and MusicXML, supports algorithmic operations like transpose, invert, retrograde, augment, and diminish, and serves as a working reference for integrating nxusKit's CLIPS and LLM providers in a Pro-tier application.",
+      "blurb": "Riffer gives developers a complete pipeline for music sequence analysis and transformation, from key detection to six-dimension musicality scoring to format conversion. It combines a deterministic music theory engine\u2014built on the Krumhansl-Schmuckler algorithm and CLIPS rule-based scoring\u2014with optional LLM integration for natural language transforms and prose narrative output. Available in Rust and Go, Riffer reads and writes MIDI and MusicXML, supports algorithmic operations like transpose, invert, retrograde, augment, and diminish, and serves as a working reference for integrating nxusKit's CLIPS and LLM providers in a Pro-tier application.",
       "content_hash": "757c2d11b7a7dd6da6f727e997a49089e26f2683f0a11a362b2a9cdf531b2a0d"
     },
     {
@@ -1012,18 +1030,20 @@
         "CLIPS"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/apps/ruler/rust",
-        "go": "examples/apps/ruler/go"
+        "go": "examples/apps/ruler/go",
+        "bash": "examples/apps/ruler/bash"
       },
       "tier": "pro",
       "difficulty": "advanced",
-      "tagline": "Turn plain English into validated CLIPS rules — describe your business logic, get production-ready expert system code with automatic error correction.",
-      "blurb": "Ruler lets you author CLIPS expert system rules by describing them in plain English, eliminating the need to hand-write production system syntax. An LLM generates the deftemplate and defrule constructs, then a built-in validator checks syntax and safety — automatically retrying with error feedback until the code passes. Available in Go and Rust, Ruler supports basic through advanced complexity targets and saves output as .clp, .json, or binary. It is part of nxusKit Pro and demonstrates the LLM-plus-CLIPS integration pattern for low-code rule authoring workflows.",
-      "content_hash": "89df26c1ef6cb4b9c82cfb7ea474ac7c0f3a1f34d0895dbd6a28b5eb7b760045"
+      "tagline": "Turn plain English into validated CLIPS rules \u2014 describe your business logic, get production-ready expert system code with automatic error correction.",
+      "blurb": "Ruler lets you author CLIPS expert system rules by describing them in plain English, eliminating the need to hand-write production system syntax. An LLM generates the deftemplate and defrule constructs, then a built-in validator checks syntax and safety \u2014 automatically retrying with error feedback until the code passes. Available in Go and Rust, Ruler supports basic through advanced complexity targets and saves output as .clp, .json, or binary. It is part of nxusKit Pro and demonstrates the LLM-plus-CLIPS integration pattern for low-code rule authoring workflows.",
+      "content_hash": "a0189aaaf06b0a6fcee28ca31e37ff44f699e5e0f8628113031502910f32a5c5"
     },
     {
       "name": "arbiter",
@@ -1054,18 +1074,20 @@
         "CLIPS"
       ],
       "languages": [
-        "rust",
-        "go"
+        "bash",
+        "go",
+        "rust"
       ],
       "implementations": {
         "rust": "examples/apps/arbiter/rust",
-        "go": "examples/apps/arbiter/go"
+        "go": "examples/apps/arbiter/go",
+        "bash": "examples/apps/arbiter/bash"
       },
       "tier": "pro",
       "difficulty": "advanced",
-      "tagline": "Stop accepting unreliable LLM output — validate every response against CLIPS rules and retry automatically until your standards are met.",
-      "blurb": "Arbiter gives you LLM outputs you can trust by automatically retrying generation whenever rule-based validation fails. It works by running each LLM response through a CLIPS rules engine that scores confidence, checks category validity, and flags missing reasoning — then adjusts inference parameters and tries again. Available in Go and Rust, the example demonstrates the Solver pattern: a provider-agnostic retry loop that bridges probabilistic generation with deterministic policy enforcement, making it practical for operations research tools, compliance pipelines, and any system where LLM output correctness is non-negotiable.",
-      "content_hash": "96ad08ef3b4b4066eaf620953b544dd8e57575158591419c8a075b2e56128c66"
+      "tagline": "Stop accepting unreliable LLM output \u2014 validate every response against CLIPS rules and retry automatically until your standards are met.",
+      "blurb": "Arbiter gives you LLM outputs you can trust by automatically retrying generation whenever rule-based validation fails. It works by running each LLM response through a CLIPS rules engine that scores confidence, checks category validity, and flags missing reasoning \u2014 then adjusts inference parameters and tries again. Available in Go and Rust, the example demonstrates the Solver pattern: a provider-agnostic retry loop that bridges probabilistic generation with deterministic policy enforcement, making it practical for operations research tools, compliance pipelines, and any system where LLM output correctness is non-negotiable.",
+      "content_hash": "cfe19fb633960065bb64d9fc7ca2d87766521d8fcfc7e5382c13d9a217c03279"
     }
   ],
   "categories": {

@@ -80,7 +80,7 @@
           "description": "Array of implemented languages, must match implementations keys",
           "items": {
             "type": "string",
-            "enum": ["rust", "go", "python"]
+            "enum": ["rust", "go", "python", "bash"]
           },
           "minItems": 1
         },
@@ -103,6 +103,10 @@
             "typescript": {
               "type": "string",
               "description": "Path to TypeScript implementation"
+            },
+            "bash": {
+              "type": "string",
+              "description": "Path to Bash/CLI implementation (via nxuskit-cli)"
             }
           },
           "additionalProperties": false
