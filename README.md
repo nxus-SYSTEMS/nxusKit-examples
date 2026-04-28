@@ -5,14 +5,14 @@
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
 
-**[nxus.SYSTEMS](https://nxus.systems)** · **[Examples Portfolio](https://nxus.systems/examples)** · **[nxusKit SDK](https://github.com/nxus-SYSTEMS/nxusKit)**
+**[Examples Docs](https://docs.nxus.systems/nxuskit/examples/)** · **[SDK Docs](https://docs.nxus.systems/nxuskit/)** · **[nxusKit SDK](https://github.com/nxus-SYSTEMS/nxusKit)** · **[Examples Portfolio](https://nxus.systems/examples)** · **[Website](https://nxus.systems)**
 
 32 production examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
 
 ## Quick Start
 
 ```bash
-# 1. Install the SDK (see nxusKit Getting Started guide)
+# 1. Install the SDK (see https://docs.nxus.systems/nxuskit/getting-started/installation/)
 # 2. Set up this project
 source ~/.nxuskit/sdk/current/scripts/setup-sdk.sh   # Go, env vars, library paths
 ./scripts/setup-sdk-symlink.sh                        # Rust Cargo paths override
