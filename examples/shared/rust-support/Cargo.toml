@@ -3,7 +3,7 @@ name = "llm-patterns"
 version = "0.1.0"
 edition = "2024"
 description = "Support types for nxusKit LLM pattern examples (Arbiter, Puzzler, Ruler, Racer)"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]

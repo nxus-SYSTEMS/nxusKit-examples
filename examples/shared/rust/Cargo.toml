@@ -3,7 +3,7 @@ name = "nxuskit-examples-interactive"
 version = "0.1.0"
 edition = "2024"
 description = "Interactive mode utilities for nxusKit examples"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 crossterm = "0.28"
