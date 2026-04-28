@@ -107,10 +107,6 @@
               "type": "string",
               "description": "Path to Python implementation"
             },
-            "typescript": {
-              "type": "string",
-              "description": "Path to TypeScript implementation"
-            },
             "bash": {
               "type": "string",
               "description": "Path to Bash/CLI implementation (via nxuskit-cli)"

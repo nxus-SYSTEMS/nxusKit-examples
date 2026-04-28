@@ -6,8 +6,7 @@
     "bash": "CLI/Bash",
     "go": "Go",
     "python": "Python",
-    "rust": "Rust",
-    "typescript": "TypeScript"
+    "rust": "Rust"
   },
   "examples": [
     {
