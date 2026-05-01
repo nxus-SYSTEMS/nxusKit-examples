@@ -167,9 +167,9 @@ VE and JT should produce identical posteriors (both are exact). LBP and Gibbs po
 
 ## Real-World Applications
 
-| Scenario | Real-World Analog |
-|----------|-------------------|
-| Haunted House | Fault diagnosis, anomaly detection, sensor fusion (multiple noisy sensors pointing to hidden causes) |
+| Application | How this example applies |
+|-------------|--------------------------|
+| Haunted House | Fault diagnosis, anomaly detection, sensor fusion from multiple noisy sensors pointing to hidden causes |
 | Coffee Shop | Manufacturing quality control, process parameter tuning, root cause analysis in production |
 | Plant Doctor | Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis |
 

@@ -21,8 +21,8 @@ Demonstrates push/pop scoping, assumption-based solving, and what-if analysis us
 ## Prerequisites
 
 - **SDK:** Use an installed SDK tree (`NXUSKIT_SDK_DIR`, `NXUSKIT_LIB_PATH` as needed); `test-examples.sh` resolves Go/Rust/Python deps from that tree only — see [README.md](../../../README.md), `scripts/setup-sdk.sh`, and `scripts/test-examples.sh`.
-- **Languages in this example:** go, rust, python (paths under this directory).
-- **Models:** Set cloud provider API keys and/or run **Ollama** locally when you execute the **Run** steps (interactive flags like `--help` / `--verbose` are documented below).
+- **Languages in this example:** go, rust, python, bash (paths under this directory).
+- **Solver entitlement:** Requires a Pro or trial entitlement because it uses the Z3-backed solver. No LLM provider is required.
 
 ## Key nxusKit Features Demonstrated
 
@@ -73,6 +73,8 @@ Attach an **installed SDK** (`NXUSKIT_SDK_DIR`). See the repository [README.md](
 # From `/examples/patterns/solver-what-if`:
 cd rust && cargo build
 cd go && make build
+cd python && python3 main.py --help
+cd bash && make build
 ```
 
 ## Run
@@ -100,6 +102,14 @@ cd python
 python3 main.py --scenario wedding
 python3 main.py --scenario mars --verbose
 python3 main.py --scenario recipe --step
+```
+
+### CLI/Bash
+```bash
+cd bash
+make run
+make run ARGS="--scenario mars"
+make run ARGS="--scenario recipe --verbose"
 ```
 
 ## Push/Pop Concepts
@@ -194,8 +204,8 @@ Each scenario is a directory containing a `problem.json` file:
 
 ## Real-World Applications
 
-| Scenario | Real-World Analog |
-|----------|-------------------|
+| Application | How this example applies |
+|-------------|--------------------------|
 | Wedding Budget Planning | Event planning, capital budgeting, portfolio allocation |
 | Mars Colony Planning | Infrastructure sizing, supply chain planning, disaster preparedness |
 | Recipe Scaling | Manufacturing scaling, formulation optimization, process engineering |
@@ -208,16 +218,20 @@ All implementations support debugging flags:
 # Verbose mode - show solver stats and constraint details
 cargo run -- --scenario wedding --verbose      # Rust
 ./bin/solver-what-if --scenario wedding --verbose  # Go
+python3 main.py --scenario wedding --verbose   # Python
+make run ARGS="--scenario wedding --verbose"   # CLI/Bash
 
 # Step mode - pause at each phase with explanations
 cargo run -- --scenario wedding --step          # Rust
 ./bin/solver-what-if --scenario wedding --step     # Go
+python3 main.py --scenario wedding --step       # Python
+make run ARGS="--scenario wedding --step"       # CLI/Bash
 
 # Combined mode
 cargo run -- --scenario wedding --verbose --step
 ```
 
-Or use environment variables (Rust and Go only):
+Or use environment variables where supported:
 ```bash
 export NXUSKIT_VERBOSE=1
 export NXUSKIT_STEP=1
@@ -231,6 +245,12 @@ cd rust && cargo test
 
 # Go
 cd go && go test -v
+
+# Python smoke
+cd python && python3 main.py --help
+
+# CLI/Bash
+cd bash && make test
 ```
 
 ## Production Considerations

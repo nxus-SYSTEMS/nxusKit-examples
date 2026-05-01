@@ -29,7 +29,7 @@ fi
 echo "Checking JSON files in examples/..."
 while IFS= read -r -d '' jsonfile; do
     # Skip node_modules, bin directories, Cargo.lock, etc.
-    if [[ "$jsonfile" == *node_modules* ]] || [[ "$jsonfile" == */bin/* ]] || [[ "$jsonfile" == */target/* ]]; then
+    if [[ "$jsonfile" == *node_modules* ]] || [[ "$jsonfile" == */bin/* ]] || [[ "$jsonfile" == */target/* ]] || [[ "$jsonfile" == */.tmp/* ]]; then
         continue
     fi
 

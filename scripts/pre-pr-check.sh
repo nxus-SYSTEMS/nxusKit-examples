@@ -212,7 +212,7 @@ check_leak_gate() {
     "ai-artifacts"
   )
   local SCAN_PATHS=()
-  for d in examples conformance scripts tools; do
+  for d in examples conformance scripts tools .github; do
     [[ -d "$d" ]] && SCAN_PATHS+=("$d")
   done
   for f in README.md SECURITY.md CODE_OF_CONDUCT.md; do
@@ -227,7 +227,12 @@ check_leak_gate() {
       --include='*.yml' --include='*.sh' \
       "$term" "${SCAN_PATHS[@]}" 2>/dev/null \
     | grep -v "sync-example-tiers-from-sdk\.sh" \
-    | grep -v "pre-pr-check\.sh" || true)
+    | grep -v "pre-pr-check\.sh" \
+    | grep -v "\.github/workflows/ci\.yml" \
+    | grep -v "\.github/workflows/publish-to-public\.yml" \
+    | grep -v "\.github/workflows/publish-to-docs\.yml" \
+    | grep -v "\.github/workflows/sdk-integration\.yml" \
+    | grep -v "\.github/workflows/sdk-bundle-smoke\.yml" || true)
     if [[ -n "$hits" ]]; then
       return 1
     fi

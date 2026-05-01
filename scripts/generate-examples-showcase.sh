@@ -131,7 +131,7 @@ TAGKEY
     echo "| Example | Tier | Category | Scenario | Real-World Application | Tags | Languages |"
     echo "|---------|------|----------|----------|----------------------|------|-----------|"
 
-    jq -r '(.language_display_names // {}) as $dn | .examples[] | [.name, .category, (.tier // "community"), .scenario, .real_world_application, (.tech_tags | join(", ")), (.languages | map(. as $l | ($dn[$l] // ($l | gsub("^(.)"; (.[:1] | ascii_upcase)))) ) | join(", "))] | @tsv' "$manifest" | \
+    jq -r 'def app_summary: if ((.real_world_applications // []) | length) > 0 then (.real_world_applications | map(if type == "object" then (.label // .name // .description // "") else tostring end) | map(select(. != "")) | join("; ")) else (.real_world_application // "") end; (.language_display_names // {}) as $dn | .examples[] | [.name, .category, (.tier // "community"), .scenario, app_summary, (.tech_tags | join(", ")), (.languages | map(. as $l | ($dn[$l] // ($l | gsub("^(.)"; (.[:1] | ascii_upcase)))) ) | join(", "))] | @tsv' "$manifest" | \
     while IFS=$'\t' read -r name category tier scenario app tags langs; do
         local display_name
         display_name=$(title_case "$name")
@@ -148,8 +148,9 @@ TAGKEY
             *) tier_label="Community" ;;
         esac
         echo "| [${display_name}](${category}/${name}/) | ${tier_label} | ${cat_label} | ${scenario} | ${app} | ${tags} | ${langs} |"
-        # Emit scenario sub-rows
+        # Emit scenario and structured real-world application sub-rows
         jq -r --arg n "$name" '.examples[] | select(.name == $n) | .scenarios // [] | .[] | "| \u0026nbsp;\u0026nbsp;↳ `\(.name)` | | | \(.description) | | | |"' "$manifest"
+        jq -r --arg n "$name" '.examples[] | select(.name == $n) | (.real_world_applications // [])[]? | if type == "object" then [(.label // .name // .description // ""), (.description // .summary // "")] else [tostring, ""] end | select(.[0] != "") | "| \u0026nbsp;\u0026nbsp;↳ real-world: **\(.[0])** | | | | \(.[1]) | | |"' "$manifest"
     done
 
     echo ""
@@ -160,24 +161,21 @@ TAGKEY
     echo "## By Real-World Application"
     echo ""
 
-    jq -r '[.examples[] | {app: .real_world_application, name: .name, category: .category}] | group_by(.app) | sort_by(.[0].app) | .[] | {app: .[0].app, examples: [.[] | {name, category}]}' "$manifest" | \
-    jq -rs '.[] | "### \(.app)\n\(.examples | map("- [\(.name)](\(.category)/\(.name)/)") | join("\n"))\n"' 2>/dev/null || {
-        # Fallback: simpler grouping approach
-        local prev_app=""
-        jq -r '.examples | sort_by(.real_world_application) | .[] | [.real_world_application, .name, .category] | @tsv' "$manifest" | \
-        while IFS=$'\t' read -r app name category; do
-            if [[ "$app" != "$prev_app" ]]; then
-                [[ -n "$prev_app" ]] && echo ""
-                echo "### ${app}"
-                echo ""
-                prev_app="$app"
-            fi
-            local display_name
-            display_name=$(title_case "$name")
-            echo "- [${display_name}](${category}/${name}/)"
-        done
-        echo ""
-    }
+    jq -r '
+      def app_rows:
+        if ((.real_world_applications // []) | length) > 0 then
+          .real_world_applications[] | if type == "object" then {app: (.label // .name // .description // ""), details: (.description // .summary // "")} else {app: tostring, details: ""} end
+        else
+          {app: (.real_world_application // ""), details: ""}
+        end;
+      [.examples[] as $ex | $ex | app_rows | select(.app != "") | {app, details, name: $ex.name, category: $ex.category}]
+      | sort_by(.app, .name)
+      | group_by(.app)[]
+      | "### \(.[0].app)\n\n"
+        + (if (.[0].details // "") != "" then "\(.[0].details)\n\n" else "" end)
+        + (map("- [\(.name)](\(.category)/\(.name)/)") | join("\n"))
+        + "\n"
+    ' "$manifest"
 
     echo "---"
     echo ""
@@ -209,18 +207,19 @@ TAGKEY
     # --- By Language ---
     echo "## By Language"
     echo ""
-    echo "| Example | Category | Rust | Go | Python |"
-    echo "|---------|----------|------|-----|--------|"
+    echo "| Example | Category | Rust | Go | Python | CLI/Bash |"
+    echo "|---------|----------|------|-----|--------|----------|"
 
-    jq -r '.examples[] | [.name, .category, (if (.languages | index("rust")) then "yes" else "no" end), (if (.languages | index("go")) then "yes" else "no" end), (if (.languages | index("python")) then "yes" else "no" end)] | @tsv' "$manifest" | \
-    while IFS=$'\t' read -r name category has_rust has_go has_python; do
+    jq -r '.examples[] | [.name, .category, (if (.languages | index("rust")) then "yes" else "no" end), (if (.languages | index("go")) then "yes" else "no" end), (if (.languages | index("python")) then "yes" else "no" end), (if (.languages | index("bash")) then "yes" else "no" end)] | @tsv' "$manifest" | \
+    while IFS=$'\t' read -r name category has_rust has_go has_python has_bash; do
         local display_name
         display_name=$(title_case "$name")
-        local rust_col go_col python_col
+        local rust_col go_col python_col bash_col
         [[ "$has_rust" == "yes" ]] && rust_col="Yes" || rust_col="-"
         [[ "$has_go" == "yes" ]] && go_col="Yes" || go_col="-"
         [[ "$has_python" == "yes" ]] && python_col="Yes" || python_col="-"
-        echo "| [${display_name}](${category}/${name}/) | ${category} | ${rust_col} | ${go_col} | ${python_col} |"
+        [[ "$has_bash" == "yes" ]] && bash_col="Yes" || bash_col="-"
+        echo "| [${display_name}](${category}/${name}/) | ${category} | ${rust_col} | ${go_col} | ${python_col} | ${bash_col} |"
     done
 
     echo ""
@@ -363,8 +362,9 @@ generate_root_table_rows() {
     jq -r --arg cat "$category" '(.language_display_names // {}) as $dn | .examples[] | select(.category == $cat) | [.name, .description, (.languages | map(. as $l | ($dn[$l] // ($l | gsub("^(.)"; (.[:1] | ascii_upcase)))) ) | join(", "))] | @tsv' "$manifest" | \
     while IFS=$'\t' read -r name desc langs; do
         echo "| [${name}](examples/${category}/${name}/) | ${desc} | ${langs} |"
-        # Scenario sub-rows
+        # Scenario and structured real-world application sub-rows
         jq -r --arg n "$name" '.examples[] | select(.name == $n) | .scenarios // [] | .[] | "| \u0026nbsp;\u0026nbsp;↳ `\(.name)` | \(.description) | |"' "$manifest"
+        jq -r --arg n "$name" '.examples[] | select(.name == $n) | (.real_world_applications // [])[]? | if type == "object" then [(.label // .name // .description // ""), (.description // .summary // "")] else [tostring, ""] end | select(.[0] != "") | "| \u0026nbsp;\u0026nbsp;↳ real-world: **\(.[0])** | \(.[1]) | |"' "$manifest"
     done
 }
 

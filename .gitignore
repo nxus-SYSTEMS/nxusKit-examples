@@ -28,6 +28,7 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+.claude/settings.local.json
 # .cursor: ignore by default, but track agent continuity paths (see repo memory convention)
 .cursor/*
 !.cursor/memory/
@@ -42,5 +43,12 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local tooling/runtime state
+.tmp/
+.vexp/
+__azurite_db_*.json
+/go
+
 # Bash example temp files
 examples/**/.tmp/

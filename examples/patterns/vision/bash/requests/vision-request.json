@@ -1,0 +1,9 @@
+{
+  "max_tokens": 300,
+  "messages": [
+    {
+      "content": "What's in this image? Describe it briefly.",
+      "role": "user"
+    }
+  ]
+}

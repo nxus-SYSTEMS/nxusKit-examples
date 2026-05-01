@@ -19,8 +19,8 @@ Send images alongside text prompts for multimodal analysis
 ## Prerequisites
 
 - **SDK:** Use an installed SDK tree (`NXUSKIT_SDK_DIR`, `NXUSKIT_LIB_PATH` as needed); `test-examples.sh` resolves Go/Rust/Python deps from that tree only — see [README.md](../../../README.md), `scripts/setup-sdk.sh`, and `scripts/test-examples.sh`.
-- **Languages in this example:** go, python, rust (paths under this directory; Python may live under a sibling `python/` or shared reference per **Language Implementations**).
-- **Models:** Set cloud provider API keys and/or run **Ollama** locally when you execute the **Run** steps (interactive flags like `--help` / `--verbose` are documented below).
+- **Languages in this example:** go, python, rust, bash (paths under this directory; Python may live under a sibling `python/` or shared reference per **Language Implementations**).
+- **Models:** Set cloud provider API keys for live Claude/OpenAI calls, or run metadata-only CLI/Bash mode with `VISION_RUN_LIVE=0`. Ollama vision models can be selected when the local provider path is available.
 
 ## Real-World Application
 
@@ -37,6 +37,7 @@ LLM, Vision
 | Rust | `rust/` | Available |
 | Go | `go/` | Available |
 | Python | `python/` | Available |
+| CLI/Bash | `bash/` | Available |
 
 ## Build
 
@@ -47,6 +48,7 @@ Attach an **installed SDK** (`NXUSKIT_SDK_DIR`). See the repository [README.md](
 cd rust && cargo build
 cd go && make build
 cd python && python3 main.py --help
+cd bash && make build
 ```
 
 ## Run
@@ -67,4 +69,28 @@ make build && bin/vision
 ```bash
 cd python
 python main.py
+```
+
+### CLI/Bash
+```bash
+cd bash
+make run
+VISION_RUN_LIVE=0 make run
+make run ARGS="openai"
+```
+
+## Testing
+
+```bash
+# Rust
+cd rust && cargo test
+
+# Go
+cd go && go test -v
+
+# Python smoke
+cd python && python3 main.py --help
+
+# CLI/Bash
+cd bash && make test
 ```

@@ -426,6 +426,99 @@ def insert_scenarios_line(text: str, scenarios: list[dict]) -> str:
     return "\n".join(new_lines)
 
 
+def _md_table_cell(value: str) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def real_world_application_rows(ex: dict | None) -> list[tuple[str, str]]:
+    if not ex:
+        return []
+    raw_apps = ex.get("real_world_applications")
+    if not isinstance(raw_apps, list):
+        return []
+
+    rows: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for raw in raw_apps:
+        if isinstance(raw, dict):
+            label = str(raw.get("label") or raw.get("name") or "").strip()
+            description = str(raw.get("description") or raw.get("summary") or "").strip()
+        else:
+            label = str(raw or "").strip()
+            description = ""
+        if not label and not description:
+            continue
+        row = (label or description, description)
+        if row not in seen:
+            rows.append(row)
+            seen.add(row)
+    return rows
+
+
+def format_real_world_applications_section(ex: dict | None) -> str:
+    rows = real_world_application_rows(ex)
+    if not rows:
+        return ""
+
+    lines = [
+        "## Real-World Applications",
+        "",
+        "| Application | How this example applies |",
+        "|-------------|--------------------------|",
+    ]
+    for label, description in rows:
+        lines.append(f"| {_md_table_cell(label)} | {_md_table_cell(description)} |")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def insert_real_world_applications_section(text: str, ex: dict | None) -> str:
+    section = format_real_world_applications_section(ex)
+    if not section:
+        return text
+
+    lines = text.split("\n")
+    start_idx = None
+    for i, line in enumerate(lines):
+        if line.strip() == "## Real-World Applications":
+            start_idx = i
+            break
+
+    if start_idx is not None:
+        end_idx = len(lines)
+        for i in range(start_idx + 1, len(lines)):
+            if lines[i].startswith("## "):
+                end_idx = i
+                break
+        before = lines[:start_idx]
+        after = lines[end_idx:]
+    else:
+        before_heading = {
+            "## Build",
+            "## Run",
+            "## Implementation Details",
+            "## How It Works",
+            "## Project Structure",
+        }
+        insert_idx = len(lines)
+        for i, line in enumerate(lines):
+            if line.strip() in before_heading:
+                insert_idx = i
+                break
+        before = lines[:insert_idx]
+        after = lines[insert_idx:]
+
+    while before and before[-1].strip() == "":
+        before.pop()
+    while after and after[0].strip() == "":
+        after.pop(0)
+
+    new_lines = before + [""] + section.rstrip("\n").split("\n")
+    if after:
+        new_lines.extend([""] + after)
+    return "\n".join(new_lines)
+
+
 def transform_text(
     text: str,
     langs: set[str],
@@ -437,6 +530,7 @@ def transform_text(
     if ex is not None:
         text = insert_tagline_blockquote(text, ex.get("tagline"))
         text = insert_scenarios_line(text, ex.get("scenarios", []))
+        text = insert_real_world_applications_section(text, ex)
         text = manifest_demonstrates_prerequisites(text, ex, langs, readme, root)
         text = _insert_or_update_difficulty_badge(text, ex)
 

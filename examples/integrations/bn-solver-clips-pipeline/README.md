@@ -177,15 +177,13 @@ Each scenario directory contains four files:
 
 ## Real-World Applications
 
-This pipeline pattern maps directly to operational decision-making systems:
-
-- **Event planning**: Predict attendance, optimize resource allocation, enforce safety codes
-- **Emergency response**: Estimate survival windows, deploy rescue assets, enforce operational protocols
-- **Manufacturing**: Forecast demand, schedule production, enforce quality and safety standards
-- **Logistics**: Predict delivery volumes, optimize fleet routing, enforce regulatory compliance
-- **Healthcare**: Predict patient load, optimize staff scheduling, enforce clinical safety protocols
-
-The key insight is that each stage addresses a fundamentally different reasoning task -- probabilistic prediction, combinatorial optimization, and rule-based compliance -- and nxusKit provides a unified interface for composing all three.
+| Application | How this example applies |
+|-------------|--------------------------|
+| Event planning | Predict attendance, optimize resource allocation, enforce safety codes |
+| Emergency response | Estimate survival windows, deploy rescue assets, enforce operational protocols |
+| Manufacturing | Forecast demand, schedule production, enforce quality and safety standards |
+| Logistics | Predict delivery volumes, optimize fleet routing, enforce regulatory compliance |
+| Healthcare | Predict patient load, optimize staff scheduling, enforce clinical safety protocols |
 
 ## Testing
 

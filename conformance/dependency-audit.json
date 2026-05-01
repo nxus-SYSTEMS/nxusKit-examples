@@ -468,6 +468,7 @@
       "category": "patterns",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "python",
         "rust"
@@ -537,6 +538,7 @@
       "category": "patterns",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "python",
         "rust"
@@ -552,6 +554,7 @@
       "category": "patterns",
       "classification": "sdk-only",
       "languages": [
+        "bash",
         "go",
         "python",
         "rust"

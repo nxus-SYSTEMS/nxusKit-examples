@@ -19,8 +19,8 @@ Demonstrates cost control by enforcing token limits during streaming responses.
 ## Prerequisites
 
 - **SDK:** Use an installed SDK tree (`NXUSKIT_SDK_DIR`, `NXUSKIT_LIB_PATH` as needed); `test-examples.sh` resolves Go/Rust/Python deps from that tree only — see [README.md](../../../README.md), `scripts/setup-sdk.sh`, and `scripts/test-examples.sh`.
-- **Languages in this example:** go, rust (paths under this directory; Python may live under a sibling `python/` or shared reference per **Language Implementations**).
-- **Models:** Set cloud provider API keys and/or run **Ollama** locally when you execute the **Run** steps (interactive flags like `--help` / `--verbose` are documented below).
+- **Languages in this example:** go, python, rust, bash (paths under this directory; Python may live under a sibling `python/` or shared reference per **Language Implementations**).
+- **Models:** CLI/Bash defaults to the `loopback` provider for credential-free smoke tests. Set cloud provider API keys or run **Ollama** locally when using live providers in the **Run** steps.
 
 ## Key nxusKit Features Demonstrated
 
@@ -57,6 +57,8 @@ LLM
 |----------|------|--------|
 | Rust | `rust/` | Available |
 | Go | `go/` | Available |
+| Python | `python/` | Available |
+| CLI/Bash | `bash/` | Available |
 
 ## Build
 
@@ -66,6 +68,8 @@ Attach an **installed SDK** (`NXUSKIT_SDK_DIR`). See the repository [README.md](
 # From `/examples/patterns/token-budget`:
 cd rust && cargo build
 cd go && make build
+cd python && python3 main.py --help
+cd bash && make build
 ```
 ## Token Estimation
 
@@ -117,6 +121,19 @@ cd go
 go run .
 ```
 
+### Python
+```bash
+cd python
+python3 main.py
+```
+
+### CLI/Bash
+```bash
+cd bash
+make run
+TOKEN_BUDGET_MAX=40 make run ARGS="ollama"
+```
+
 ## Interactive Modes
 
 All examples support debugging flags:
@@ -125,10 +142,12 @@ All examples support debugging flags:
 # Verbose mode - show raw HTTP request/response data
 cargo run -- --verbose      # Rust
 go run . --verbose          # Go
+make run ARGS="--verbose"  # CLI/Bash
 
 # Step mode - pause at each step with explanations
 cargo run -- --step         # Rust
 go run . --step             # Go
+make run ARGS="--step"     # CLI/Bash
 
 # Combined mode
 cargo run -- --verbose --step
@@ -148,6 +167,12 @@ cd rust && cargo test
 
 # Go
 cd go && go test -v
+
+# Python smoke
+cd python && python3 main.py --help
+
+# CLI/Bash
+cd bash && make test
 ```
 
 ## Production Considerations

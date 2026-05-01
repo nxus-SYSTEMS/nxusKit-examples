@@ -162,8 +162,8 @@ Each scenario is a directory containing a `problem.json` file with the following
 
 ## Real-World Applications
 
-| Scenario | Real-World Analog |
-|----------|-------------------|
+| Application | How this example applies |
+|-------------|--------------------------|
 | Theme Park Planning | Facility layout, capital budgeting, resource allocation |
 | Space Colony Planning | Infrastructure sizing, capacity planning, disaster recovery modeling |
 | Fantasy Sports Draft | Portfolio optimization, team composition, auction bidding strategies |

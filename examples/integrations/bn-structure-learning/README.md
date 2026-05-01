@@ -209,15 +209,13 @@ Log-likelihood measures how well the model's CPTs explain the observed data: `LL
 
 ## Real-World Applications
 
-Structure learning from observational data is used in:
-
-- **Epidemiology**: Discovering disease risk factor relationships from patient records
-- **Manufacturing**: Identifying root causes of defects from production data
-- **Finance**: Mapping causal relationships between economic indicators
-- **Genomics**: Learning gene regulatory networks from expression data
-- **Quality control**: Finding which process parameters affect product quality
-
-The key insight is that structure learning automates the construction of causal models, which traditionally requires domain expert knowledge. By comparing multiple algorithms, practitioners can identify robust causal relationships with higher confidence.
+| Application | How this example applies |
+|-------------|--------------------------|
+| Epidemiology | Discover disease risk factor relationships from patient records |
+| Manufacturing | Identify root causes of defects from production data |
+| Finance | Map causal relationships between economic indicators |
+| Genomics | Learn gene regulatory networks from expression data |
+| Quality control | Find which process parameters affect product quality |
 
 ## Testing
 

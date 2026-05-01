@@ -27,9 +27,9 @@ jobs:
       - name: Read version and stats
         id: meta
         run: |
-          # Hybrid tag: SDK version + date (e.g., v0.9.1-20260331)
+          # Hybrid tag: SDK version + date (e.g., v0.9.3-20260501)
           # Allows interim examples releases between SDK versions
-          SDK_VERSION="0.9.1"
+          SDK_VERSION="0.9.3"
           TAG="v${SDK_VERSION}-$(date -u +%Y%m%d)"
 
           EXAMPLES=$(python3 -c "
@@ -37,7 +37,8 @@ jobs:
           m = json.load(open('conformance/examples_manifest.json'))
           total = len(m['examples'])
           py = sum(1 for e in m['examples'] if 'python' in e.get('languages', []))
-          print(f'{total} examples ({py} with Python)')
+          bash = sum(1 for e in m['examples'] if 'bash' in e.get('languages', []))
+          print(f'{total} examples ({py} with Python, {bash} with CLI/Bash)')
           ")
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -64,7 +65,7 @@ jobs:
             --notes "$(cat <<EOF
           ## nxusKit Examples $TAG
 
-          $EXAMPLES in Rust, Go, and Python — compatible with nxusKit SDK v${SDK}.
+          $EXAMPLES in Rust, Go, Python, and CLI/Bash — compatible with nxusKit SDK v${SDK}.
 
           ### Download
 

@@ -1,0 +1,10 @@
+{
+  "max_tokens": 256,
+  "messages": [
+    {
+      "content": "Write a concise but vivid story about a robot learning to paint murals in an old train station.",
+      "role": "user"
+    }
+  ],
+  "model": "echo"
+}

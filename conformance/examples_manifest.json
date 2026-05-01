@@ -1,6 +1,6 @@
 {
   "$schema": "./harness/schema.json",
-  "version": "4.0.0",
+  "version": "5.1.0",
   "description": "Cross-language example parity manifest for nxusKit",
   "language_display_names": {
     "bash": "CLI/Bash",
@@ -312,18 +312,20 @@
       "languages": [
         "rust",
         "go",
-        "python"
+        "python",
+        "bash"
       ],
       "implementations": {
         "rust": "examples/patterns/token-budget/rust",
         "go": "examples/patterns/token-budget/go",
-        "python": "examples/patterns/token-budget/python"
+        "python": "examples/patterns/token-budget/python",
+        "bash": "examples/patterns/token-budget/bash"
       },
       "tier": "community",
       "difficulty": "starter",
       "tagline": "Stop paying for tokens you don't need \u2014 enforce real-time streaming budgets and cancel LLM requests the moment your limit is reached.",
-      "blurb": "The token-budget pattern gives you precise cost control over streaming LLM responses by cancelling generation the moment an estimated token limit is hit. It works by counting characters in real time as chunks arrive \u2014 using a simple four-characters-per-token heuristic \u2014 and gracefully terminating the stream when the budget is exhausted. The result includes the partial content, estimated token count, and a flag indicating whether the budget was reached. Implementations are available in Go and Rust, and the pattern works with any streaming-capable provider including Claude, OpenAI, and Ollama.",
-      "content_hash": "79627018586c236fa05557805a05a08da3959b4b445bdd20d7d4e65c60192787"
+      "blurb": "The token-budget pattern gives you precise cost control over streaming LLM responses by cancelling generation the moment an estimated token limit is hit. It works by counting characters in real time as chunks arrive \u2014 using a simple four-characters-per-token heuristic \u2014 and gracefully terminating the stream when the budget is exhausted. The result includes the partial content, estimated token count, and a flag indicating whether the budget was reached. Implementations are available in Go, Rust, Python, and CLI/Bash, and the pattern works with any streaming-capable provider including Claude, OpenAI, and Ollama.",
+      "content_hash": "eb824ee23b1edf0a6f82e9d15b616f8636d270a4fa083b67caa3db1ed6f0b3a8"
     },
     {
       "name": "vision",
@@ -339,18 +341,20 @@
       "languages": [
         "rust",
         "go",
-        "python"
+        "python",
+        "bash"
       ],
       "implementations": {
         "rust": "examples/patterns/vision/rust",
         "go": "examples/patterns/vision/go",
-        "python": "examples/patterns/vision/python"
+        "python": "examples/patterns/vision/python",
+        "bash": "examples/patterns/vision/bash"
       },
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Send images alongside text to any LLM provider using one consistent API that handles encoding, formatting, and provider differences for you.",
-      "blurb": "The vision example shows you how to build multimodal LLM requests\u2014combining text prompts with images\u2014using a single fluent API that works across Claude and OpenAI. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, and Rust, covering use cases from image captioning and visual QA to document understanding.",
-      "content_hash": "26ccab0d76243070e8be29620c73d826c884e758f0f9d6d0979bb2e5cf34ef00"
+      "blurb": "The vision example shows you how to build multimodal LLM requests\u2014combining text prompts with images\u2014using one consistent provider-agnostic flow across Claude, OpenAI, Ollama, and CLI/Bash automation. nxusKit normalizes provider-specific image formats, encoding requirements, and detail-level options so your application code stays consistent regardless of which backend you target. You can attach images by URL or local file, chain multiple images for comparison tasks, and query models for vision capability before sending a request. Implementations are available in Go, Python, Rust, and CLI/Bash, covering use cases from image captioning and visual QA to document understanding.",
+      "content_hash": "0124982ae70ca330d9320425f7e384041d224160b57a43fc02d67df8a9ec54e9"
     },
     {
       "name": "auth-helper",
@@ -442,7 +446,21 @@
       "difficulty": "intermediate",
       "tagline": "Define variables, add constraints, and solve complex planning problems with Z3 \u2014 without leaving your nxusKit workflow.",
       "blurb": "The solver example gives you a complete, runnable constraint solver integrated directly into nxusKit \u2014 covering satisfaction checking, single- and multi-objective optimization, soft constraints, and reversible what-if analysis. It works by wrapping a Z3 solver session through the nxusKit SDK, letting you build and query constraint models incrementally without managing solver state manually. Three scenario-driven problem definitions \u2014 theme park planning, space colony design, and fantasy sports drafting \u2014 demonstrate each technique against realistic decision variables. Implementations are available in Go, Rust, and Python, and no LLM provider is required.",
-      "content_hash": "d5853504bf3af76ceb8fbbae3dfd7e3a85bb08b6916ea2c081bb64b5586cc8c4"
+      "content_hash": "d5853504bf3af76ceb8fbbae3dfd7e3a85bb08b6916ea2c081bb64b5586cc8c4",
+      "real_world_applications": [
+        {
+          "label": "Theme Park Planning",
+          "description": "Facility layout, capital budgeting, resource allocation"
+        },
+        {
+          "label": "Space Colony Planning",
+          "description": "Infrastructure sizing, capacity planning, disaster recovery modeling"
+        },
+        {
+          "label": "Fantasy Sports Draft",
+          "description": "Portfolio optimization, team composition, auction bidding strategies"
+        }
+      ]
     },
     {
       "name": "bayesian-inference",
@@ -487,7 +505,21 @@
       "difficulty": "starter",
       "tagline": "Run exact and approximate Bayesian inference on real-world diagnostic models using four algorithms and three themed scenarios \u2014 all from a single SDK call.",
       "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms \u2014 exact and approximate \u2014 through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, and Python are included, and no LLM provider is required.",
-      "content_hash": "8f9ffecd2acd21be20e0d427826454c8bfba909cc8a004d29b49c61a65e9f4a0"
+      "content_hash": "8f9ffecd2acd21be20e0d427826454c8bfba909cc8a004d29b49c61a65e9f4a0",
+      "real_world_applications": [
+        {
+          "label": "Haunted House",
+          "description": "Fault diagnosis, anomaly detection, sensor fusion from multiple noisy sensors pointing to hidden causes"
+        },
+        {
+          "label": "Coffee Shop",
+          "description": "Manufacturing quality control, process parameter tuning, root cause analysis in production"
+        },
+        {
+          "label": "Plant Doctor",
+          "description": "Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis"
+        }
+      ]
     },
     {
       "name": "solver-what-if",
@@ -519,18 +551,34 @@
       "languages": [
         "rust",
         "go",
-        "python"
+        "python",
+        "bash"
       ],
       "implementations": {
         "rust": "examples/patterns/solver-what-if/rust",
         "go": "examples/patterns/solver-what-if/go",
-        "python": "examples/patterns/solver-what-if/python"
+        "python": "examples/patterns/solver-what-if/python",
+        "bash": "examples/patterns/solver-what-if/bash"
       },
       "tier": "pro",
       "difficulty": "intermediate",
       "tagline": "Explore alternative outcomes without rebuilding your model \u2014 push constraints, solve, compare, and pop back to baseline in one clean pattern.",
-      "blurb": "The solver-what-if example gives developers a reusable pattern for exploring how constraint changes affect optimal solutions \u2014 without ever rebuilding the model from scratch. It works by wrapping each alternative scenario in a push/pop scope: push the current solver state, inject temporary constraints, solve, diff the results against the baseline, then pop back to restore the original model. When a scenario is infeasible, the unsat core surfaces the exact constraint labels causing the conflict. Three themed scenarios \u2014 wedding budget, Mars colony resource allocation, and recipe scaling \u2014 provide concrete starting points. Available in Go, Rust, and Python.",
-      "content_hash": "19ce9be26dc50e29fe915da456bde7f55c82742fa4c2a14bf8b3f7adc87357d6"
+      "blurb": "The solver-what-if example gives developers a reusable pattern for exploring how constraint changes affect optimal solutions \u2014 without ever rebuilding the model from scratch. It works by wrapping each alternative scenario in a push/pop scope: push the current solver state, inject temporary constraints, solve, diff the results against the baseline, then pop back to restore the original model. When a scenario is infeasible, the unsat core surfaces the exact constraint labels causing the conflict. Three themed scenarios \u2014 wedding budget, Mars colony resource allocation, and recipe scaling \u2014 provide concrete starting points. Available in Go, Rust, Python, and CLI/Bash.",
+      "content_hash": "eba4742ceb763b05222d0f5607065738f71911768eeac098c1038618edf71e59",
+      "real_world_applications": [
+        {
+          "label": "Wedding Budget Planning",
+          "description": "Event planning, capital budgeting, portfolio allocation"
+        },
+        {
+          "label": "Mars Colony Planning",
+          "description": "Infrastructure sizing, supply chain planning, disaster preparedness"
+        },
+        {
+          "label": "Recipe Scaling",
+          "description": "Manufacturing scaling, formulation optimization, process engineering"
+        }
+      ]
     },
     {
       "name": "ollama",
@@ -730,7 +778,29 @@
       "difficulty": "advanced",
       "tagline": "Chain probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single production-ready pipeline using one unified SDK.",
       "blurb": "Wire probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single coherent pipeline without managing three separate integrations. nxusKit threads a Bayesian Network's posterior outputs into a Z3 solver, then feeds the solver's assignments directly into a CLIPS rule engine that fires domain-specific safety alerts. The example ships runnable festival, rescue, and bakery scenarios in both Go and Rust, demonstrating that the same three-stage data flow works whether you prefer the Session API or provider chat.",
-      "content_hash": "900eda5aba1ba69cdfd28c1c8cac4bacc2f13489ce6dc83236c2e75be460af26"
+      "content_hash": "900eda5aba1ba69cdfd28c1c8cac4bacc2f13489ce6dc83236c2e75be460af26",
+      "real_world_applications": [
+        {
+          "label": "Event planning",
+          "description": "Predict attendance, optimize resource allocation, enforce safety codes"
+        },
+        {
+          "label": "Emergency response",
+          "description": "Estimate survival windows, deploy rescue assets, enforce operational protocols"
+        },
+        {
+          "label": "Manufacturing",
+          "description": "Forecast demand, schedule production, enforce quality and safety standards"
+        },
+        {
+          "label": "Logistics",
+          "description": "Predict delivery volumes, optimize fleet routing, enforce regulatory compliance"
+        },
+        {
+          "label": "Healthcare",
+          "description": "Predict patient load, optimize staff scheduling, enforce clinical safety protocols"
+        }
+      ]
     },
     {
       "name": "llm-solver-hybrid",
@@ -819,7 +889,29 @@
       "difficulty": "intermediate",
       "tagline": "Discover causal structure hidden in your data \u2014 learn Bayesian network topology and parameters directly from CSV observations using Hill-Climb and K2 search algorithms.",
       "blurb": "Automatically recover causal graph structure from raw observational data and run inference on the result \u2014 no hand-coded network topology required. nxusKit's BN structure learning pipeline reads a CSV file, discovers directed edges using Hill-Climb and K2 search algorithms, fits conditional probability tables via Maximum Likelihood Estimation, and evaluates model fit with log-likelihood scoring. Edges agreed upon by both algorithms surface as high-confidence causal relationships. Available in Go, Rust, and Python on the Community edition SDK.",
-      "content_hash": "2c175270894c3a1176c55bc08077d21e9be2624d129ec6795a8c933e0b3ebc32"
+      "content_hash": "2c175270894c3a1176c55bc08077d21e9be2624d129ec6795a8c933e0b3ebc32",
+      "real_world_applications": [
+        {
+          "label": "Epidemiology",
+          "description": "Discover disease risk factor relationships from patient records"
+        },
+        {
+          "label": "Manufacturing",
+          "description": "Identify root causes of defects from production data"
+        },
+        {
+          "label": "Finance",
+          "description": "Map causal relationships between economic indicators"
+        },
+        {
+          "label": "Genomics",
+          "description": "Learn gene regulatory networks from expression data"
+        },
+        {
+          "label": "Quality control",
+          "description": "Find which process parameters affect product quality"
+        }
+      ]
     },
     {
       "name": "zen-decisions",

@@ -2,9 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://nxuskit.dev/schemas/examples-manifest.json",
   "title": "nxusKit Examples Manifest",
-  "description": "Schema for cross-language example parity manifest (v5.0.0 — adds scenarios array)",
+  "description": "Schema for cross-language example parity manifest (v5.1.0 — adds structured real_world_applications array)",
   "type": "object",
-  "required": ["version", "examples"],
+  "required": [
+    "version",
+    "examples"
+  ],
   "properties": {
     "$schema": {
       "type": "string",
@@ -44,7 +47,16 @@
   "$defs": {
     "example": {
       "type": "object",
-      "required": ["name", "description", "category", "implementations", "scenario", "real_world_application", "tech_tags", "languages"],
+      "required": [
+        "name",
+        "description",
+        "category",
+        "implementations",
+        "scenario",
+        "real_world_application",
+        "tech_tags",
+        "languages"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -58,7 +70,11 @@
         "category": {
           "type": "string",
           "description": "Category this example belongs to",
-          "enum": ["patterns", "integrations", "apps"]
+          "enum": [
+            "patterns",
+            "integrations",
+            "apps"
+          ]
         },
         "required": {
           "type": "boolean",
@@ -78,7 +94,18 @@
           "description": "Technology tags from the approved tag key",
           "items": {
             "type": "string",
-            "enum": ["LLM", "CLIPS", "Solver", "BN", "ZEN", "MCP", "Vision", "Streaming", "Auth", "OAuth"]
+            "enum": [
+              "LLM",
+              "CLIPS",
+              "Solver",
+              "BN",
+              "ZEN",
+              "MCP",
+              "Vision",
+              "Streaming",
+              "Auth",
+              "OAuth"
+            ]
           },
           "minItems": 1
         },
@@ -87,7 +114,12 @@
           "description": "Array of implemented languages, must match implementations keys",
           "items": {
             "type": "string",
-            "enum": ["rust", "go", "python", "bash"]
+            "enum": [
+              "rust",
+              "go",
+              "python",
+              "bash"
+            ]
           },
           "minItems": 1
         },
@@ -152,7 +184,11 @@
         "difficulty": {
           "type": "string",
           "description": "Developer skill level required to understand and modify this example.",
-          "enum": ["starter", "intermediate", "advanced"]
+          "enum": [
+            "starter",
+            "intermediate",
+            "advanced"
+          ]
         },
         "difficulty_override": {
           "type": "boolean",
@@ -167,7 +203,11 @@
           "description": "Named scenarios supported by this example. Omit for single-scenario examples. Each entry has a name, description, and CLI invocation.",
           "items": {
             "type": "object",
-            "required": ["name", "description", "cli"],
+            "required": [
+              "name",
+              "description",
+              "cli"
+            ],
             "properties": {
               "name": {
                 "type": "string",
@@ -185,12 +225,39 @@
             "additionalProperties": false
           },
           "minItems": 2
+        },
+        "real_world_applications": {
+          "type": "array",
+          "description": "Structured real-world applications for this example. Each item maps a README-facing application label to a concise outcome description.",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "description"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Short application or domain label, for example Event planning or Manufacturing",
+                "minLength": 2
+              },
+              "description": {
+                "type": "string",
+                "description": "Concise description of how the example pattern applies in that domain",
+                "minLength": 5
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
         }
       }
     },
     "category": {
       "type": "object",
-      "required": ["description"],
+      "required": [
+        "description"
+      ],
       "properties": {
         "description": {
           "type": "string",

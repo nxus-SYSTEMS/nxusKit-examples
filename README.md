@@ -42,8 +42,8 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [retry-fallback](examples/patterns/retry-fallback/) | Retry and fallback strategies across providers | Rust, Go, Python, CLI/Bash |
 | [structured-output](examples/patterns/structured-output/) | JSON mode and structured output generation | Rust, Go, Python, CLI/Bash |
 | [timeout-config](examples/patterns/timeout-config/) | Timeout configuration and connection management | Rust, Go, Python |
-| [token-budget](examples/patterns/token-budget/) | Token budget management and cost estimation | Rust, Go, Python |
-| [vision](examples/patterns/vision/) | Vision and multimodal capabilities with images | Rust, Go, Python |
+| [token-budget](examples/patterns/token-budget/) | Token budget management and cost estimation | Rust, Go, Python, CLI/Bash |
+| [vision](examples/patterns/vision/) | Vision and multimodal capabilities with images | Rust, Go, Python, CLI/Bash |
 | [auth-helper](examples/patterns/auth-helper/) | OAuth login flow and credential management helper | Rust, Go |
 | &nbsp;&nbsp;↳ `status` | List provider authentication status and stored credentials | |
 | &nbsp;&nbsp;↳ `set` | Store an API key for a specific provider | |
@@ -53,14 +53,23 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `theme-park` | Budget and space planning for a theme park with rides, food courts, and entertainment zones | |
 | &nbsp;&nbsp;↳ `space-colony` | Resource allocation for a space colony dealing with solar storm what-if scenarios | |
 | &nbsp;&nbsp;↳ `fantasy-draft` | Fantasy sports draft optimization under salary cap with injury what-if analysis | |
+| &nbsp;&nbsp;↳ real-world: **Theme Park Planning** | Facility layout, capital budgeting, resource allocation | |
+| &nbsp;&nbsp;↳ real-world: **Space Colony Planning** | Infrastructure sizing, capacity planning, disaster recovery modeling | |
+| &nbsp;&nbsp;↳ real-world: **Fantasy Sports Draft** | Portfolio optimization, team composition, auction bidding strategies | |
 | [bayesian-inference](examples/patterns/bayesian-inference/) | Bayesian network inference via nxusKit SDK | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `haunted-house` | Investigate a haunted house — is it a ghost or a raccoon? | |
 | &nbsp;&nbsp;↳ `coffee-shop` | Diagnose bad espresso from grind size, temperature, and bean age | |
 | &nbsp;&nbsp;↳ `plant-doctor` | Diagnose a sick plant from overwatering, nutrient, and disease evidence | |
-| [solver-what-if](examples/patterns/solver-what-if/) | What-if scenario analysis with solver scoping | Rust, Go, Python |
+| &nbsp;&nbsp;↳ real-world: **Haunted House** | Fault diagnosis, anomaly detection, sensor fusion from multiple noisy sensors pointing to hidden causes | |
+| &nbsp;&nbsp;↳ real-world: **Coffee Shop** | Manufacturing quality control, process parameter tuning, root cause analysis in production | |
+| &nbsp;&nbsp;↳ real-world: **Plant Doctor** | Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis | |
+| [solver-what-if](examples/patterns/solver-what-if/) | What-if scenario analysis with solver scoping | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `wedding` | Wedding budget planning with $25k constraint and vendor what-if scenarios | |
 | &nbsp;&nbsp;↳ `mars` | Mars colony resource allocation with dust storm what-if disruptions | |
 | &nbsp;&nbsp;↳ `recipe` | Recipe scaling with vegan substitution — may be UNSAT | |
+| &nbsp;&nbsp;↳ real-world: **Wedding Budget Planning** | Event planning, capital budgeting, portfolio allocation | |
+| &nbsp;&nbsp;↳ real-world: **Mars Colony Planning** | Infrastructure sizing, supply chain planning, disaster preparedness | |
+| &nbsp;&nbsp;↳ real-world: **Recipe Scaling** | Manufacturing scaling, formulation optimization, process engineering | |
 
 ### Integrations — Combining SDK features
 
@@ -76,6 +85,11 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |
 | &nbsp;&nbsp;↳ `rescue` | Search and rescue — survivor probability drives team assignment and safety checks | |
 | &nbsp;&nbsp;↳ `bakery` | Bakery scheduling — demand forecasts drive oven allocation and allergen separation | |
+| &nbsp;&nbsp;↳ real-world: **Event planning** | Predict attendance, optimize resource allocation, enforce safety codes | |
+| &nbsp;&nbsp;↳ real-world: **Emergency response** | Estimate survival windows, deploy rescue assets, enforce operational protocols | |
+| &nbsp;&nbsp;↳ real-world: **Manufacturing** | Forecast demand, schedule production, enforce quality and safety standards | |
+| &nbsp;&nbsp;↳ real-world: **Logistics** | Predict delivery volumes, optimize fleet routing, enforce regulatory compliance | |
+| &nbsp;&nbsp;↳ real-world: **Healthcare** | Predict patient load, optimize staff scheduling, enforce clinical safety protocols | |
 | [llm-solver-hybrid](examples/integrations/llm-solver-hybrid/) | Hybrid LLM + Z3 solver problem solving | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `seating` | Wedding dinner seating — 12 guests across 3 tables with constraints | |
 | &nbsp;&nbsp;↳ `dungeon` | Dungeon layout — 5 rooms with boss and treasure placement rules | |
@@ -84,6 +98,11 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ `golf` | Golf course conditions — weather, soil, and maintenance factor learning | |
 | &nbsp;&nbsp;↳ `bmx` | BMX performance — skill level, technique, and jump factor learning | |
 | &nbsp;&nbsp;↳ `sourdough` | Sourdough baking — feeding schedule, flour type, and temperature factor learning | |
+| &nbsp;&nbsp;↳ real-world: **Epidemiology** | Discover disease risk factor relationships from patient records | |
+| &nbsp;&nbsp;↳ real-world: **Manufacturing** | Identify root causes of defects from production data | |
+| &nbsp;&nbsp;↳ real-world: **Finance** | Map causal relationships between economic indicators | |
+| &nbsp;&nbsp;↳ real-world: **Genomics** | Learn gene regulatory networks from expression data | |
+| &nbsp;&nbsp;↳ real-world: **Quality control** | Find which process parameters affect product quality | |
 | [zen-decisions](examples/integrations/zen-decisions/) | ZEN decision table evaluation via nxusKit SDK | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `maze-rat` | First Hit Policy — route a maze runner through personality-driven decisions | |
 | &nbsp;&nbsp;↳ `potion` | Collect Hit Policy — match ingredient lists against brewing recipes | |
@@ -136,7 +155,7 @@ examples/
 ├── patterns/       Community-tier reusable patterns
 ├── integrations/   SDK feature combinations
 ├── apps/           Complete applications (mostly Pro tier)
-└── shared/         Shared libraries (Rust, Go, interactive utilities)
+└── shared/         Shared libraries and helpers (Rust, Go, Python, CLI/Bash)
 conformance/        Example manifest and tier definitions
 scripts/            Build and test helpers
 ```
@@ -170,8 +189,13 @@ go run -tags nxuskit ./examples/<category>/<name>/go/cmd
 python examples/<category>/<name>/python/main.py
 ```
 
----
+### CLI/Bash
+```bash
+cd examples/<category>/<name>/bash
+make run
+```
 
+---
 <!-- ACKNOWLEDGEMENTS START -->
 Built with gratitude for the open-source projects that make nxusKit possible.
 See [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md) for a curated list of key projects.

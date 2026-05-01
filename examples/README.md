@@ -40,43 +40,62 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | [Retry Fallback](patterns/retry-fallback/) | Community | Pattern | Automatically retry failed requests and fall back to alternate providers | High-availability AI service, resilient inference pipeline | LLM | Rust, Go, Python, CLI/Bash |
 | [Structured Output](patterns/structured-output/) | Community | Pattern | Request and parse structured JSON responses from an LLM | Data extraction, form auto-fill, API response generation | LLM | Rust, Go, Python, CLI/Bash |
 | [Timeout Config](patterns/timeout-config/) | Community | Pattern | Configure request timeouts and connection pool settings | Latency-sensitive services, SLA-bound AI endpoints | LLM | Rust, Go, Python |
-| [Token Budget](patterns/token-budget/) | Community | Pattern | Track and limit token usage across requests | Usage metering, per-user quota enforcement | LLM | Rust, Go, Python |
-| [Vision](patterns/vision/) | Community | Pattern | Send images alongside text prompts for multimodal analysis | Image captioning, visual QA, document understanding | LLM, Vision | Rust, Go, Python |
+| [Token Budget](patterns/token-budget/) | Community | Pattern | Track and limit token usage across requests | Usage metering, per-user quota enforcement | LLM | Rust, Go, Python, CLI/Bash |
+| [Vision](patterns/vision/) | Community | Pattern | Send images alongside text prompts for multimodal analysis | Image captioning, visual QA, document understanding | LLM, Vision | Rust, Go, Python, CLI/Bash |
 | [Auth Helper](patterns/auth-helper/) | Community | Pattern | List providers, check auth status, set credentials, initiate OAuth flows | Developer tooling, credential management, multi-provider auth setup | Auth, OAuth | Rust, Go |
 | &nbsp;&nbsp;↳ `status` | | | List provider authentication status and stored credentials | | | |
 | &nbsp;&nbsp;↳ `set` | | | Store an API key for a specific provider | | | |
 | &nbsp;&nbsp;↳ `remove` | | | Remove a stored API key for a provider | | | |
 | &nbsp;&nbsp;↳ `dashboard` | | | Open provider credential dashboard in browser | | | |
-| [Solver](patterns/solver/) | Pro | Pattern | Define and solve constraint satisfaction problems with Z3 | Scheduling optimization, resource allocation, configuration validation | Solver | Rust, Go, Python, CLI/Bash |
+| [Solver](patterns/solver/) | Pro | Pattern | Define and solve constraint satisfaction problems with Z3 | Theme Park Planning; Space Colony Planning; Fantasy Sports Draft | Solver | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `theme-park` | | | Budget and space planning for a theme park with rides, food courts, and entertainment zones | | | |
 | &nbsp;&nbsp;↳ `space-colony` | | | Resource allocation for a space colony dealing with solar storm what-if scenarios | | | |
 | &nbsp;&nbsp;↳ `fantasy-draft` | | | Fantasy sports draft optimization under salary cap with injury what-if analysis | | | |
-| [Bayesian Inference](patterns/bayesian-inference/) | Community | Pattern | Build a Bayesian network and perform probabilistic inference | Risk assessment, medical diagnosis support, fault detection | BN | Rust, Go, Python, CLI/Bash |
+| &nbsp;&nbsp;↳ real-world: **Theme Park Planning** | | | | Facility layout, capital budgeting, resource allocation | | |
+| &nbsp;&nbsp;↳ real-world: **Space Colony Planning** | | | | Infrastructure sizing, capacity planning, disaster recovery modeling | | |
+| &nbsp;&nbsp;↳ real-world: **Fantasy Sports Draft** | | | | Portfolio optimization, team composition, auction bidding strategies | | |
+| [Bayesian Inference](patterns/bayesian-inference/) | Community | Pattern | Build a Bayesian network and perform probabilistic inference | Haunted House; Coffee Shop; Plant Doctor | BN | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `haunted-house` | | | Investigate a haunted house — is it a ghost or a raccoon? | | | |
 | &nbsp;&nbsp;↳ `coffee-shop` | | | Diagnose bad espresso from grind size, temperature, and bean age | | | |
 | &nbsp;&nbsp;↳ `plant-doctor` | | | Diagnose a sick plant from overwatering, nutrient, and disease evidence | | | |
-| [Solver What If](patterns/solver-what-if/) | Pro | Pattern | Explore what-if scenarios with solver push/pop constraint scoping | Financial planning, capacity modeling, sensitivity analysis | Solver | Rust, Go, Python |
+| &nbsp;&nbsp;↳ real-world: **Haunted House** | | | | Fault diagnosis, anomaly detection, sensor fusion from multiple noisy sensors pointing to hidden causes | | |
+| &nbsp;&nbsp;↳ real-world: **Coffee Shop** | | | | Manufacturing quality control, process parameter tuning, root cause analysis in production | | |
+| &nbsp;&nbsp;↳ real-world: **Plant Doctor** | | | | Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis | | |
+| [Solver What If](patterns/solver-what-if/) | Pro | Pattern | Explore what-if scenarios with solver push/pop constraint scoping | Wedding Budget Planning; Mars Colony Planning; Recipe Scaling | Solver | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `wedding` | | | Wedding budget planning with $25k constraint and vendor what-if scenarios | | | |
 | &nbsp;&nbsp;↳ `mars` | | | Mars colony resource allocation with dust storm what-if disruptions | | | |
 | &nbsp;&nbsp;↳ `recipe` | | | Recipe scaling with vegan substitution — may be UNSAT | | | |
+| &nbsp;&nbsp;↳ real-world: **Wedding Budget Planning** | | | | Event planning, capital budgeting, portfolio allocation | | |
+| &nbsp;&nbsp;↳ real-world: **Mars Colony Planning** | | | | Infrastructure sizing, supply chain planning, disaster preparedness | | |
+| &nbsp;&nbsp;↳ real-world: **Recipe Scaling** | | | | Manufacturing scaling, formulation optimization, process engineering | | |
 | [Ollama](integrations/ollama/) | Community | Integration | Connect to a local Ollama instance for private LLM inference | On-premise AI deployment, air-gapped inference | LLM | Rust, Go, Python |
 | [LM Studio](integrations/lmstudio/) | Community | Integration | Connect to a local LM Studio server for desktop LLM inference | Developer local testing, offline prototyping | LLM | Rust, Go |
 | [Alert Triage](integrations/alert-triage/) | Community | Integration | Classify and prioritize alerts using LLM reasoning | SOC alert triage, IT incident management | LLM | Rust, Go, CLI/Bash |
 | [CLI Assistant](integrations/cli-assistant/) | Community | Integration | Build an interactive terminal assistant powered by an LLM | Developer productivity tool, command-line copilot | LLM | Rust, Go |
 | [CLIPS Basics](integrations/clips-basics/) | Community | Integration | Load rules, assert facts, and run the CLIPS inference engine | Business rules engine, compliance checking | CLIPS | Rust, Go, CLI/Bash |
 | [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | Community | Integration | Combine deterministic CLIPS rules with LLM-based reasoning | Explainable AI decisions, regulated industry automation | LLM, CLIPS | Rust, Go, Python, CLI/Bash |
-| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Multi-stage decision support, risk-aware optimization with safety validation | CLIPS, Solver, BN | Rust, Go, CLI/Bash |
+| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Event planning; Emergency response; Manufacturing; Logistics; Healthcare | CLIPS, Solver, BN | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | | | Music festival staging — crowd predictions drive band scheduling and safety | | | |
 | &nbsp;&nbsp;↳ `rescue` | | | Search and rescue — survivor probability drives team assignment and safety checks | | | |
 | &nbsp;&nbsp;↳ `bakery` | | | Bakery scheduling — demand forecasts drive oven allocation and allergen separation | | | |
+| &nbsp;&nbsp;↳ real-world: **Event planning** | | | | Predict attendance, optimize resource allocation, enforce safety codes | | |
+| &nbsp;&nbsp;↳ real-world: **Emergency response** | | | | Estimate survival windows, deploy rescue assets, enforce operational protocols | | |
+| &nbsp;&nbsp;↳ real-world: **Manufacturing** | | | | Forecast demand, schedule production, enforce quality and safety standards | | |
+| &nbsp;&nbsp;↳ real-world: **Logistics** | | | | Predict delivery volumes, optimize fleet routing, enforce regulatory compliance | | |
+| &nbsp;&nbsp;↳ real-world: **Healthcare** | | | | Predict patient load, optimize staff scheduling, enforce clinical safety protocols | | |
 | [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | Pro | Integration | Use an LLM to formulate constraints and Z3 to solve them | Natural language optimization, conversational planning | LLM, Solver | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `seating` | | | Wedding dinner seating — 12 guests across 3 tables with constraints | | | |
 | &nbsp;&nbsp;↳ `dungeon` | | | Dungeon layout — 5 rooms with boss and treasure placement rules | | | |
 | &nbsp;&nbsp;↳ `road-trip` | | | Road trip planning — 14 days across 5 national parks with preferences | | | |
-| [BN Structure Learning](integrations/bn-structure-learning/) | Community | Integration | Learn Bayesian network structure from observational data | Causal discovery, epidemiological modeling, root cause analysis | BN | Rust, Go, Python |
+| [BN Structure Learning](integrations/bn-structure-learning/) | Community | Integration | Learn Bayesian network structure from observational data | Epidemiology; Manufacturing; Finance; Genomics; Quality control | BN | Rust, Go, Python |
 | &nbsp;&nbsp;↳ `golf` | | | Golf course conditions — weather, soil, and maintenance factor learning | | | |
 | &nbsp;&nbsp;↳ `bmx` | | | BMX performance — skill level, technique, and jump factor learning | | | |
 | &nbsp;&nbsp;↳ `sourdough` | | | Sourdough baking — feeding schedule, flour type, and temperature factor learning | | | |
+| &nbsp;&nbsp;↳ real-world: **Epidemiology** | | | | Discover disease risk factor relationships from patient records | | |
+| &nbsp;&nbsp;↳ real-world: **Manufacturing** | | | | Identify root causes of defects from production data | | |
+| &nbsp;&nbsp;↳ real-world: **Finance** | | | | Map causal relationships between economic indicators | | |
+| &nbsp;&nbsp;↳ real-world: **Genomics** | | | | Learn gene regulatory networks from expression data | | |
+| &nbsp;&nbsp;↳ real-world: **Quality control** | | | | Find which process parameters affect product quality | | |
 | [ZEN Decisions](integrations/zen-decisions/) | Pro | Integration | Evaluate business decision tables using the ZEN engine | Pricing rules, eligibility determination, policy evaluation | ZEN | Rust, Go, Python, CLI/Bash |
 | &nbsp;&nbsp;↳ `maze-rat` | | | First Hit Policy — route a maze runner through personality-driven decisions | | | |
 | &nbsp;&nbsp;↳ `potion` | | | Collect Hit Policy — match ingredient lists against brewing recipes | | | |
@@ -111,100 +130,221 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 ## By Real-World Application
 
 ### AI approach comparison, rule engine vs LLM benchmarking, hybrid strategy selection
+
 - [racer](apps/racer/)
 
 ### AI strategy comparison, constraint vs neural solving benchmarks, educational puzzle platforms
+
 - [puzzler](apps/puzzler/)
 
 ### Adaptive AI middleware, feature-gated UX
+
 - [capability-detection](patterns/capability-detection/)
 
 ### Business rules engine, compliance checking
+
 - [clips-basics](integrations/clips-basics/)
 
 ### CLI tools, batch processing scripts
+
 - [blocking-api](patterns/blocking-api/)
 
-### Causal discovery, epidemiological modeling, root cause analysis
-- [bn-structure-learning](integrations/bn-structure-learning/)
+### Coffee Shop
+
+Manufacturing quality control, process parameter tuning, root cause analysis in production
+
+- [bayesian-inference](patterns/bayesian-inference/)
 
 ### Cost-optimized inference, budget-aware model selection, prompt complexity tiering
+
 - [cost-routing](patterns/cost-routing/)
 
 ### Customer support chatbot, FAQ assistant
+
 - [basic-chat](patterns/basic-chat/)
 
 ### Data extraction, form auto-fill, API response generation
+
 - [structured-output](patterns/structured-output/)
 
 ### Developer local testing, offline prototyping
+
 - [lmstudio](integrations/lmstudio/)
 
 ### Developer productivity tool, command-line copilot
+
 - [cli-assistant](integrations/cli-assistant/)
 
 ### Developer tooling, credential management, multi-provider auth setup
+
 - [auth-helper](patterns/auth-helper/)
 
+### Emergency response
+
+Estimate survival windows, deploy rescue assets, enforce operational protocols
+
+- [bn-solver-clips-pipeline](integrations/bn-solver-clips-pipeline/)
+
+### Epidemiology
+
+Discover disease risk factor relationships from patient records
+
+- [bn-structure-learning](integrations/bn-structure-learning/)
+
+### Event planning
+
+Predict attendance, optimize resource allocation, enforce safety codes
+
+- [bn-solver-clips-pipeline](integrations/bn-solver-clips-pipeline/)
+
 ### Explainable AI decisions, regulated industry automation
+
 - [clips-llm-hybrid](integrations/clips-llm-hybrid/)
 
-### Financial planning, capacity modeling, sensitivity analysis
-- [solver-what-if](patterns/solver-what-if/)
+### Fantasy Sports Draft
+
+Portfolio optimization, team composition, auction bidding strategies
+
+- [solver](patterns/solver/)
+
+### Finance
+
+Map causal relationships between economic indicators
+
+- [bn-structure-learning](integrations/bn-structure-learning/)
+
+### Genomics
+
+Learn gene regulatory networks from expression data
+
+- [bn-structure-learning](integrations/bn-structure-learning/)
+
+### Haunted House
+
+Fault diagnosis, anomaly detection, sensor fusion from multiple noisy sensors pointing to hidden causes
+
+- [bayesian-inference](patterns/bayesian-inference/)
+
+### Healthcare
+
+Predict patient load, optimize staff scheduling, enforce clinical safety protocols
+
+- [bn-solver-clips-pipeline](integrations/bn-solver-clips-pipeline/)
 
 ### High-availability AI service, resilient inference pipeline
+
 - [retry-fallback](patterns/retry-fallback/)
 
 ### Image captioning, visual QA, document understanding
+
 - [vision](patterns/vision/)
 
 ### Latency-sensitive services, SLA-bound AI endpoints
+
 - [timeout-config](patterns/timeout-config/)
 
-### Low-code rule authoring, natural language business logic, automated CLIPS code generation
-- [ruler](apps/ruler/)
+### Logistics
 
-### Multi-stage decision support, risk-aware optimization with safety validation
+Predict delivery volumes, optimize fleet routing, enforce regulatory compliance
+
 - [bn-solver-clips-pipeline](integrations/bn-solver-clips-pipeline/)
 
+### Low-code rule authoring, natural language business logic, automated CLIPS code generation
+
+- [ruler](apps/ruler/)
+
+### Manufacturing
+
+Forecast demand, schedule production, enforce quality and safety standards
+
+- [bn-solver-clips-pipeline](integrations/bn-solver-clips-pipeline/)
+- [bn-structure-learning](integrations/bn-structure-learning/)
+
+### Mars Colony Planning
+
+Infrastructure sizing, supply chain planning, disaster preparedness
+
+- [solver-what-if](patterns/solver-what-if/)
+
 ### Multi-vendor AI gateway, provider comparison tool
+
 - [multi-provider](patterns/multi-provider/)
 
 ### Music theory analysis, algorithmic composition assistance, MIDI/MusicXML processing
+
 - [riffer](apps/riffer/)
 
 ### Natural language optimization, conversational planning
+
 - [llm-solver-hybrid](integrations/llm-solver-hybrid/)
 
 ### On-premise AI deployment, air-gapped inference
+
 - [ollama](integrations/ollama/)
 
+### Plant Doctor
+
+Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis
+
+- [bayesian-inference](patterns/bayesian-inference/)
+
 ### Plugin architecture, provider-agnostic application layer
+
 - [polymorphic](patterns/polymorphic/)
 
 ### Pricing rules, eligibility determination, policy evaluation
+
 - [zen-decisions](integrations/zen-decisions/)
 
+### Quality control
+
+Find which process parameters affect product quality
+
+- [bn-structure-learning](integrations/bn-structure-learning/)
+
 ### Rapid prototyping, scripting with LLM capabilities
+
 - [convenience-api](patterns/convenience-api/)
 
 ### Real-time chat interface, live transcription display
+
 - [streaming](patterns/streaming/)
 
+### Recipe Scaling
+
+Manufacturing scaling, formulation optimization, process engineering
+
+- [solver-what-if](patterns/solver-what-if/)
+
 ### Reliable AI answers with deterministic validation, LLM output verification, hybrid rule+LLM pipelines
+
 - [arbiter](apps/arbiter/)
 
-### Risk assessment, medical diagnosis support, fault detection
-- [bayesian-inference](patterns/bayesian-inference/)
-
 ### SOC alert triage, IT incident management
+
 - [alert-triage](integrations/alert-triage/)
 
-### Scheduling optimization, resource allocation, configuration validation
+### Space Colony Planning
+
+Infrastructure sizing, capacity planning, disaster recovery modeling
+
+- [solver](patterns/solver/)
+
+### Theme Park Planning
+
+Facility layout, capital budgeting, resource allocation
+
 - [solver](patterns/solver/)
 
 ### Usage metering, per-user quota enforcement
+
 - [token-budget](patterns/token-budget/)
+
+### Wedding Budget Planning
+
+Event planning, capital budgeting, portfolio allocation
+
+- [solver-what-if](patterns/solver-what-if/)
 
 ---
 
@@ -278,47 +418,47 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 
 ## By Language
 
-| Example | Category | Rust | Go | Python |
-|---------|----------|------|-----|--------|
-| [Basic Chat](patterns/basic-chat/) | patterns | Yes | Yes | Yes |
-| [Streaming](patterns/streaming/) | patterns | Yes | Yes | Yes |
-| [Multi Provider](patterns/multi-provider/) | patterns | Yes | Yes | Yes |
-| [Convenience API](patterns/convenience-api/) | patterns | Yes | Yes | - |
-| [Blocking API](patterns/blocking-api/) | patterns | Yes | Yes | - |
-| [Capability Detection](patterns/capability-detection/) | patterns | Yes | Yes | - |
-| [Cost Routing](patterns/cost-routing/) | patterns | Yes | Yes | Yes |
-| [Polymorphic](patterns/polymorphic/) | patterns | Yes | Yes | - |
-| [Retry Fallback](patterns/retry-fallback/) | patterns | Yes | Yes | Yes |
-| [Structured Output](patterns/structured-output/) | patterns | Yes | Yes | Yes |
-| [Timeout Config](patterns/timeout-config/) | patterns | Yes | Yes | Yes |
-| [Token Budget](patterns/token-budget/) | patterns | Yes | Yes | Yes |
-| [Vision](patterns/vision/) | patterns | Yes | Yes | Yes |
-| [Auth Helper](patterns/auth-helper/) | patterns | Yes | Yes | - |
-| [Solver](patterns/solver/) | patterns | Yes | Yes | Yes |
-| [Bayesian Inference](patterns/bayesian-inference/) | patterns | Yes | Yes | Yes |
-| [Solver What If](patterns/solver-what-if/) | patterns | Yes | Yes | Yes |
-| [Ollama](integrations/ollama/) | integrations | Yes | Yes | Yes |
-| [LM Studio](integrations/lmstudio/) | integrations | Yes | Yes | - |
-| [Alert Triage](integrations/alert-triage/) | integrations | Yes | Yes | - |
-| [CLI Assistant](integrations/cli-assistant/) | integrations | Yes | Yes | - |
-| [CLIPS Basics](integrations/clips-basics/) | integrations | Yes | Yes | - |
-| [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | integrations | Yes | Yes | Yes |
-| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | integrations | Yes | Yes | - |
-| [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | integrations | Yes | Yes | Yes |
-| [BN Structure Learning](integrations/bn-structure-learning/) | integrations | Yes | Yes | Yes |
-| [ZEN Decisions](integrations/zen-decisions/) | integrations | Yes | Yes | Yes |
-| [Puzzler](apps/puzzler/) | apps | Yes | Yes | - |
-| [Racer](apps/racer/) | apps | Yes | Yes | - |
-| [Riffer](apps/riffer/) | apps | Yes | Yes | - |
-| [Ruler](apps/ruler/) | apps | Yes | Yes | - |
-| [Arbiter](apps/arbiter/) | apps | Yes | Yes | - |
+| Example | Category | Rust | Go | Python | CLI/Bash |
+|---------|----------|------|-----|--------|----------|
+| [Basic Chat](patterns/basic-chat/) | patterns | Yes | Yes | Yes | - |
+| [Streaming](patterns/streaming/) | patterns | Yes | Yes | Yes | - |
+| [Multi Provider](patterns/multi-provider/) | patterns | Yes | Yes | Yes | Yes |
+| [Convenience API](patterns/convenience-api/) | patterns | Yes | Yes | - | - |
+| [Blocking API](patterns/blocking-api/) | patterns | Yes | Yes | - | - |
+| [Capability Detection](patterns/capability-detection/) | patterns | Yes | Yes | - | Yes |
+| [Cost Routing](patterns/cost-routing/) | patterns | Yes | Yes | Yes | Yes |
+| [Polymorphic](patterns/polymorphic/) | patterns | Yes | Yes | - | - |
+| [Retry Fallback](patterns/retry-fallback/) | patterns | Yes | Yes | Yes | Yes |
+| [Structured Output](patterns/structured-output/) | patterns | Yes | Yes | Yes | Yes |
+| [Timeout Config](patterns/timeout-config/) | patterns | Yes | Yes | Yes | - |
+| [Token Budget](patterns/token-budget/) | patterns | Yes | Yes | Yes | Yes |
+| [Vision](patterns/vision/) | patterns | Yes | Yes | Yes | Yes |
+| [Auth Helper](patterns/auth-helper/) | patterns | Yes | Yes | - | - |
+| [Solver](patterns/solver/) | patterns | Yes | Yes | Yes | Yes |
+| [Bayesian Inference](patterns/bayesian-inference/) | patterns | Yes | Yes | Yes | Yes |
+| [Solver What If](patterns/solver-what-if/) | patterns | Yes | Yes | Yes | Yes |
+| [Ollama](integrations/ollama/) | integrations | Yes | Yes | Yes | - |
+| [LM Studio](integrations/lmstudio/) | integrations | Yes | Yes | - | - |
+| [Alert Triage](integrations/alert-triage/) | integrations | Yes | Yes | - | Yes |
+| [CLI Assistant](integrations/cli-assistant/) | integrations | Yes | Yes | - | - |
+| [CLIPS Basics](integrations/clips-basics/) | integrations | Yes | Yes | - | Yes |
+| [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | integrations | Yes | Yes | Yes | Yes |
+| [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | integrations | Yes | Yes | - | Yes |
+| [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | integrations | Yes | Yes | Yes | Yes |
+| [BN Structure Learning](integrations/bn-structure-learning/) | integrations | Yes | Yes | Yes | - |
+| [ZEN Decisions](integrations/zen-decisions/) | integrations | Yes | Yes | Yes | Yes |
+| [Puzzler](apps/puzzler/) | apps | Yes | Yes | - | - |
+| [Racer](apps/racer/) | apps | Yes | Yes | - | - |
+| [Riffer](apps/riffer/) | apps | Yes | Yes | - | - |
+| [Ruler](apps/ruler/) | apps | Yes | Yes | - | Yes |
+| [Arbiter](apps/arbiter/) | apps | Yes | Yes | - | Yes |
 
 
 <!-- END: Auto-generated showcase -->
 
 ## Quick Start
 
-Each example includes Rust and Go implementations (some also include Python). Pick any example and run:
+Each example includes Rust and Go implementations; many also include Python or CLI/Bash. Pick any example and run:
 
 ```bash
 # Rust
@@ -332,6 +472,10 @@ make build && bin/basic-chat
 # Python (where available)
 cd examples/patterns/basic-chat/python
 python main.py
+
+# CLI/Bash (where available)
+cd examples/patterns/token-budget/bash
+make run
 ```
 
 ## Interactive Modes
@@ -351,6 +495,9 @@ go run . --verbose
 
 # Python
 python main.py --verbose
+
+# CLI/Bash
+make run ARGS="--verbose"
 ```
 
 Output includes:

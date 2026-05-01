@@ -1,0 +1,139 @@
+# .github/workflows/publish-to-docs.yml
+#
+# Pushes examples documentation to nxus-docs for public hosting.
+# Triggered on push to main (mirrors publish-to-public cadence) or
+# workflow_dispatch for manual syncs.
+#
+# Pushes content to: nxus-docs/src/content/docs/nxuskit/examples/
+# Source of truth:   README.md (examples index page)
+#
+# Required secrets:
+#   NXUS_DOCS_TOKEN  — fine-grained PAT with Contents write access to
+#                      nxus-SYSTEMS/nxus-docs, scoped to src/content/docs/nxuskit/examples/
+
+name: Publish to Docs
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "README.md"
+      - "conformance/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Leak gate ────────────────────────────────────────────────
+      - name: Leak gate — forbidden terms in doc sources
+        run: |
+          set -eu -o pipefail
+          SCAN_PATHS=()
+          for f in README.md; do
+            [[ -f "$f" ]] && SCAN_PATHS+=("$f")
+          done
+
+          FORBIDDEN_TERMS=(
+            "INTERNAL-ONLY"
+            "nxusKit-internal"
+            "nxusKit-examples-internal"
+            "nxusKit-plugins-internal"
+          )
+
+          for term in "${FORBIDDEN_TERMS[@]}"; do
+            HITS=$(grep -r -n \
+                --include='*.md' --include='*.mdx' \
+                "$term" "${SCAN_PATHS[@]}" 2>/dev/null || true)
+            if [[ -n "$HITS" ]]; then
+              echo "$HITS"
+              echo "::error::Forbidden term '$term' found in doc sources."
+              exit 1
+            fi
+          done
+          echo "Leak gate passed."
+
+      # ── Export examples doc content ──────────────────────────────
+      - name: Export examples documentation
+        run: |
+          set -eu -o pipefail
+          EXPORT=/tmp/nxuskit-examples-docs-export
+
+          rm -rf "$EXPORT"
+          mkdir -p "$EXPORT"
+
+          # README.md becomes the examples index page in nxus-docs.
+          # Add Starlight frontmatter in the exported copy only so the GitHub
+          # README stays clean.
+          if [[ -f "README.md" ]]; then
+            {
+              echo "---"
+              echo "title: nxusKit Examples"
+              echo "description: Production-ready nxusKit examples across Rust, Go, Python, and CLI/Bash."
+              echo "---"
+              echo ""
+              cat README.md
+            } > "$EXPORT/index.md"
+            echo "Exported: README.md → examples/index.md"
+          fi
+
+          echo ""
+          echo "Export complete: $(find "$EXPORT" -name '*.md' -o -name '*.mdx' | wc -l | tr -d ' ') doc files"
+
+      # ── Commit message ───────────────────────────────────────────
+      - name: Build commit message
+        id: commit-msg
+        run: |
+          set -eu -o pipefail
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            SUBJECT=$(git log -1 --format='%s' HEAD)
+            echo "msg=docs(nxuskit/examples): sync — ${SUBJECT}" >> "$GITHUB_OUTPUT"
+          else
+            SUBJECT=$(git log -1 --format='%s' HEAD)
+            echo "msg=docs(nxuskit/examples): sync — ${SUBJECT}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── Push to nxus-docs ────────────────────────────────────────
+      - name: Push to nxus-docs
+        env:
+          NXUS_DOCS_TOKEN: ${{ secrets.NXUS_DOCS_TOKEN }}
+          COMMIT_MSG: ${{ steps.commit-msg.outputs.msg }}
+        run: |
+          set -eu -o pipefail
+          EXPORT=/tmp/nxuskit-examples-docs-export
+
+          if [[ -z "${NXUS_DOCS_TOKEN:-}" ]]; then
+            echo "::notice::NXUS_DOCS_TOKEN not configured — skipping push."
+            echo "Add a fine-grained PAT with Contents write on nxus-SYSTEMS/nxus-docs."
+            exit 0
+          fi
+
+          REMOTE_URL="https://x-access-token:${NXUS_DOCS_TOKEN}@github.com/nxus-SYSTEMS/nxus-docs.git"
+
+          git clone --depth=1 "$REMOTE_URL" /tmp/nxus-docs-clone
+          cd /tmp/nxus-docs-clone
+
+          # Sync exported examples docs into the nxuskit/examples/ subtree only.
+          mkdir -p src/content/docs/nxuskit/examples
+          rsync -a --delete \
+            --exclude='.git' \
+            "$EXPORT/" src/content/docs/nxuskit/examples/
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No doc changes to publish."
+            exit 0
+          fi
+
+          git -c user.name="nxusKit Docs Bot" \
+              -c user.email="docs-bot@nxuskit.local" \
+              commit -m "$COMMIT_MSG"
+          git push origin main
+          echo "Successfully pushed examples docs to nxus-docs."
