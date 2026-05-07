@@ -1,0 +1,20 @@
+{
+  "engine": "solver",
+  "expected_result": {
+    "corrected_action": "drive-car-to-wash",
+    "naive_action": "walk-to-car-wash",
+    "naive_feasible": false,
+    "proof": [
+      "wash_requires(car_at_car_wash)",
+      "walk_to_car_wash_moves(person)",
+      "walk_to_car_wash_does_not_move(car)",
+      "therefore naive_action violates required object presence"
+    ],
+    "satisfiable": true
+  },
+  "explanation": "The mock Solver proof marks the naive walk recommendation infeasible and the drive-car recommendation feasible.",
+  "variables": {
+    "car_at_car_wash_after_action": "bool",
+    "person_at_car_wash_after_action": "bool"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "engine": "solver",
+  "expected_result": {
+    "alternate_route_feasible": true,
+    "constraints": [
+      "door_width >= pallet_width",
+      "loaded_pallet_tilt == false"
+    ],
+    "naive_action": "angle-and-push",
+    "naive_feasible": false,
+    "recommended_action": "use-dock-door-b",
+    "satisfiable": true
+  },
+  "explanation": "The mock Solver proof shows the narrow-door route is UNSAT while the wider dock-door route satisfies clearance.",
+  "variables": {
+    "dock_door_b_width_inches": 60,
+    "door_width_inches": 42,
+    "pallet_width_inches": 48
+  }
+}

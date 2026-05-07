@@ -55,7 +55,8 @@
         "scenario",
         "real_world_application",
         "tech_tags",
-        "languages"
+        "languages",
+        "tier"
       ],
       "properties": {
         "name": {
@@ -146,6 +147,14 @@
           },
           "additionalProperties": false
         },
+        "tier": {
+          "type": "string",
+          "description": "Scalar SDK edition tier for compatibility with existing consumers.",
+          "enum": [
+            "community",
+            "pro"
+          ]
+        },
         "tags": {
           "type": "array",
           "description": "Tags for filtering and organization",
@@ -163,6 +172,13 @@
         "notes": {
           "type": "string",
           "description": "Optional notes about the example"
+        },
+        "edition_note": {
+          "type": "string",
+          "description": "Optional human-facing note for examples with Community defaults and optional higher-tier enhancements."
+        },
+        "tier_profile": {
+          "$ref": "#/$defs/tier_profile"
         },
         "tagline": {
           "type": "string",
@@ -252,6 +268,127 @@
           "minItems": 1
         }
       }
+    },
+    "tier_profile": {
+      "type": "object",
+      "description": "Enhanced tier metadata for examples whose default scalar tier remains simple but optional stages may use additional tiers.",
+      "required": [
+        "schema_version",
+        "minimum_tier",
+        "tiers",
+        "default_stage",
+        "summary",
+        "stages"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "minimum_tier": {
+          "type": "string",
+          "enum": [
+            "community",
+            "pro"
+          ]
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "community",
+              "pro"
+            ]
+          },
+          "minItems": 1
+        },
+        "default_stage": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "badges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "kind"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "tier",
+              "required",
+              "enabled_by_default",
+              "requires_entitlement",
+              "capabilities",
+              "fallback"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "community",
+                  "pro"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "enabled_by_default": {
+                "type": "boolean"
+              },
+              "requires_entitlement": {
+                "type": "boolean"
+              },
+              "capabilities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "fallback": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
     },
     "category": {
       "type": "object",

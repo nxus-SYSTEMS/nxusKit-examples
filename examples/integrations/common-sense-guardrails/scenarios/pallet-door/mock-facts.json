@@ -1,0 +1,56 @@
+{
+  "candidate_actions": [
+    {
+      "id": "angle-and-push",
+      "load_state": "loaded",
+      "recommendation": "push_through_door"
+    }
+  ],
+  "confidence": 1,
+  "constraints": [
+    {
+      "door_width_inches": 42,
+      "id": "minimum-clearance",
+      "pallet_width_inches": 48,
+      "type": "geometry"
+    },
+    {
+      "id": "loaded-pallet-tilt",
+      "maximum_tilt_degrees": 0,
+      "type": "safety"
+    }
+  ],
+  "goal": {
+    "object": "loaded_pallet",
+    "outcome": "move_to_next_area",
+    "target_location": "through_door"
+  },
+  "objects_moved": [
+    {
+      "action_id": "angle-and-push",
+      "from": "warehouse_floor",
+      "object": "loaded_pallet",
+      "to": "doorway"
+    }
+  ],
+  "objects_required": [
+    {
+      "current_location": "warehouse_floor",
+      "object": "clearance_width",
+      "present_at_required_location": false,
+      "required_location": "doorway"
+    }
+  ],
+  "policy_context": {
+    "door_width_inches": 42,
+    "load_state": "loaded",
+    "pallet_width_inches": 48
+  },
+  "resources": [
+    {
+      "id": "dock-door-b",
+      "type": "alternate_route",
+      "width_inches": 60
+    }
+  ]
+}

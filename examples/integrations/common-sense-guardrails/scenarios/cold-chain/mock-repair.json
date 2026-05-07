@@ -1,0 +1,4 @@
+{
+  "repair_instructions": "Reject unsupported courier options and require carrier certification, active temperature monitoring, and documented custody handoff.",
+  "retry_prompt": "The earlier answer chose the cheap courier with ice packs. That fails because the shipment requires certified refrigerated transport, continuous temperature evidence, and documented handoff. Recommend a certified cold-chain carrier with monitoring and audit records."
+}

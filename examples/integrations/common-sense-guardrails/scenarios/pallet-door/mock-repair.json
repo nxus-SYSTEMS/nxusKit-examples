@@ -1,0 +1,4 @@
+{
+  "repair_instructions": "Reject the narrow-door route and recommend an alternate route, unloading/repacking, or a wider opening with documented clearance.",
+  "retry_prompt": "The earlier answer said to angle and push the loaded pallet. That fails because the 48 inch pallet is wider than the 42 inch door and loaded pallets should not be tilted to force clearance. Recommend a wider dock, unloading and repacking, or another approved route."
+}

@@ -12,7 +12,7 @@ Demonstrates Bayesian Network inference using multiple algorithms: load a BIF mo
 
 ## What this demonstrates
 
-**Difficulty: Starter** 🟢 · BN
+**Difficulty: Intermediate** 🟦 · BN
 
 - **Summary:** Bayesian network inference via nxusKit SDK
 - **Scenario:** Build a Bayesian network and perform probabilistic inference

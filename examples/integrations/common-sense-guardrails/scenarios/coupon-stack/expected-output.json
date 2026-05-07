@@ -1,0 +1,44 @@
+{
+  "expected_correction_contains": [
+    "single",
+    "eligible"
+  ],
+  "expected_findings": [
+    {
+      "evidence": {
+        "discounts": [
+          "welcome-25",
+          "employee-15"
+        ],
+        "limit": 1
+      },
+      "message": "The recommendation combines non-stackable promotion families.",
+      "rule_id": "non-stackable-discount-conflict",
+      "severity": "error",
+      "status": "fail"
+    },
+    {
+      "evidence": {
+        "actual_margin_percent": -7,
+        "minimum_margin_percent": 20
+      },
+      "message": "The stacked promotion drives the clearance item below the allowed margin floor.",
+      "rule_id": "margin-floor-breach",
+      "severity": "error",
+      "status": "fail"
+    }
+  ],
+  "final_status": "pass",
+  "pro_stage": {
+    "id": "zen-policy",
+    "mode": "mock-fixture"
+  },
+  "required_stage_ids": [
+    "raw-baseline",
+    "structured-facts",
+    "clips-validation",
+    "repair-packet",
+    "corrected-answer"
+  ],
+  "scenario": "coupon-stack"
+}

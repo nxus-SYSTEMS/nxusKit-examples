@@ -1,0 +1,67 @@
+{
+  "candidate_actions": [
+    {
+      "carrier": "cheap-courier",
+      "id": "use-cheap-courier",
+      "temperature_logging": false
+    }
+  ],
+  "confidence": 1,
+  "constraints": [
+    {
+      "id": "refrigerated-certified-carrier",
+      "required": true,
+      "type": "handling"
+    },
+    {
+      "id": "continuous-temperature-log",
+      "required": true,
+      "type": "audit"
+    },
+    {
+      "id": "documented-handoff",
+      "required": true,
+      "type": "custody"
+    }
+  ],
+  "goal": {
+    "object": "frozen_medical_samples",
+    "outcome": "same_day_delivery",
+    "target_state": "frozen_and_auditable"
+  },
+  "objects_moved": [
+    {
+      "action_id": "use-cheap-courier",
+      "from": "clinic",
+      "object": "frozen_medical_samples",
+      "to": "lab"
+    }
+  ],
+  "objects_required": [
+    {
+      "current_location": "unassigned",
+      "object": "certified_refrigerated_carrier",
+      "present_at_required_location": false,
+      "required_location": "shipment_plan"
+    }
+  ],
+  "policy_context": {
+    "carrier_certified": false,
+    "handoff_record": false,
+    "temperature_monitoring": false
+  },
+  "resources": [
+    {
+      "id": "cheap-courier",
+      "refrigerated": false,
+      "temperature_logging": false,
+      "type": "carrier"
+    },
+    {
+      "id": "certified-cold-carrier",
+      "refrigerated": true,
+      "temperature_logging": true,
+      "type": "carrier"
+    }
+  ]
+}

@@ -426,6 +426,45 @@ def insert_scenarios_line(text: str, scenarios: list[dict]) -> str:
     return "\n".join(new_lines)
 
 
+def insert_edition_note(text: str, ex: dict | None) -> str:
+    """Insert or replace an edition note in the Edition section."""
+    if not ex:
+        return text
+    note = str(ex.get("edition_note") or "").strip()
+    if not note or "## Edition\n" not in text:
+        return text
+
+    before, after = text.split("## Edition\n", 1)
+    section, sep, rest = after.partition("\n## ")
+    lines = []
+    skip_blank_after_note = False
+    for line in section.split("\n"):
+        if line.startswith("**Edition note:**"):
+            skip_blank_after_note = True
+            continue
+        if skip_blank_after_note and line.strip() == "":
+            skip_blank_after_note = False
+            continue
+        skip_blank_after_note = False
+        if line.strip() == "" and lines and lines[-1].strip() == "":
+            continue
+        lines.append(line)
+
+    insert_at = 0
+    while insert_at < len(lines) and lines[insert_at].strip() == "":
+        insert_at += 1
+    while insert_at < len(lines) and lines[insert_at].strip() != "":
+        insert_at += 1
+    while insert_at < len(lines) and lines[insert_at].strip() == "":
+        insert_at += 1
+
+    note_lines = [f"**Edition note:** {note}", ""]
+    if insert_at > 0 and lines[insert_at - 1].strip() != "":
+        note_lines.insert(0, "")
+    new_section = lines[:insert_at] + note_lines + lines[insert_at:]
+    return before + "## Edition\n" + "\n".join(new_section).rstrip() + "\n\n" + (("## " + rest) if sep else "")
+
+
 def _md_table_cell(value: str) -> str:
     return str(value or "").replace("|", "\\|").replace("\n", " ").strip()
 
@@ -530,6 +569,7 @@ def transform_text(
     if ex is not None:
         text = insert_tagline_blockquote(text, ex.get("tagline"))
         text = insert_scenarios_line(text, ex.get("scenarios", []))
+        text = insert_edition_note(text, ex)
         text = insert_real_world_applications_section(text, ex)
         text = manifest_demonstrates_prerequisites(text, ex, langs, readme, root)
         text = _insert_or_update_difficulty_badge(text, ex)

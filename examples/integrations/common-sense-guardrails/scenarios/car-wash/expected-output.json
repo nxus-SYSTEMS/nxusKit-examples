@@ -1,0 +1,33 @@
+{
+  "expected_correction_contains": [
+    "drive",
+    "car"
+  ],
+  "expected_findings": [
+    {
+      "evidence": {
+        "candidate_action": "walk-to-car-wash",
+        "moved_object": "person",
+        "required_location": "car_wash",
+        "required_object": "car"
+      },
+      "message": "Walking moves the person to the wash, but the car remains at home.",
+      "rule_id": "car-required-at-wash",
+      "severity": "error",
+      "status": "fail"
+    }
+  ],
+  "final_status": "pass",
+  "pro_stage": {
+    "id": "solver-proof",
+    "mode": "mock-fixture"
+  },
+  "required_stage_ids": [
+    "raw-baseline",
+    "structured-facts",
+    "clips-validation",
+    "repair-packet",
+    "corrected-answer"
+  ],
+  "scenario": "car-wash"
+}

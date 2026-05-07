@@ -26,6 +26,7 @@
     "cli-assistant": "community",
     "clips-basics": "community",
     "clips-llm-hybrid": "community",
+    "common-sense-guardrails": "community",
     "bn-solver-clips-pipeline": "pro",
     "llm-solver-hybrid": "pro",
     "bn-structure-learning": "community",

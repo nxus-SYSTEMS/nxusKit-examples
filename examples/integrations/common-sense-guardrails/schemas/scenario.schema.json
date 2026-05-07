@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "acknowledgement": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "baseline_prompt": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "expected_bad_answer": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "expected_corrected_answer": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "extraction_prompt": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "failure_class": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "guardrail_summary": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    },
+    "pro_stage": {
+      "additionalProperties": true,
+      "properties": {
+        "artifact": {
+          "type": "string"
+        },
+        "engine": {
+          "enum": [
+            "solver",
+            "zen"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "solver-proof",
+            "zen-policy"
+          ],
+          "type": "string"
+        },
+        "tier": {
+          "const": "pro"
+        }
+      },
+      "required": [
+        "id",
+        "engine",
+        "artifact",
+        "tier"
+      ],
+      "type": "object"
+    },
+    "repair_template": {
+      "pattern": "\\{findings\\}",
+      "type": "string"
+    },
+    "research_notes": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "failure_class",
+    "baseline_prompt",
+    "extraction_prompt",
+    "repair_template",
+    "expected_bad_answer",
+    "guardrail_summary",
+    "expected_corrected_answer"
+  ],
+  "title": "Common-Sense Guardrails Scenario",
+  "type": "object"
+}

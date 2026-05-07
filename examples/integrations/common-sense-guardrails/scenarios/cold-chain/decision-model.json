@@ -1,0 +1,21 @@
+{
+  "engine": "zen",
+  "expected_result": {
+    "allowed": false,
+    "decision": "reject_uncertified_courier",
+    "recommended_policy": "use_certified_cold_chain_carrier",
+    "required_conditions": [
+      "certified_refrigerated_carrier",
+      "continuous_temperature_log",
+      "documented_handoff"
+    ]
+  },
+  "explanation": "The mock ZEN decision rejects the cheap courier and requires refrigerated certification, temperature logs, and custody evidence.",
+  "hit_policy": "first",
+  "inputs": {
+    "carrier_certified": false,
+    "handoff_record": false,
+    "refrigerated": false,
+    "temperature_logging": false
+  }
+}

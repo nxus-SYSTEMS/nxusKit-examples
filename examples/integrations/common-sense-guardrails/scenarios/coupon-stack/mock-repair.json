@@ -1,0 +1,4 @@
+{
+  "repair_instructions": "Recommend only eligible promotion combinations and explicitly reject stacks that break margin or non-stackable rules.",
+  "retry_prompt": "The earlier answer stacked every discount. That fails because welcome and employee discounts are non-stackable and the clearance item margin is below the required floor. Recommend the single best eligible discount and explain that free shipping or loyalty credit may apply only if policy keeps margin compliant."
+}

@@ -9,8 +9,12 @@ from __future__ import annotations
 
 import json
 import sys
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python < 3.11
+    tomllib = None
 
 REPO = Path(__file__).resolve().parents[1]
 MANIFEST = REPO / "conformance" / "examples_manifest.json"
@@ -76,12 +80,35 @@ NO_ENTITLEMENT_PROBE: frozenset[str] = frozenset({"puzzler", "riffer"})
 
 
 def load_toml_bins(cargo_toml: Path) -> list[str]:
+    if tomllib is None:
+        return load_toml_bins_fallback(cargo_toml)
     with open(cargo_toml, "rb") as f:
         data = tomllib.load(f)
     bins: list[str] = []
     for block in data.get("bin") or []:
         if isinstance(block, dict) and "name" in block:
             bins.append(block["name"])
+    return bins
+
+
+def load_toml_bins_fallback(cargo_toml: Path) -> list[str]:
+    bins: list[str] = []
+    in_bin_block = False
+    for raw_line in cargo_toml.read_text().splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        if line == "[[bin]]":
+            in_bin_block = True
+            continue
+        if line.startswith("["):
+            in_bin_block = False
+            continue
+        if not in_bin_block:
+            continue
+        key, sep, value = line.partition("=")
+        if sep and key.strip() == "name":
+            name = value.strip().strip('"').strip("'")
+            if name:
+                bins.append(name)
     return bins
 
 
@@ -131,6 +158,8 @@ def argv_tail(
     category: str,
     example_dir: Path,
 ) -> list[str]:
+    if example_name == "common-sense-guardrails":
+        return ["--scenario", "car-wash", "--mode", "mock", "--stage", "ce"]
     if category == APPS_CATEGORY:
         if lang == "go":
             key = (example_name, "go")
@@ -166,9 +195,11 @@ def main() -> int:
         tags = list(ex.get("tech_tags") or [])
         impls = ex.get("implementations") or {}
         example_dir = None
-        for lang in ("rust", "go", "python"):
+        for lang in ("rust", "go", "python", "bash"):
             rel = impls.get(lang)
             if not rel:
+                continue
+            if lang == "bash" and name != "common-sense-guardrails":
                 continue
             impl_dir = REPO / rel
             if not impl_dir.is_dir():
@@ -187,24 +218,54 @@ def main() -> int:
                 )
             elif lang == "go":
                 cmd = go_run_prefix(impl_dir) + tail
+            elif lang == "bash":
+                cmd = ["bash", "main.sh"] + tail
             else:
                 cmd = ["python3", "main.py"] + tail
 
-            runs.append(
-                {
-                    "id": f"{name}|{lang}",
-                    "example": name,
-                    "tier": tier,
-                    "category": category,
-                    "language": lang,
-                    "cwd_rel": rel.replace("\\", "/"),
-                    "command": cmd,
-                    "entitlement_probe": entitlement_probe,
-                    "requires_cloud_llm": cloud,
-                    "requires_local_lmstudio": local_lmstudio,
-                    "requires_local_ollama_go": local_ollama_go,
-                }
-            )
+            row = {
+                "id": f"{name}|{lang}",
+                "example": name,
+                "tier": tier,
+                "category": category,
+                "language": lang,
+                "cwd_rel": rel.replace("\\", "/"),
+                "command": cmd,
+                "entitlement_probe": entitlement_probe,
+                "requires_cloud_llm": cloud,
+                "requires_local_lmstudio": local_lmstudio,
+                "requires_local_ollama_go": local_ollama_go,
+            }
+            if name == "common-sense-guardrails":
+                row.update(
+                    {
+                        "id": f"{name}|{lang}|ce",
+                        "stage": "ce",
+                        "stage_tier": "community",
+                        "requires_pro": False,
+                    }
+                )
+            runs.append(row)
+
+            if name == "common-sense-guardrails" and lang in {"python", "bash"}:
+                runs.append(
+                    {
+                        "id": f"{name}|{lang}|pro",
+                        "example": name,
+                        "tier": tier,
+                        "category": category,
+                        "language": lang,
+                        "cwd_rel": rel.replace("\\", "/"),
+                        "command": cmd[:-1] + ["pro"],
+                        "entitlement_probe": False,
+                        "requires_cloud_llm": False,
+                        "requires_local_lmstudio": False,
+                        "requires_local_ollama_go": False,
+                        "stage": "pro",
+                        "stage_tier": "pro",
+                        "requires_pro": False,
+                    }
+                )
 
     out = {
         "$schema": "./harness/example_smoke_matrix.schema.json",

@@ -1,0 +1,8 @@
+{
+  "content": "Use the 25% welcome coupon, add the 15% employee discount, apply the $10 loyalty credit, and include free shipping so the customer gets the maximum savings.",
+  "notes": [
+    "Common bad answer: assumes every available promotion can be combined.",
+    "The answer ignores clearance-item margin policy."
+  ],
+  "source": "mock"
+}

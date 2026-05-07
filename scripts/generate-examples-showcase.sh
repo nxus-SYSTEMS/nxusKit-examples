@@ -296,7 +296,38 @@ do_generate() {
     update_root_readme
 }
 
-# --- Root README table generation --------------------------------------------
+# --- Root README generation ---------------------------------------------------
+root_intro_line() {
+    local manifest="$1"
+    local total
+    total=$(jq '.examples | length' "$manifest")
+    echo "${total} production-quality examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables."
+}
+
+generate_root_tables() {
+    local manifest="$1"
+
+    echo "### Patterns — Reusable SDK integration patterns"
+    echo ""
+    echo "| Example | Description | Languages |"
+    echo "|---------|-------------|-----------|"
+    generate_root_table_rows "$manifest" "patterns"
+    echo ""
+
+    echo "### Integrations — Combining SDK features"
+    echo ""
+    echo "| Example | Description | Languages |"
+    echo "|---------|-------------|-----------|"
+    generate_root_table_rows "$manifest" "integrations"
+    echo ""
+
+    echo "### Apps — Complete applications"
+    echo ""
+    echo "| Example | Description | Languages |"
+    echo "|---------|-------------|-----------|"
+    generate_root_table_rows "$manifest" "apps"
+}
+
 update_root_readme() {
     local root_readme="$REPO_ROOT/README.md"
     local root_begin="<!-- EXAMPLES-TABLE:START -->"
@@ -310,34 +341,29 @@ update_root_readme() {
     fi
 
     local manifest="$MANIFEST"
+    local expected_intro
+    expected_intro="$(root_intro_line "$manifest")"
+
+    if ! awk -v intro="$expected_intro" '
+        /^[0-9]+ production(-[[:alpha:]]+)? examples for the nxusKit SDK/ && updated == 0 {
+            print intro
+            updated = 1
+            next
+        }
+        { print }
+        END { if (updated == 0) exit 2 }
+    ' "$root_readme" > "$TMPDIR/root_intro.md"; then
+        echo "Error: could not find generated root README intro count line" >&2
+        exit 1
+    fi
 
     # Generate category tables with scenario sub-rows
-    {
-        echo "### Patterns — Reusable SDK integration patterns"
-        echo ""
-        echo "| Example | Description | Languages |"
-        echo "|---------|-------------|-----------|"
-        generate_root_table_rows "$manifest" "patterns"
-        echo ""
-
-        echo "### Integrations — Combining SDK features"
-        echo ""
-        echo "| Example | Description | Languages |"
-        echo "|---------|-------------|-----------|"
-        generate_root_table_rows "$manifest" "integrations"
-        echo ""
-
-        echo "### Apps — Complete applications"
-        echo ""
-        echo "| Example | Description | Languages |"
-        echo "|---------|-------------|-----------|"
-        generate_root_table_rows "$manifest" "apps"
-    } > "$TMPDIR/root_tables.md"
+    generate_root_tables "$manifest" > "$TMPDIR/root_tables.md"
 
     # Replace content between markers
     local begin_line end_line
-    begin_line=$(grep -nF "$root_begin" "$root_readme" | head -1 | cut -d: -f1)
-    end_line=$(grep -nF "$root_end" "$root_readme" | head -1 | cut -d: -f1)
+    begin_line=$(grep -nF "$root_begin" "$TMPDIR/root_intro.md" | head -1 | cut -d: -f1)
+    end_line=$(grep -nF "$root_end" "$TMPDIR/root_intro.md" | head -1 | cut -d: -f1)
 
     if [[ -z "$begin_line" || -z "$end_line" ]]; then
         echo "Warning: could not find both EXAMPLES-TABLE markers in root README.md" >&2
@@ -345,14 +371,14 @@ update_root_readme() {
     fi
 
     {
-        head -n "$begin_line" "$root_readme"
+        head -n "$begin_line" "$TMPDIR/root_intro.md"
         echo ""
         cat "$TMPDIR/root_tables.md"
         echo ""
-        tail -n +"$end_line" "$root_readme"
+        tail -n +"$end_line" "$TMPDIR/root_intro.md"
     } > "$TMPDIR/new_root_readme.md"
     cp "$TMPDIR/new_root_readme.md" "$root_readme"
-    echo "Regenerated: $root_readme (EXAMPLES-TABLE content replaced)" >&2
+    echo "Regenerated: $root_readme (intro count and EXAMPLES-TABLE content replaced)" >&2
 }
 
 generate_root_table_rows() {
@@ -369,6 +395,47 @@ generate_root_table_rows() {
 }
 
 # --- Validate mode -----------------------------------------------------------
+validate_root_readme() {
+    local root_readme="$REPO_ROOT/README.md"
+    local root_begin="<!-- EXAMPLES-TABLE:START -->"
+    local root_end="<!-- EXAMPLES-TABLE:END -->"
+
+    if [[ ! -f "$root_readme" ]]; then
+        echo "FAIL: root README not found: $root_readme" >&2
+        exit 1
+    fi
+
+    local expected_intro current_intro
+    expected_intro="$(root_intro_line "$MANIFEST")"
+    current_intro="$(awk '/^[0-9]+ production(-[[:alpha:]]+)? examples for the nxusKit SDK/ { print; exit }' "$root_readme")"
+    if [[ "$current_intro" != "$expected_intro" ]]; then
+        echo "FAIL: root README intro count line is out of date." >&2
+        echo "Expected: $expected_intro" >&2
+        echo "Actual:   ${current_intro:-<missing>}" >&2
+        exit 1
+    fi
+
+    if ! grep -qF "$root_begin" "$root_readme" || ! grep -qF "$root_end" "$root_readme"; then
+        echo "FAIL: root README EXAMPLES-TABLE markers not found" >&2
+        exit 1
+    fi
+
+    local begin_line end_line
+    begin_line=$(grep -nF "$root_begin" "$root_readme" | head -1 | cut -d: -f1)
+    end_line=$(grep -nF "$root_end" "$root_readme" | head -1 | cut -d: -f1)
+
+    sed -n "$((begin_line + 1)),$((end_line - 1))p" "$root_readme" | sed '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > "$TMPDIR/current_root.md"
+    generate_root_tables "$MANIFEST" | sed '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > "$TMPDIR/expected_root.md"
+
+    if diff -q "$TMPDIR/current_root.md" "$TMPDIR/expected_root.md" &>/dev/null; then
+        echo "PASS: root README is up to date" >&2
+    else
+        echo "FAIL: root README EXAMPLES-TABLE is out of date. Differences:" >&2
+        diff -u "$TMPDIR/current_root.md" "$TMPDIR/expected_root.md" >&2 || true
+        exit 1
+    fi
+}
+
 do_validate() {
     if [[ ! -f "$README" ]]; then
         echo "FAIL: README not found: $README" >&2
@@ -390,6 +457,7 @@ do_validate() {
 
     if diff -q "$TMPDIR/current.md" "$TMPDIR/expected.md" &>/dev/null; then
         echo "PASS: showcase is up to date" >&2
+        validate_root_readme
         check_untracked_examples
         exit 0
     else

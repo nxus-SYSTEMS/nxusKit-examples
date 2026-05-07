@@ -1,0 +1,20 @@
+{
+  "engine": "zen",
+  "expected_result": {
+    "allowed": false,
+    "decision": "deny_stack",
+    "reasons": [
+      "non_stackable_discount_conflict",
+      "margin_floor_breach"
+    ],
+    "recommended_policy": "select_single_best_eligible_discount"
+  },
+  "explanation": "The mock ZEN decision denies the all-promotions stack and selects a single eligible discount path.",
+  "hit_policy": "first",
+  "inputs": {
+    "clearance_item": true,
+    "combined_margin_percent": -7,
+    "discount_count": 3,
+    "non_stackable_count": 2
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "expected_correction_contains": [
+    "wider",
+    "clearance"
+  ],
+  "expected_findings": [
+    {
+      "evidence": {
+        "door_width_inches": 42,
+        "pallet_width_inches": 48
+      },
+      "message": "The loaded pallet is wider than the door opening.",
+      "rule_id": "door-clearance-too-small",
+      "severity": "error",
+      "status": "fail"
+    },
+    {
+      "evidence": {
+        "action": "angle-and-push",
+        "load_state": "loaded"
+      },
+      "message": "Tilting or forcing a loaded pallet is outside the safe handling rule.",
+      "rule_id": "tilt-unsafe-for-load",
+      "severity": "error",
+      "status": "fail"
+    }
+  ],
+  "final_status": "pass",
+  "pro_stage": {
+    "id": "solver-proof",
+    "mode": "mock-fixture"
+  },
+  "required_stage_ids": [
+    "raw-baseline",
+    "structured-facts",
+    "clips-validation",
+    "repair-packet",
+    "corrected-answer"
+  ],
+  "scenario": "pallet-door"
+}

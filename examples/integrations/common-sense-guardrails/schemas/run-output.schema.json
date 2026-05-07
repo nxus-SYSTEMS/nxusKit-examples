@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "example": {
+      "const": "common-sense-guardrails"
+    },
+    "final_status": {
+      "enum": [
+        "pass",
+        "warn",
+        "fail",
+        "skipped"
+      ],
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "auto",
+        "live",
+        "mock"
+      ],
+      "type": "string"
+    },
+    "mode_resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "provider_available": {
+          "type": "boolean"
+        },
+        "requested": {
+          "enum": [
+            "auto",
+            "live",
+            "mock"
+          ],
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "live",
+            "mock"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "requested",
+        "source",
+        "provider_available",
+        "message"
+      ],
+      "type": "object"
+    },
+    "requested_stage": {
+      "enum": [
+        "ce",
+        "pro",
+        "all"
+      ],
+      "type": "string"
+    },
+    "resolved_mode": {
+      "enum": [
+        "live",
+        "mock"
+      ],
+      "type": "string"
+    },
+    "scenario": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    },
+    "stages": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "output": {
+            "type": "object"
+          },
+          "source": {
+            "enum": [
+              "live",
+              "mock"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "warn",
+              "fail",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "community",
+              "pro"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "tier",
+          "source",
+          "status",
+          "output"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "example",
+    "scenario",
+    "mode",
+    "resolved_mode",
+    "requested_stage",
+    "mode_resolution",
+    "stages",
+    "final_status",
+    "summary"
+  ],
+  "title": "Common-Sense Guardrails Run Output",
+  "type": "object"
+}

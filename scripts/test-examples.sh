@@ -355,10 +355,12 @@ smoke_all() {
     rust) smoke_lang rust ;;
     go)   smoke_lang go ;;
     python) smoke_lang python ;;
+    bash) smoke_lang bash ;;
     all)
       smoke_lang rust || return 1
       smoke_lang go || return 1
       smoke_lang python || return 1
+      smoke_lang bash || return 1
       ;;
     *) return 0 ;;
   esac
@@ -366,6 +368,9 @@ smoke_all() {
 
 BACKUPS=()
 restore_tomls() {
+  if [[ ${#BACKUPS[@]} -eq 0 ]]; then
+    return 0
+  fi
   for b in "${BACKUPS[@]}"; do
     orig="${b%.bak}"
     mv "$b" "$orig"
@@ -624,7 +629,11 @@ case "$LANG" in
     bash_phase || FAIL=1
     ;;
   bash)
-    bash_phase || FAIL=1
+    if [[ "$SMOKE_RUN" -eq 1 && "$RUN_TESTS" -eq 0 ]]; then
+      echo "skip: Bash make test phase (--smoke-run without --test runs manifest smoke rows only)" >&2
+    else
+      bash_phase || FAIL=1
+    fi
     ;;
   *) echo "error: --lang must be rust, go, python, bash, or all" >&2; exit 1 ;;
 esac

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "expected_correction_contains": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "expected_findings": {
+      "items": {
+        "additionalProperties": true,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "rule_id": {
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "warn",
+              "fail"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "status"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "final_status": {
+      "enum": [
+        "pass",
+        "warn",
+        "fail",
+        "skipped"
+      ],
+      "type": "string"
+    },
+    "pro_stage": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "enum": [
+            "solver-proof",
+            "zen-policy"
+          ],
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "mock-fixture",
+            "live-entitled",
+            "unavailable"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "mode"
+      ],
+      "type": "object"
+    },
+    "required_stage_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 5,
+      "type": "array"
+    },
+    "scenario": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scenario",
+    "final_status",
+    "required_stage_ids",
+    "expected_findings",
+    "expected_correction_contains"
+  ],
+  "title": "Common-Sense Guardrails Expected Output",
+  "type": "object"
+}

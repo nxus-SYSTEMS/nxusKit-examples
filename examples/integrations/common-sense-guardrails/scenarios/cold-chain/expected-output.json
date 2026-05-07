@@ -1,0 +1,41 @@
+{
+  "expected_correction_contains": [
+    "certified",
+    "temperature"
+  ],
+  "expected_findings": [
+    {
+      "evidence": {
+        "carrier": "cheap-courier",
+        "carrier_certified": false
+      },
+      "message": "The selected carrier is not certified for refrigerated medical shipment.",
+      "rule_id": "carrier-not-certified",
+      "severity": "error",
+      "status": "fail"
+    },
+    {
+      "evidence": {
+        "handoff_record": false,
+        "temperature_monitoring": false
+      },
+      "message": "The plan lacks temperature monitoring and custody handoff evidence.",
+      "rule_id": "temperature-audit-missing",
+      "severity": "error",
+      "status": "fail"
+    }
+  ],
+  "final_status": "pass",
+  "pro_stage": {
+    "id": "zen-policy",
+    "mode": "mock-fixture"
+  },
+  "required_stage_ids": [
+    "raw-baseline",
+    "structured-facts",
+    "clips-validation",
+    "repair-packet",
+    "corrected-answer"
+  ],
+  "scenario": "cold-chain"
+}

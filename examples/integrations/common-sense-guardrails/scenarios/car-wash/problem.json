@@ -1,0 +1,41 @@
+{
+  "acknowledgement": {
+    "lineage": "Inspired by the public car-wash common-sense failure example discussed by Haris Rahi and Tamara Storm.",
+    "people": [
+      "Haris Rahi",
+      "Tamara Storm"
+    ]
+  },
+  "baseline_prompt": "The car wash is about 50 meters away from my house. I want to wash my car. What should I do?",
+  "expected_bad_answer": "Walk to the nearby car wash because the distance is short.",
+  "expected_corrected_answer": "Drive the car to the car wash, or walk only if the car is already at the car wash.",
+  "extraction_prompt": "Extract the user's goal, candidate action, objects required at each location, objects moved by each action, and feasibility constraints.",
+  "failure_class": "implicit object-presence precondition",
+  "guardrail_summary": "Washing the car requires the car to be at the wash location.",
+  "id": "car-wash",
+  "pro_stage": {
+    "artifact": "solver-problem.json",
+    "engine": "solver",
+    "id": "solver-proof",
+    "tier": "pro"
+  },
+  "repair_template": "Your previous answer failed these feasibility checks: {findings}. Revise the recommendation so every required object is at the required location before the action is attempted.",
+  "research_notes": [
+    {
+      "date_observed": "2026-05-06",
+      "label": "Opper.ai",
+      "note": "Public discussion of common-sense evaluation examples referenced in the launch PoR."
+    },
+    {
+      "date_observed": "2026-05-06",
+      "label": "Focus AI",
+      "note": "Public article lineage referenced by the launch PoR for common-sense prompt failures."
+    },
+    {
+      "date_observed": "2026-05-06",
+      "label": "HOB",
+      "note": "Benchmark line referenced as public context only; this example does not claim benchmark coverage."
+    }
+  ],
+  "title": "Car Wash Object-Presence Guardrail"
+}

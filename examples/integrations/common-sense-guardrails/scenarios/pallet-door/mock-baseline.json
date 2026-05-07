@@ -1,0 +1,8 @@
+{
+  "content": "They can angle the pallet and push slowly through the 42 inch door. Since the difference is small, careful handling should make it work.",
+  "notes": [
+    "Common bad answer: treats a hard dimensional constraint as a soft preference.",
+    "The answer ignores loaded-pallet safety rules."
+  ],
+  "source": "mock"
+}

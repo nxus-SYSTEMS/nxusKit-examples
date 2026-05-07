@@ -30,13 +30,16 @@
           "example": { "type": "string" },
           "tier": { "type": "string" },
           "category": { "type": "string" },
-          "language": { "type": "string", "enum": ["rust", "go", "python"] },
+          "language": { "type": "string", "enum": ["rust", "go", "python", "bash"] },
           "cwd_rel": { "type": "string" },
           "command": {
             "type": "array",
             "items": { "type": "string" },
             "minItems": 1
           },
+          "stage": { "type": "string" },
+          "stage_tier": { "type": "string", "enum": ["community", "pro"] },
+          "requires_pro": { "type": "boolean" },
           "entitlement_probe": { "type": "boolean" },
           "requires_cloud_llm": { "type": "boolean" },
           "requires_local_lmstudio": { "type": "boolean" },

@@ -1,0 +1,8 @@
+{
+  "content": "Use the cheap courier and pack the samples with extra ice. They can pick up quickly, so the delivery should be fine if the package is insulated.",
+  "notes": [
+    "Common bad answer: optimizes cost and speed while ignoring cold-chain requirements.",
+    "The answer omits certification, temperature monitoring, and handoff evidence."
+  ],
+  "source": "mock"
+}

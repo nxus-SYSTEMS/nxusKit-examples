@@ -2,9 +2,9 @@
 
 # nxusKit Examples
 
-A curated collection of **32 production-ready examples** demonstrating LLM integration, rule engines, constraint solvers, Bayesian networks, and decision tables using the nxusKit SDK (nxuskit, nxuskit-go, nxuskit-py).
+A curated collection of **33 production-ready examples** demonstrating LLM integration, rule engines, constraint solvers, Bayesian networks, and decision tables using the nxusKit SDK (nxuskit, nxuskit-go, nxuskit-py).
 
-> **5 apps** | **17 patterns** | **10 integrations** — start with [Basic Chat](patterns/basic-chat/) or [Streaming](patterns/streaming/).
+> **5 apps** | **17 patterns** | **11 integrations** — start with [Basic Chat](patterns/basic-chat/) or [Streaming](patterns/streaming/).
 
 **Browse by:** [Scenario](#by-scenario) | [Real-World Application](#by-real-world-application) | [Technology](#by-technology) | [Language](#by-language) | [Acronym and Tag Key](#acronym-and-tag-key)
 
@@ -74,6 +74,14 @@ A curated collection of **32 production-ready examples** demonstrating LLM integ
 | [CLI Assistant](integrations/cli-assistant/) | Community | Integration | Build an interactive terminal assistant powered by an LLM | Developer productivity tool, command-line copilot | LLM | Rust, Go |
 | [CLIPS Basics](integrations/clips-basics/) | Community | Integration | Load rules, assert facts, and run the CLIPS inference engine | Business rules engine, compliance checking | CLIPS | Rust, Go, CLI/Bash |
 | [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | Community | Integration | Combine deterministic CLIPS rules with LLM-based reasoning | Explainable AI decisions, regulated industry automation | LLM, CLIPS | Rust, Go, Python, CLI/Bash |
+| [Common Sense Guardrails](integrations/common-sense-guardrails/) | Community | Integration | Refine LLM recommendations with structured extraction, rules, retry repair, and optional Pro proof | LLM answer validation; Policy enforcement; Operational decision support | LLM, CLIPS | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `car-wash` | | | Catch the classic car-wash walk-vs-drive failure with object-presence rules and optional solver proof | | | |
+| &nbsp;&nbsp;↳ `coupon-stack` | | | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation | | | |
+| &nbsp;&nbsp;↳ `pallet-door` | | | Block unsafe warehouse advice that ignores dimensional clearance, with optional solver what-if | | | |
+| &nbsp;&nbsp;↳ `cold-chain` | | | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation | | | |
+| &nbsp;&nbsp;↳ real-world: **LLM answer validation** | | | | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | | |
+| &nbsp;&nbsp;↳ real-world: **Policy enforcement** | | | | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | | |
+| &nbsp;&nbsp;↳ real-world: **Operational decision support** | | | | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | | |
 | [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Event planning; Emergency response; Manufacturing; Logistics; Healthcare | CLIPS, Solver, BN | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | | | Music festival staging — crowd predictions drive band scheduling and safety | | | |
 | &nbsp;&nbsp;↳ `rescue` | | | Search and rescue — survivor probability drives team assignment and safety checks | | | |
@@ -239,6 +247,12 @@ Predict patient load, optimize staff scheduling, enforce clinical safety protoco
 
 - [vision](patterns/vision/)
 
+### LLM answer validation
+
+Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users
+
+- [common-sense-guardrails](integrations/common-sense-guardrails/)
+
 ### Latency-sensitive services, SLA-bound AI endpoints
 
 - [timeout-config](patterns/timeout-config/)
@@ -282,6 +296,12 @@ Infrastructure sizing, supply chain planning, disaster preparedness
 
 - [ollama](integrations/ollama/)
 
+### Operational decision support
+
+Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations
+
+- [common-sense-guardrails](integrations/common-sense-guardrails/)
+
 ### Plant Doctor
 
 Medical diagnosis, agricultural advisory systems, multi-symptom differential diagnosis
@@ -291,6 +311,12 @@ Medical diagnosis, agricultural advisory systems, multi-symptom differential dia
 ### Plugin architecture, provider-agnostic application layer
 
 - [polymorphic](patterns/polymorphic/)
+
+### Policy enforcement
+
+Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context
+
+- [common-sense-guardrails](integrations/common-sense-guardrails/)
 
 ### Pricing rules, eligibility determination, policy evaluation
 
@@ -370,6 +396,7 @@ Event planning, capital budgeting, portfolio allocation
 - [Alert Triage](integrations/alert-triage/)
 - [CLI Assistant](integrations/cli-assistant/)
 - [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/)
+- [Common Sense Guardrails](integrations/common-sense-guardrails/)
 - [LLM Solver Hybrid](integrations/llm-solver-hybrid/)
 - [Puzzler](apps/puzzler/)
 - [Racer](apps/racer/)
@@ -381,6 +408,7 @@ Event planning, capital budgeting, portfolio allocation
 
 - [CLIPS Basics](integrations/clips-basics/)
 - [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/)
+- [Common Sense Guardrails](integrations/common-sense-guardrails/)
 - [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/)
 - [Puzzler](apps/puzzler/)
 - [Racer](apps/racer/)
@@ -443,6 +471,7 @@ Event planning, capital budgeting, portfolio allocation
 | [CLI Assistant](integrations/cli-assistant/) | integrations | Yes | Yes | - | - |
 | [CLIPS Basics](integrations/clips-basics/) | integrations | Yes | Yes | - | Yes |
 | [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | integrations | Yes | Yes | Yes | Yes |
+| [Common Sense Guardrails](integrations/common-sense-guardrails/) | integrations | - | - | Yes | Yes |
 | [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | integrations | Yes | Yes | - | Yes |
 | [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | integrations | Yes | Yes | Yes | Yes |
 | [BN Structure Learning](integrations/bn-structure-learning/) | integrations | Yes | Yes | Yes | - |

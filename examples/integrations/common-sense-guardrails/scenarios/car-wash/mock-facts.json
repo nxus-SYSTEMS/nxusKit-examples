@@ -1,0 +1,52 @@
+{
+  "candidate_actions": [
+    {
+      "id": "walk-to-car-wash",
+      "moves": [
+        "person"
+      ],
+      "recommendation": "walk",
+      "target_location": "car_wash"
+    }
+  ],
+  "confidence": 1,
+  "constraints": [
+    {
+      "id": "car-must-be-at-wash",
+      "requirement": "car.location == car_wash before washing",
+      "type": "physical"
+    }
+  ],
+  "goal": {
+    "object": "car",
+    "outcome": "wash",
+    "target_location": "car_wash"
+  },
+  "objects_moved": [
+    {
+      "action_id": "walk-to-car-wash",
+      "from": "home",
+      "object": "person",
+      "to": "car_wash"
+    }
+  ],
+  "objects_required": [
+    {
+      "current_location": "home",
+      "object": "car",
+      "present_at_required_location": false,
+      "required_location": "car_wash"
+    }
+  ],
+  "policy_context": {
+    "distance_meters": 50,
+    "domain": "physical_planning"
+  },
+  "resources": [
+    {
+      "id": "car",
+      "state": "at_home",
+      "type": "vehicle"
+    }
+  ]
+}

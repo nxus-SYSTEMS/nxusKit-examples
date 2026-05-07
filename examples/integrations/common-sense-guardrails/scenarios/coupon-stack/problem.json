@@ -1,0 +1,17 @@
+{
+  "baseline_prompt": "A shopper has a 25% welcome coupon, a 15% employee discount, a $10 loyalty credit, and free shipping on a clearance item with only 8% margin. What is the best checkout recommendation?",
+  "expected_bad_answer": "Apply every discount, use the loyalty credit, and add free shipping because the customer has all of them.",
+  "expected_corrected_answer": "Choose the single best eligible discount, preserve the margin floor, and avoid free shipping when policy or margin rules disallow it.",
+  "extraction_prompt": "Extract promotion eligibility, stacking constraints, margin floor, item type, and recommended checkout actions.",
+  "failure_class": "promotion stacking and margin policy violation",
+  "guardrail_summary": "Promotion recommendations must obey non-stackable coupon rules and margin thresholds.",
+  "id": "coupon-stack",
+  "pro_stage": {
+    "artifact": "decision-model.json",
+    "engine": "zen",
+    "id": "zen-policy",
+    "tier": "pro"
+  },
+  "repair_template": "Your previous answer failed these promotion policy checks: {findings}. Revise the recommendation so discounts are eligible, non-stackable offers are not combined, and the margin floor is preserved.",
+  "title": "Coupon Stack Policy Guardrail"
+}

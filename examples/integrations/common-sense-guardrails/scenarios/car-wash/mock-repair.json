@@ -1,0 +1,4 @@
+{
+  "repair_instructions": "Revise the recommendation so the car, not only the person, reaches the car wash before washing starts.",
+  "retry_prompt": "The earlier answer suggested walking to the car wash. That fails because washing the car requires the car to be at the wash. Recommend driving the car there, or walking only if the car is already at the wash location."
+}

@@ -1,0 +1,60 @@
+{
+  "candidate_actions": [
+    {
+      "discounts": [
+        "welcome-25",
+        "employee-15",
+        "loyalty-10"
+      ],
+      "free_shipping": true,
+      "id": "stack-all-promotions"
+    }
+  ],
+  "confidence": 1,
+  "constraints": [
+    {
+      "id": "non-stackable-coupons",
+      "limit": 1,
+      "type": "policy"
+    },
+    {
+      "id": "clearance-margin-floor",
+      "minimum_margin_percent": 20,
+      "type": "margin"
+    }
+  ],
+  "goal": {
+    "outcome": "max_customer_savings",
+    "subject": "checkout"
+  },
+  "objects_moved": [],
+  "objects_required": [
+    {
+      "object": "eligible_promotion_set",
+      "present_at_required_location": false,
+      "required_location": "checkout_decision"
+    }
+  ],
+  "policy_context": {
+    "item_type": "clearance",
+    "margin_percent_after_stack": -7,
+    "margin_percent_before_discount": 8
+  },
+  "resources": [
+    {
+      "id": "welcome-25",
+      "stackable": false,
+      "type": "coupon"
+    },
+    {
+      "id": "employee-15",
+      "stackable": false,
+      "type": "discount"
+    },
+    {
+      "id": "loyalty-10",
+      "stackable": true,
+      "type": "credit"
+    }
+  ]
+}

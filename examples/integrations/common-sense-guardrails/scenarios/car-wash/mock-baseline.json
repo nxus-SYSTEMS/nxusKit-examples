@@ -1,0 +1,8 @@
+{
+  "content": "Since the car wash is only about 50 meters away, you should just walk there. It is close enough that walking is the simplest option.",
+  "notes": [
+    "Common bad answer: overweights short distance.",
+    "The answer moves the person but leaves the car behind."
+  ],
+  "source": "mock"
+}

@@ -7,7 +7,7 @@
 
 **[Examples Docs](https://docs.nxus.systems/nxuskit/examples/)** · **[SDK Docs](https://docs.nxus.systems/nxuskit/)** · **[nxusKit SDK](https://github.com/nxus-SYSTEMS/nxusKit)** · **[Examples Portfolio](https://nxus.systems/examples)** · **[Website](https://nxus.systems)**
 
-32 production examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
+33 production-quality examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
 
 ## Quick Start
 
@@ -81,6 +81,14 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [cli-assistant](examples/integrations/cli-assistant/) | Interactive CLI assistant with LLM backend | Rust, Go |
 | [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | Rust, Go, CLI/Bash |
 | [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | Rust, Go, Python, CLI/Bash |
+| [common-sense-guardrails](examples/integrations/common-sense-guardrails/) | Progressive LLM guardrails with Community CLIPS validation and optional Pro proof stages | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `car-wash` | Catch the classic car-wash walk-vs-drive failure with object-presence rules and optional solver proof | |
+| &nbsp;&nbsp;↳ `coupon-stack` | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation | |
+| &nbsp;&nbsp;↳ `pallet-door` | Block unsafe warehouse advice that ignores dimensional clearance, with optional solver what-if | |
+| &nbsp;&nbsp;↳ `cold-chain` | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation | |
+| &nbsp;&nbsp;↳ real-world: **LLM answer validation** | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | |
+| &nbsp;&nbsp;↳ real-world: **Policy enforcement** | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | |
+| &nbsp;&nbsp;↳ real-world: **Operational decision support** | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | |
 | [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |
 | &nbsp;&nbsp;↳ `rescue` | Search and rescue — survivor probability drives team assignment and safety checks | |
