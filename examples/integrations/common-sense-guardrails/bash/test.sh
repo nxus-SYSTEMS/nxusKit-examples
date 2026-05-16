@@ -102,10 +102,12 @@ cmd="${1:-}"
 shift || true
 input=""
 output=""
+model=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -i|--input) input="${2:-}"; shift 2 ;;
     -o|--output) output="${2:-}"; shift 2 ;;
+    --model) model="${2:-}"; shift 2 ;;
     *) shift ;;
   esac
 done
@@ -117,25 +119,58 @@ fi
 
 prompt="$(jq -r '.messages[-1].content // empty' "$input")"
 if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  if [[ "$model" != "qwen3:4b" ]]; then
+    echo "expected facts model qwen3:4b, got ${model:-<unset>}" >&2
+    exit 9
+  fi
   content='Here are the extracted JSON facts:
 
 ```json
 {
-  "goal": "wash car",
-  "candidate_actions": [],
-  "objects_required": [],
-  "objects_moved": [],
-  "resources": [],
-  "constraints": [],
-  "policy_context": {},
+  "goal": {"object": "car", "outcome": "wash", "target_location": "car_wash"},
+  "candidate_actions": [
+    {
+      "id": "walk-to-car-wash",
+      "moves": ["person"],
+      "recommendation": "walk",
+      "target_location": "car_wash"
+    }
+  ],
+  "objects_required": [
+    {
+      "current_location": "home",
+      "object": "car",
+      "present_at_required_location": false,
+      "required_location": "car_wash"
+    }
+  ],
+  "objects_moved": [
+    {
+      "action_id": "walk-to-car-wash",
+      "from": "home",
+      "object": "person",
+      "to": "car_wash"
+    }
+  ],
+  "resources": [{"id": "car", "state": "at_home", "type": "vehicle"}],
+  "constraints": [{"id": "car-must-be-at-wash", "type": "physical"}],
+  "policy_context": {"distance_meters": 50, "domain": "physical_planning"},
   "confidence": 0.8
 }
 ```
 
 Trailing prose.'
-elif [[ "$prompt" == *"failed these feasibility checks"* ]]; then
+elif [[ "$prompt" == *"failed these feasibility checks"* || "$prompt" == *"washing the car requires"* ]]; then
+  if [[ "$model" != "gemma3" ]]; then
+    echo "expected repair model gemma3, got ${model:-<unset>}" >&2
+    exit 9
+  fi
   content="Drive the car to the car wash, or walk only if the car is already there."
 else
+  if [[ "$model" != "llama3.2" ]]; then
+    echo "expected baseline model llama3.2, got ${model:-<unset>}" >&2
+    exit 9
+  fi
   content="Walk to the car wash because it is nearby."
 fi
 jq -n --arg content "$content" '{result:{content:$content}}' > "$output"
@@ -144,7 +179,9 @@ chmod +x "$fake_cli"
 wrapped_live="$(
   NXUSKIT_CLI="$fake_cli" \
   NXUSKIT_PROVIDER=ollama \
-  NXUSKIT_MODEL=llama3:8b \
+  NXUSKIT_MODEL=llama3.2 \
+  NXUSKIT_COMMON_SENSE_FACTS_MODEL=qwen3:4b \
+  NXUSKIT_COMMON_SENSE_REPAIR_MODEL=gemma3 \
   bash "$BASH_MAIN" --scenario car-wash --mode live --stage ce --json
 )"
 rm -rf "$tmp_cli_dir"
@@ -154,6 +191,73 @@ assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .status' <<<
 [[ "$(jq -r '.stages[] | select(.id == "structured-facts") | .message' <<<"$wrapped_live")" == *"wrapped JSON in prose"* ]] || {
   echo "FAIL wrapped JSON extraction did not emit warning" >&2
   echo "$wrapped_live" >&2
+  exit 1
+}
+
+tmp_cli_dir="$(mktemp -d)"
+fake_cli="$tmp_cli_dir/nxuskit-cli"
+cat > "$fake_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+shift || true
+input=""
+output=""
+model=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -i|--input) input="${2:-}"; shift 2 ;;
+    -o|--output) output="${2:-}"; shift 2 ;;
+    --model) model="${2:-}"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+if [[ "$cmd" == "clips" ]]; then
+  printf '{}\n' > "$output"
+  exit 0
+fi
+
+if [[ "$cmd" == "call" && "$model" != "llama3:8b" ]]; then
+  echo "expected model llama3:8b, got ${model:-<unset>}" >&2
+  exit 9
+fi
+
+prompt="$(jq -r '.messages[-1].content // empty' "$input")"
+if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  content='{
+    "goal": "Get a car washed",
+    "candidate_actions": [{"name": "Walk or jog"}],
+    "objects_required": {"location1": ["car"], "location2": []},
+    "objects_moved": {"location1": ["car"], "location2": []},
+    "resources": {"energy": "walking"},
+    "constraints": [{"type": "distance", "value": "50 meters"}],
+    "policy_context": "car wash",
+    "confidence": 0.8
+  }'
+elif [[ "$prompt" == *"failed these feasibility checks"* || "$prompt" == *"washing the car requires"* ]]; then
+  content="Drive the car to the car wash, or walk only if the car is already there."
+else
+  content="Walk to the car wash because it is nearby."
+fi
+jq -n --arg content "$content" '{result:{content:$content}}' > "$output"
+EOF
+chmod +x "$fake_cli"
+malformed_live="$(
+  NXUSKIT_CLI="$fake_cli" \
+  NXUSKIT_PROVIDER=ollama \
+  NXUSKIT_MODEL=llama3:8b \
+  bash "$BASH_MAIN" --scenario car-wash --mode live --stage ce --json
+)"
+rm -rf "$tmp_cli_dir"
+assert_eq "$(jq -r '.resolved_mode' <<<"$malformed_live")" "live" "malformed facts live mode"
+assert_eq "$(jq -r '.final_status' <<<"$malformed_live")" "fail" "malformed facts final status"
+assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .source' <<<"$malformed_live")" "mock" "malformed facts fallback source"
+assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .status' <<<"$malformed_live")" "fail" "malformed facts fallback status"
+[[ "$(jq -r '.stages[] | select(.id == "structured-facts") | .message' <<<"$malformed_live")" == *"using checked-in fact fixture"* ]] || {
+  echo "FAIL malformed fact extraction did not fall back to fixture" >&2
+  echo "$malformed_live" >&2
   exit 1
 }
 

@@ -183,6 +183,75 @@ def test_live_without_provider_fails_clearly() -> None:
     assert "live mode requires" in proc.stderr
 
 
+def test_ollama_provider_uses_live_host_and_local_timeouts() -> None:
+    calls: dict = {}
+
+    class FakeProvider:
+        @staticmethod
+        def ollama(**kwargs):
+            calls.update(kwargs)
+            return object()
+
+    original_module = sys.modules.get("nxuskit")
+    fake_module = type(sys)("nxuskit")
+    fake_module.Provider = FakeProvider
+    sys.modules["nxuskit"] = fake_module
+
+    original_env = os.environ.copy()
+    try:
+        os.environ["NXUSKIT_PROVIDER"] = "ollama"
+        os.environ["NXUSKIT_MODEL"] = "llama3.1:8b"
+        os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
+        CSG.make_provider()
+    finally:
+        os.environ.clear()
+        os.environ.update(original_env)
+        if original_module is None:
+            sys.modules.pop("nxuskit", None)
+        else:
+            sys.modules["nxuskit"] = original_module
+
+    assert calls["model"] == "llama3.1:8b"
+    assert calls["api_url"] == "http://127.0.0.1:11434"
+    assert calls["timeout"] == 120.0
+    assert calls["connect_timeout"] == 5.0
+    assert calls["read_timeout"] == 120.0
+
+
+def test_phase_specific_ollama_model_overrides_global_model() -> None:
+    calls: list[dict] = []
+
+    class FakeProvider:
+        @staticmethod
+        def ollama(**kwargs):
+            calls.append(kwargs)
+            return object()
+
+    original_module = sys.modules.get("nxuskit")
+    fake_module = type(sys)("nxuskit")
+    fake_module.Provider = FakeProvider
+    sys.modules["nxuskit"] = fake_module
+
+    original_env = os.environ.copy()
+    try:
+        os.environ["NXUSKIT_PROVIDER"] = "ollama"
+        os.environ["NXUSKIT_MODEL"] = "llama3.2"
+        os.environ["NXUSKIT_COMMON_SENSE_FACTS_MODEL"] = "qwen3:4b"
+        os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
+        CSG.make_provider("baseline")
+        CSG.make_provider("facts")
+        CSG.make_provider("repair")
+    finally:
+        os.environ.clear()
+        os.environ.update(original_env)
+        if original_module is None:
+            sys.modules.pop("nxuskit", None)
+        else:
+            sys.modules["nxuskit"] = original_module
+
+    assert [call["model"] for call in calls] == ["llama3.2", "qwen3:4b", "llama3.2"]
+
+
 def test_structured_json_accepts_pure_json_without_warning() -> None:
     content = json.dumps(
         {
@@ -249,7 +318,7 @@ def test_live_mode_falls_back_when_structured_fact_json_invalid() -> None:
     original_provider_chat = CSG.provider_chat
     original_live_clips_findings = CSG.live_clips_findings
     try:
-        CSG.make_provider = lambda: object()
+        CSG.make_provider = lambda *_args: object()
         CSG.provider_chat = lambda *_args, **_kwargs: next(responses)
         CSG.live_clips_findings = lambda loaded, facts: {
             "findings": CSG.expected_findings(loaded["expected"], facts)
@@ -262,9 +331,32 @@ def test_live_mode_falls_back_when_structured_fact_json_invalid() -> None:
 
     structured = next(stage for stage in stages if stage["id"] == "structured-facts")
     assert structured["source"] == "mock"
-    assert structured["status"] == "warn"
+    assert structured["status"] == "fail"
     assert "using checked-in fact fixture" in structured["message"]
     assert structured["output"] == scenario["facts"]
+
+
+def test_structured_json_rejects_wrong_fact_shape() -> None:
+    content = json.dumps(
+        {
+            "goal": "Get a car washed",
+            "candidate_actions": [{"name": "Walk or jog"}],
+            "objects_required": {"location1": ["car"], "location2": []},
+            "objects_moved": {"location1": ["car"], "location2": []},
+            "resources": {"energy": "walking"},
+            "constraints": [{"type": "distance", "value": "50 meters"}],
+            "policy_context": "car wash",
+            "confidence": 0.8,
+        }
+    )
+    try:
+        CSG.parse_facts_response(content)
+    except CSG.StructuredJsonError as exc:
+        message = str(exc)
+        assert "objects_required" in message
+        assert "policy_context" in message
+    else:
+        raise AssertionError("expected StructuredJsonError")
 
 
 def test_missing_artifact_names_file() -> None:

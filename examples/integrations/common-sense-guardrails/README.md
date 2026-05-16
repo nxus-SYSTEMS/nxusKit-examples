@@ -79,9 +79,22 @@ done
 - `--mode live`: requires a configured live provider and fails before scenario content is sent if preflight is unavailable.
 - `--mode auto`: uses live execution when provider preflight succeeds; otherwise it labels the run as fixture-backed mock mode.
 
-Live structured fact extraction prefers pure JSON. If the model wraps a valid JSON object in prose, the runners extract it and mark the structured-facts stage as `warn`; if no valid JSON object is recoverable after retry, the stage falls back to checked-in fact fixtures with a warning.
+Live structured fact extraction prefers pure JSON. If the model wraps a valid JSON object in prose, the runners extract it and mark the structured-facts stage as `warn`; if no valid JSON object is recoverable after retry, the structured-facts stage is marked `fail` and the run falls back to checked-in fact fixtures so later guardrail stages can still show their behavior.
 
-Provider preflight order is explicit nxusKit provider/model environment, nxusKit-recognized cloud credentials, reachable Ollama, then reachable LM Studio. Do not commit provider credentials or license tokens.
+Provider preflight order is explicit nxusKit provider/model environment, phase-specific model environment, nxusKit-recognized cloud credentials, reachable Ollama, then reachable LM Studio. Do not commit provider credentials or license tokens.
+
+For local Ollama live runs, the Python runner honors `OLLAMA_HOST` and uses a short 5 second connect timeout with a 120 second read timeout because local model responses can be slower than cloud providers. The Bash runner forwards model settings to `nxuskit-cli call`; CLI timeout behavior comes from the installed SDK.
+
+Live runs can use one provider/model for every phase or override phases independently:
+
+```bash
+export NXUSKIT_PROVIDER=ollama
+export NXUSKIT_MODEL=llama3.2
+export NXUSKIT_COMMON_SENSE_FACTS_MODEL=qwen3:4b
+export NXUSKIT_COMMON_SENSE_REPAIR_MODEL=gemma3
+```
+
+Phase-specific provider overrides are also supported with `NXUSKIT_COMMON_SENSE_BASELINE_PROVIDER`, `NXUSKIT_COMMON_SENSE_FACTS_PROVIDER`, and `NXUSKIT_COMMON_SENSE_REPAIR_PROVIDER`. See [OLLAMA_MODELS.md](./OLLAMA_MODELS.md) for local Ollama model notes from the repository walkthrough.
 
 ## Local Model Starting Points
 

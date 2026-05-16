@@ -42,6 +42,8 @@ REQUIRED_SCENARIO_FILES = (
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIO_ROOT = ROOT / "scenarios"
+OLLAMA_CONNECT_TIMEOUT_SECONDS = 5.0
+OLLAMA_READ_TIMEOUT_SECONDS = 120.0
 
 
 class ScenarioError(RuntimeError):
@@ -162,6 +164,15 @@ def provider_env_present() -> bool:
     if os.environ.get("NXUSKIT_COMMON_SENSE_SIMULATE_LIVE") == "1":
         return True
     if os.environ.get("NXUSKIT_PROVIDER") and os.environ.get("NXUSKIT_MODEL"):
+        return True
+    if any(
+        os.environ.get(name)
+        for name in (
+            "NXUSKIT_COMMON_SENSE_BASELINE_MODEL",
+            "NXUSKIT_COMMON_SENSE_FACTS_MODEL",
+            "NXUSKIT_COMMON_SENSE_REPAIR_MODEL",
+        )
+    ):
         return True
     if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
         return True
@@ -484,11 +495,26 @@ def mock_ce_stages(scenario: dict[str, Any], source: str) -> list[dict[str, Any]
     ]
 
 
-def make_provider():
+def phase_env(phase: str | None, suffix: str) -> str | None:
+    phase_names = {
+        "baseline": f"NXUSKIT_COMMON_SENSE_BASELINE_{suffix}",
+        "facts": f"NXUSKIT_COMMON_SENSE_FACTS_{suffix}",
+        "repair": f"NXUSKIT_COMMON_SENSE_REPAIR_{suffix}",
+    }
+    if phase and phase in phase_names:
+        value = os.environ.get(phase_names[phase])
+        if value:
+            return value
+    return None
+
+
+def make_provider(phase: str | None = None):
     from nxuskit import Provider
 
-    provider_name = os.environ.get("NXUSKIT_PROVIDER", "").lower()
-    model = os.environ.get("NXUSKIT_MODEL")
+    provider_name = (
+        phase_env(phase, "PROVIDER") or os.environ.get("NXUSKIT_PROVIDER", "")
+    ).lower()
+    model = phase_env(phase, "MODEL") or os.environ.get("NXUSKIT_MODEL")
     if provider_name in {"anthropic", "claude"} or (
         not provider_name and os.environ.get("ANTHROPIC_API_KEY")
     ):
@@ -502,7 +528,13 @@ def make_provider():
         return Provider.openai(
             model=model or "gpt-4o-mini", api_key=os.environ.get("OPENAI_API_KEY")
         )
-    return Provider.ollama(model=model or "llama3")
+    return Provider.ollama(
+        model=model or "llama3",
+        api_url=os.environ.get("OLLAMA_HOST") or None,
+        timeout=OLLAMA_READ_TIMEOUT_SECONDS,
+        connect_timeout=OLLAMA_CONNECT_TIMEOUT_SECONDS,
+        read_timeout=OLLAMA_READ_TIMEOUT_SECONDS,
+    )
 
 
 def provider_chat(
@@ -613,18 +645,44 @@ def extract_json_object(content: str) -> tuple[dict[str, Any], str | None]:
 
 def validate_facts_shape(facts: dict[str, Any]) -> list[str]:
     errors = []
-    for key in (
-        "goal",
-        "candidate_actions",
-        "objects_required",
-        "objects_moved",
-        "resources",
-        "constraints",
-        "policy_context",
-        "confidence",
-    ):
+    expected_types = {
+        "candidate_actions": list,
+        "objects_required": list,
+        "objects_moved": list,
+        "resources": list,
+        "constraints": list,
+        "policy_context": dict,
+        "confidence": (int, float),
+    }
+    for key in ("goal", *expected_types):
         if key not in facts:
             errors.append(f"missing key '{key}'")
+    if errors:
+        return errors
+    if not isinstance(facts["goal"], (dict, str)):
+        errors.append("key 'goal' must be an object or string")
+    for key, expected in expected_types.items():
+        if not isinstance(facts[key], expected):
+            errors.append(f"key '{key}' has invalid type")
+    for item in facts.get("objects_required", []):
+        if not isinstance(item, dict):
+            errors.append("objects_required items must be objects")
+            continue
+        if not isinstance(item.get("object"), str):
+            errors.append("objects_required items need string object")
+        if not isinstance(item.get("required_location"), str):
+            errors.append("objects_required items need string required_location")
+        if not isinstance(item.get("present_at_required_location"), bool):
+            errors.append(
+                "objects_required items need boolean present_at_required_location"
+            )
+    for item in facts.get("objects_moved", []):
+        if not isinstance(item, dict):
+            errors.append("objects_moved items must be objects")
+            continue
+        for key in ("action_id", "object", "from", "to"):
+            if not isinstance(item.get(key), str):
+                errors.append(f"objects_moved items need string {key}")
     return errors
 
 
@@ -668,9 +726,11 @@ def live_ce_stages(
     scenario: dict[str, Any], *, allow_fixture_fallback: bool
 ) -> list[dict[str, Any]]:
     problem = scenario["problem"]
-    provider = make_provider()
+    baseline_provider = make_provider("baseline")
+    facts_provider = make_provider("facts")
+    repair_provider = make_provider("repair")
     raw = provider_chat(
-        provider,
+        baseline_provider,
         problem["baseline_prompt"],
         system="Answer the user directly. Do not mention guardrails.",
         max_tokens=500,
@@ -687,12 +747,12 @@ def live_ce_stages(
     fact_message = "Facts came from live structured extraction."
     try:
         facts, fact_status, fact_message = live_structured_facts(
-            provider, extraction_prompt
+            facts_provider, extraction_prompt
         )
     except StructuredJsonError as exc:
         facts = scenario["facts"]
         fact_source = "mock"
-        fact_status = "warn"
+        fact_status = "fail"
         fact_message = (
             f"Live structured extraction failed ({exc}); using checked-in fact fixture."
         )
@@ -726,7 +786,7 @@ def live_ce_stages(
     corrected_prompt = packet["retry_prompt"]
     try:
         corrected = provider_chat(
-            provider,
+            repair_provider,
             corrected_prompt,
             system="Return a corrected recommendation that satisfies every finding.",
             max_tokens=700,
@@ -876,6 +936,11 @@ def build_report(
         stages.append(pro_stage(scenario, source))
 
     if any(
+        stage["id"] == "structured-facts" and stage["status"] == "fail"
+        for stage in stages
+    ):
+        final_status = "fail"
+    elif any(
         stage["id"] == "corrected-answer" and stage["status"] == "pass"
         for stage in stages
     ):
@@ -900,9 +965,13 @@ def build_report(
         "mode_resolution": resolution,
         "stages": stages,
         "final_status": final_status,
-        "summary": "Corrected recommendation passes Community guardrails."
-        if final_status == "pass"
-        else "Run completed with guardrail warnings or skipped stages.",
+        "summary": (
+            "Corrected recommendation passes Community guardrails."
+            if final_status == "pass"
+            else "Run completed with structured-facts or guardrail failures."
+            if final_status == "fail"
+            else "Run completed with guardrail warnings or skipped stages."
+        ),
     }
 
 

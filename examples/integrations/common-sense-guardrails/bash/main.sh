@@ -108,6 +108,7 @@ endpoint_reachable() {
 provider_available() {
   [[ "${NXUSKIT_COMMON_SENSE_SIMULATE_LIVE:-}" == "1" ]] && return 0
   [[ -n "${NXUSKIT_PROVIDER:-}" && -n "${NXUSKIT_MODEL:-}" ]] && return 0
+  [[ -n "${NXUSKIT_COMMON_SENSE_BASELINE_MODEL:-}" || -n "${NXUSKIT_COMMON_SENSE_FACTS_MODEL:-}" || -n "${NXUSKIT_COMMON_SENSE_REPAIR_MODEL:-}" ]] && return 0
   [[ -n "${ANTHROPIC_API_KEY:-}" || -n "${OPENAI_API_KEY:-}" ]] && return 0
   [[ -n "${OLLAMA_HOST:-}" ]] && endpoint_reachable "$OLLAMA_HOST" "/api/tags" && return 0
   [[ -n "${LMSTUDIO_BASE_URL:-}" ]] && endpoint_reachable "$LMSTUDIO_BASE_URL" "/v1/models" && return 0
@@ -121,20 +122,44 @@ pro_entitled() {
 }
 
 live_provider_name() {
-  case "${NXUSKIT_PROVIDER:-}" in
+  local provider="${1:-${NXUSKIT_PROVIDER:-}}"
+  case "$provider" in
     ""|mock|fixture) printf '%s' "ollama" ;;
     anthropic|claude) printf '%s' "claude" ;;
-    *) printf '%s' "$NXUSKIT_PROVIDER" ;;
+    *) printf '%s' "$provider" ;;
+  esac
+}
+
+phase_provider() {
+  local phase="$1"
+  case "$phase" in
+    baseline) printf '%s' "${NXUSKIT_COMMON_SENSE_BASELINE_PROVIDER:-${NXUSKIT_PROVIDER:-}}" ;;
+    facts) printf '%s' "${NXUSKIT_COMMON_SENSE_FACTS_PROVIDER:-${NXUSKIT_PROVIDER:-}}" ;;
+    repair) printf '%s' "${NXUSKIT_COMMON_SENSE_REPAIR_PROVIDER:-${NXUSKIT_PROVIDER:-}}" ;;
+    *) printf '%s' "${NXUSKIT_PROVIDER:-}" ;;
+  esac
+}
+
+phase_model() {
+  local phase="$1"
+  case "$phase" in
+    baseline) printf '%s' "${NXUSKIT_COMMON_SENSE_BASELINE_MODEL:-${NXUSKIT_MODEL:-}}" ;;
+    facts) printf '%s' "${NXUSKIT_COMMON_SENSE_FACTS_MODEL:-${NXUSKIT_MODEL:-}}" ;;
+    repair) printf '%s' "${NXUSKIT_COMMON_SENSE_REPAIR_MODEL:-${NXUSKIT_MODEL:-}}" ;;
+    *) printf '%s' "${NXUSKIT_MODEL:-}" ;;
   esac
 }
 
 live_call_fixture() {
-  local prompt="$1" outfile="$2" req out content
+  local prompt="$1" outfile="$2" phase="${3:-baseline}" req out content model
+  local provider_args=(--provider "$(live_provider_name "$(phase_provider "$phase")")")
+  model="$(phase_model "$phase")"
+  [[ -n "$model" ]] && provider_args+=(--model "$model")
   req="$(tmpfile "csg-live-call-request.json")"
   out="$(tmpfile "csg-live-call-output.json")"
   jq -n --arg prompt "$prompt" \
     '{messages:[{role:"user",content:$prompt}], temperature:0.1, max_tokens:700}' > "$req"
-  run_cli call --provider "$(live_provider_name)" -i "$req" -f json -o "$out" >/dev/null
+  run_cli call "${provider_args[@]}" -i "$req" -f json -o "$out" >/dev/null
   content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
   [[ -n "$content" ]] || return 1
   jq -n --arg content "$content" \
@@ -146,7 +171,71 @@ LIVE_FACT_STATUS="pass"
 LIVE_FACT_MESSAGE="Facts came from live structured extraction."
 
 facts_json_valid() {
-  jq -e '.goal and .candidate_actions and .objects_required and .objects_moved and .resources and .constraints and .policy_context and (.confidence != null)' >/dev/null 2>&1
+  jq -e --arg scenario "$SCENARIO" '
+    def is_string: type == "string";
+    def is_number: type == "number";
+    def is_bool: type == "boolean";
+    def object_required:
+      type == "object"
+      and (.object | is_string)
+      and (.required_location | is_string)
+      and (.present_at_required_location | is_bool);
+    def moved_object:
+      type == "object"
+      and (.action_id | is_string)
+      and (.object | is_string)
+      and (.from | is_string)
+      and (.to | is_string);
+    def common:
+      type == "object"
+      and (((.goal | type) == "object") or ((.goal | type) == "string"))
+      and (.candidate_actions | type == "array")
+      and (.objects_required | type == "array")
+      and (.objects_moved | type == "array")
+      and (.resources | type == "array")
+      and (.constraints | type == "array")
+      and (.policy_context | type == "object")
+      and (.confidence | is_number)
+      and all(.candidate_actions[]; type == "object")
+      and all(.objects_required[]; object_required)
+      and all(.objects_moved[]; moved_object)
+      and all(.resources[]; type == "object")
+      and all(.constraints[]; type == "object");
+    def car_wash:
+      (.candidate_actions | length > 0)
+      and (.objects_required | length > 0)
+      and (.objects_moved | length > 0)
+      and all(.candidate_actions[]; (.id | is_string) and (.recommendation | is_string) and (.target_location | is_string))
+      and all(.candidate_actions[]; (.moves | type == "array") and all(.moves[]; is_string))
+      and all(.objects_required[]; (.current_location | is_string));
+    def coupon_stack:
+      (.candidate_actions | length > 0)
+      and (.candidate_actions[0].id | is_string)
+      and (.candidate_actions[0].discounts | type == "array")
+      and (.candidate_actions[0].discounts | length > 0)
+      and all(.candidate_actions[0].discounts[]; is_string)
+      and (.candidate_actions[0].free_shipping | is_bool)
+      and (.policy_context.margin_percent_after_stack | is_number);
+    def pallet_door:
+      (.candidate_actions | length > 0)
+      and (.candidate_actions[0].id | is_string)
+      and (.candidate_actions[0].recommendation | is_string)
+      and (.policy_context.pallet_width_inches | is_number)
+      and (.policy_context.door_width_inches | is_number)
+      and (.policy_context.load_state | is_string);
+    def cold_chain:
+      (.policy_context.carrier_certified | is_bool)
+      and (.policy_context.handoff_record | is_bool)
+      and (.policy_context.temperature_monitoring | is_bool)
+      and any(.resources[]; (.id == "cheap-courier") and (.refrigerated | is_bool) and (.temperature_logging | is_bool));
+    common and
+    if $scenario == "car-wash" then car_wash
+    elif $scenario == "coupon-stack" then coupon_stack
+    elif $scenario == "pallet-door" then pallet_door
+    elif $scenario == "cold-chain" then cold_chain
+    else false
+    end
+  ' >/dev/null 2>&1
 }
 
 extract_facts_json() {
@@ -195,7 +284,10 @@ extract_facts_json() {
 }
 
 live_extract_facts_fixture() {
-  local problem="$1" baseline_file="$2" fallback_facts="$3" outfile="$4" req out content retry_req error
+  local problem="$1" baseline_file="$2" fallback_facts="$3" outfile="$4" req out content retry_req error model
+  local provider_args=(--provider "$(live_provider_name "$(phase_provider facts)")")
+  model="$(phase_model facts)"
+  [[ -n "$model" ]] && provider_args+=(--model "$model")
   LIVE_FACT_SOURCE="live"
   LIVE_FACT_STATUS="pass"
   LIVE_FACT_MESSAGE="Facts came from live structured extraction."
@@ -205,7 +297,7 @@ live_extract_facts_fixture() {
     --arg prompt "$(jq -r '.extraction_prompt' "$problem")" \
     --arg baseline "$(jq -r '.content' "$baseline_file")" \
     '{messages:[{role:"user",content:($prompt + "\nReturn only JSON with keys goal, candidate_actions, objects_required, objects_moved, resources, constraints, policy_context, confidence.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$req"
-  if run_cli call --provider "$(live_provider_name)" -i "$req" -f json -o "$out" >/dev/null; then
+  if run_cli call "${provider_args[@]}" -i "$req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
     if extract_facts_json "$content" "$outfile"; then
       return 0
@@ -221,7 +313,7 @@ live_extract_facts_fixture() {
     --arg baseline "$(jq -r '.content' "$baseline_file")" \
     --arg error "$error" \
     '{messages:[{role:"user",content:($prompt + "\nThe previous extraction was invalid: " + $error + ". Return only valid JSON with all required fact keys and no prose.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$retry_req"
-  if run_cli call --provider "$(live_provider_name)" -i "$retry_req" -f json -o "$out" >/dev/null; then
+  if run_cli call "${provider_args[@]}" -i "$retry_req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
     if extract_facts_json "$content" "$outfile"; then
       return 0
@@ -233,7 +325,7 @@ live_extract_facts_fixture() {
 
   jq --sort-keys '.' "$fallback_facts" > "$outfile"
   LIVE_FACT_SOURCE="mock"
-  LIVE_FACT_STATUS="warn"
+  LIVE_FACT_STATUS="fail"
   LIVE_FACT_MESSAGE="Live structured extraction failed ($error); using checked-in fact fixture."
 }
 
@@ -321,7 +413,7 @@ build_report() {
     live_baseline="$(tmpfile "csg-live-baseline.json")"
     live_facts="$(tmpfile "csg-live-facts.json")"
     live_corrected="$(tmpfile "csg-live-corrected.json")"
-    if live_call_fixture "$(jq -r '.baseline_prompt' "$problem")" "$live_baseline"; then
+    if live_call_fixture "$(jq -r '.baseline_prompt' "$problem")" "$live_baseline" baseline; then
       baseline="$live_baseline"
       live_extract_facts_fixture "$problem" "$baseline" "$facts" "$live_facts"
       facts="$live_facts"
@@ -333,7 +425,7 @@ build_report() {
           die "nxuskit-cli clips eval failed in live mode" 1
         fi
       fi
-      if live_call_fixture "$(jq -r '.retry_prompt' "$repair")" "$live_corrected"; then
+      if live_call_fixture "$(jq -r '.retry_prompt' "$repair")" "$live_corrected" repair; then
         corrected="$live_corrected"
       elif [[ "$MODE" == "live" ]]; then
         die "nxuskit-cli corrected-answer call failed in live mode" 1
@@ -412,6 +504,7 @@ build_report() {
         stage($ps.id; (if $ps.engine == "solver" then "Solver proof" else "ZEN policy table" end); "pro"; $source; "pass"; {engine:$ps.engine, entitlement_mode:(if $source == "mock" then "mock-fixture" else "live-entitled" end), result:($pa.expected_result // $pa), artifact:$ps.artifact, explanation:($pa.explanation // "Pro evidence fixture supports the corrected recommendation.")}; (if $source == "mock" then "Mock Pro evidence uses checked-in Solver/ZEN artifacts and requires no entitlement." else "Live Pro evidence entitlement check passed." end))
       end) as $pro_stage |
       (if $requested_stage == "ce" then $ce elif $requested_stage == "pro" then [$pro_stage] else ($ce + [$pro_stage]) end) as $stages |
+      (if any($stages[]; .id == "structured-facts" and .status == "fail") then "fail" elif any($stages[]; .id == "corrected-answer" and .status == "pass") then "pass" elif all($stages[]; .status == "skipped") then "skipped" elif any($stages[]; .status == "warn") then "warn" elif any($stages[]; .status == "fail" and .id != "raw-baseline") then "fail" else "pass" end) as $final_status |
       {
         example: $example,
         scenario: $scenario,
@@ -420,8 +513,8 @@ build_report() {
         requested_stage: $requested_stage,
         mode_resolution: $resolution,
         stages: $stages,
-        final_status: (if any($stages[]; .id == "corrected-answer" and .status == "pass") then "pass" elif all($stages[]; .status == "skipped") then "skipped" elif any($stages[]; .status == "warn") then "warn" elif any($stages[]; .status == "fail" and .id != "raw-baseline") then "fail" else "pass" end),
-        summary: "Corrected recommendation passes Community guardrails."
+        final_status: $final_status,
+        summary: (if $final_status == "pass" then "Corrected recommendation passes Community guardrails." elif $final_status == "fail" then "Run completed with structured-facts or guardrail failures." else "Run completed with guardrail warnings or skipped stages." end)
       }
     '
 }

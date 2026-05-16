@@ -856,7 +856,7 @@
       "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, rule findings, repair packets, and optional Pro evidence.",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
       "blurb": "The common-sense-guardrails example shows how to make LLM recommendations safer without hiding behind vague prompt advice. Each scenario captures a plausible bad answer, extracts typed facts, applies Community CLIPS findings, builds a deterministic repair packet, and returns a corrected recommendation. Four launch scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. Python and CLI/Bash implementations share the same fixtures, and optional mock Pro stages show where Solver or ZEN evidence can strengthen the audit trail.",
-      "content_hash": "926924c467aa68ee344a9dabf94c368e3f6135e34c77f2beb96b32c4d3a54e4f"
+      "content_hash": "7b8d54de554b1ef7d49fd17c7cf8a15fffb50cb4f2a383df548ffcfab7c20188"
     },
     {
       "name": "model-research-harness",
