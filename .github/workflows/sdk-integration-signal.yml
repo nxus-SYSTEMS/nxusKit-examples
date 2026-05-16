@@ -1,0 +1,82 @@
+name: SDK Integration Signal
+
+# Cheap repository_dispatch receiver for SDK repository updates.
+#
+# Each dispatch overwrites a single pending marker on the automation branch.
+# The scheduled SDK Integration workflow consumes that marker during off-hours,
+# so many SDK updates before the window coalesce into one examples build.
+
+on:
+  repository_dispatch:
+    types: [sdk-updated]
+
+concurrency:
+  group: sdk-integration-pending-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  STATE_BRANCH: automation/sdk-integration-pending
+  STATE_FILE: .github/sdk-integration-pending.json
+
+jobs:
+  record-pending:
+    name: Record Pending SDK Integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Record latest SDK update
+        env:
+          SDK_REF: ${{ github.event.client_payload.ref || 'main' }}
+          SDK_SHA: ${{ github.event.client_payload.sha || '' }}
+          DISPATCH_RUN_ID: ${{ github.run_id }}
+          DISPATCH_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$STATE_BRANCH" --depth=1
+            git switch --force-create "$STATE_BRANCH" "origin/$STATE_BRANCH"
+          else
+            git switch --orphan "$STATE_BRANCH"
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          mkdir -p "$(dirname "$STATE_FILE")"
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload = {
+              "status": "pending",
+              "sdk_ref": os.environ.get("SDK_REF") or "main",
+              "sdk_sha": os.environ.get("SDK_SHA") or "",
+              "source_event": "repository_dispatch",
+              "source_run_id": os.environ.get("DISPATCH_RUN_ID") or "",
+              "source_run_attempt": os.environ.get("DISPATCH_RUN_ATTEMPT") or "",
+              "updated_at": datetime.now(timezone.utc).isoformat(),
+          }
+          Path(os.environ["STATE_FILE"]).write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          git add "$STATE_FILE"
+          if git diff --cached --quiet; then
+            echo "Pending marker already up to date."
+            exit 0
+          fi
+
+          git commit -m "Record pending SDK integration"
+          git push origin HEAD:"$STATE_BRANCH"
