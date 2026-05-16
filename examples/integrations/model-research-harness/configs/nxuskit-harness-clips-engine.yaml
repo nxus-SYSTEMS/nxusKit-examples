@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "id": "nxuskit-clips-engine-policy",
+  "description": "Real nxusKit ClipsSession policy execution with Python fallback when native CLIPS is unavailable.",
+  "providers": [
+    {
+      "id": "clips-engine-fixture",
+      "provider": "loopback",
+      "label": "CLIPS engine fixture provider",
+      "model": "fixture-clips-engine-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "unavailable",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "clips-engine-safe-label",
+      "prompt": "Return routing JSON for: {{ ticket }}",
+      "vars": {
+        "ticket": "Production login is failing for paid users."
+      },
+      "provider_ids": ["clips-engine-fixture"],
+      "mock_response": {
+        "label": "infrastructure",
+        "confidence": 0.88,
+        "rationale": "Production login failures need infrastructure escalation."
+      },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "equals", "path": "$.label", "value": "infrastructure" }
+      ]
+    }
+  ],
+  "policy": {
+    "engine": "nxuskit-clips",
+    "on_engine_unavailable": "fallback-python",
+    "required_fields": ["label", "confidence", "rationale"],
+    "forbidden_values": [
+      { "id": "no-unknown-label", "field": "label", "values": ["unknown"], "severity": "high" }
+    ],
+    "clips": {
+      "rules_file": "../fixtures/clips/policy-rules.clp",
+      "fact_template": "model-output",
+      "finding_template": "policy-finding",
+      "slot_map": {
+        "label": "label",
+        "confidence": "confidence"
+      }
+    }
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

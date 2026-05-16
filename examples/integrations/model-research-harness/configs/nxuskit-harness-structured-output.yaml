@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "id": "structured-output-truth",
+  "description": "Distinguish native JSON mode from harness-side validation.",
+  "providers": [
+    {
+      "id": "json-fixture",
+      "provider": "loopback",
+      "label": "JSON fixture provider",
+      "model": "fixture-json-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": true,
+        "thinking_control": "unavailable",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "schema-validated-output",
+      "prompt": "Extract a JSON ticket label for: {{ ticket }}",
+      "vars": { "ticket": "The API returns 500 errors for all checkout calls." },
+      "provider_ids": ["json-fixture"],
+      "mock_response": { "label": "application", "confidence": 0.91, "rationale": "API failure" },
+      "assertions": [
+        {
+          "type": "json-schema",
+          "schema": {
+            "type": "object",
+            "required": ["label", "confidence", "rationale"],
+            "properties": {
+              "label": { "type": "string" },
+              "confidence": { "type": "number" },
+              "rationale": { "type": "string" }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

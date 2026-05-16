@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "id": "bayesian-confidence-ranking",
+  "description": "Aggregate sparse test evidence into a posterior model-fitness confidence.",
+  "providers": [
+    {
+      "id": "compact-local",
+      "provider": "loopback",
+      "label": "Compact local model fixture",
+      "model": "fixture-compact-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "prompt_only",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "format-following",
+      "prompt": "Return JSON with label confidence rationale for: {{ text }}",
+      "vars": { "text": "Cancel duplicate renewal charge." },
+      "provider_ids": ["compact-local"],
+      "bayesian_weight": 1.0,
+      "mock_response": { "label": "billing", "confidence": 0.93, "rationale": "refund request" },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "required-fields", "fields": ["label", "confidence", "rationale"] }
+      ]
+    },
+    {
+      "id": "expected-label",
+      "prompt": "Classify: {{ text }}",
+      "vars": { "text": "Cannot log in after deployment." },
+      "provider_ids": ["compact-local"],
+      "bayesian_weight": 2.0,
+      "mock_response": { "label": "infrastructure", "confidence": 0.86, "rationale": "login outage" },
+      "assertions": [
+        { "type": "equals", "path": "$.label", "value": "infrastructure", "weight": 2.0 }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence"]
+  },
+  "bayesian": {
+    "prior_alpha": 3,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

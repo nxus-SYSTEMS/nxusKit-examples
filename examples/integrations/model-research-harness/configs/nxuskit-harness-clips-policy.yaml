@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clips-policy-ticket-routing",
+  "description": "CLIPS-style deterministic policy gates on model outputs.",
+  "providers": [
+    {
+      "id": "policy-fixture",
+      "provider": "loopback",
+      "label": "Policy fixture provider",
+      "model": "fixture-policy-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "unavailable",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "policy-safe-classification",
+      "prompt": "Return routing JSON for: {{ ticket }}",
+      "vars": {
+        "ticket": "Production login is failing for paid users after the latest deployment."
+      },
+      "provider_ids": ["policy-fixture"],
+      "mock_response": {
+        "label": "infrastructure",
+        "confidence": 0.88,
+        "rationale": "Production login failures need infrastructure escalation."
+      },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "equals", "path": "$.label", "value": "infrastructure" }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"],
+    "forbidden_values": [
+      { "id": "block-unsafe-disposition", "field": "label", "values": ["ignore", "unknown"], "severity": "high" }
+    ]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

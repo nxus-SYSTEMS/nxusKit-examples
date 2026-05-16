@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "id": "matrix-config-template",
+  "description": "Compact matrix syntax for expanding prompt/parameter variants without duplicating tests.",
+  "providers": [
+    {
+      "id": "matrix-fixture",
+      "provider": "loopback",
+      "label": "Matrix fixture provider",
+      "model": "fixture-matrix-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": true,
+        "thinking_control": "prompt_only",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "format-{{ prompt_variant }}-think-{{ think }}",
+      "prompt": "Return JSON for prompt variant {{ prompt_variant }} with thinking {{ think }}.",
+      "provider_ids": ["matrix-fixture"],
+      "matrix": {
+        "prompt_variant": ["baseline", "strict"],
+        "think": ["off", "low"]
+      },
+      "mock_response": { "label": "billing", "confidence": 0.9, "rationale": "fixture" },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "required-fields", "fields": ["label", "confidence", "rationale"] }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

@@ -7,7 +7,16 @@
 
 **[Examples Docs](https://docs.nxus.systems/nxuskit/examples/)** · **[SDK Docs](https://docs.nxus.systems/nxuskit/)** · **[nxusKit SDK](https://github.com/nxus-SYSTEMS/nxusKit)** · **[Examples Portfolio](https://nxus.systems/examples)** · **[Website](https://nxus.systems)**
 
-33 production-quality examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
+34 production-quality examples for the nxusKit SDK in Rust, Go, and Python, plus selected CLI/Bash implementations for shell-first orchestration — covering LLM patterns, CLIPS rule engines, Z3 constraint solvers, Bayesian networks, and ZEN decision tables.
+
+## A Word About CLIPS
+
+During its development at NASA from 1985 to 1996, the primary CLIPS
+contributors were: Robert Savely, who conceived and championed the project;
+Chris Culbert, who managed the project; Gary Riley and Brian Dantes, who were
+the lead developers; and Frank Lopez, who developed the first version. Since
+leaving NASA in 1996, Gary Riley has maintained CLIPS as public domain
+software.
 
 ## Quick Start
 
@@ -89,6 +98,14 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | &nbsp;&nbsp;↳ real-world: **LLM answer validation** | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | |
 | &nbsp;&nbsp;↳ real-world: **Policy enforcement** | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | |
 | &nbsp;&nbsp;↳ real-world: **Operational decision support** | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | |
+| [model-research-harness](examples/integrations/model-research-harness/) | Python-first harness for provider-neutral model research, Promptfoo import, CLIPS policy, Bayesian scoring, and dry-run lifecycle recommendations | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `basic-ticket-routing` | Run a credentials-free support ticket classification research smoke | |
+| &nbsp;&nbsp;↳ `promptfoo-import` | Import a Promptfoo config and run the converted nxusKit harness matrix | |
+| &nbsp;&nbsp;↳ `software-dev` | Evaluate code analysis, bug finding, patching, generation, refactoring, and review outputs | |
+| &nbsp;&nbsp;↳ real-world: **Model evaluation** | Score model candidates against task-specific outputs and report confidence instead of relying on ad hoc impressions | |
+| &nbsp;&nbsp;↳ real-world: **Provider comparison** | Compare local and cloud providers through one provider-neutral workflow while keeping capability claims honest | |
+| &nbsp;&nbsp;↳ real-world: **Lifecycle policy** | Generate dry-run pull, pin, keep, or retest recommendations bounded by deterministic policy | |
+| &nbsp;&nbsp;↳ real-world: **Software development workflow research** | Exercise code analysis, bug finding, bugfixing, generation, refactoring, and review scenarios with public-safe fixtures | |
 | [bn-solver-clips-pipeline](examples/integrations/bn-solver-clips-pipeline/) | Three-stage BN prediction → Solver optimization → CLIPS safety pipeline | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | Music festival staging — crowd predictions drive band scheduling and safety | |
 | &nbsp;&nbsp;↳ `rescue` | Search and rescue — survivor probability drives team assignment and safety checks | |

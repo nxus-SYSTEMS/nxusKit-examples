@@ -221,11 +221,7 @@ check_leak_gate() {
 
   for term in "${FORBIDDEN_TERMS[@]}"; do
     local hits
-    hits=$(grep -r -n \
-      --include='*.md' --include='*.go' --include='*.rs' \
-      --include='*.py' --include='*.json' --include='*.yaml' \
-      --include='*.yml' --include='*.sh' \
-      "$term" "${SCAN_PATHS[@]}" 2>/dev/null \
+    hits=$(git grep -n -I -e "$term" -- "${SCAN_PATHS[@]}" 2>/dev/null \
     | grep -v "sync-example-tiers-from-sdk\.sh" \
     | grep -v "pre-pr-check\.sh" \
     | grep -v "\.github/workflows/ci\.yml" \
@@ -245,9 +241,9 @@ run_check "Leak gate (internal refs)" check_leak_gate
 
 check_stray_binaries() {
   local stray
-  stray=$(find examples -type f -perm /111 \
-    ! -name "*.sh" ! -name "Makefile" ! -name "*.py" \
-    ! -path "*/bin/*" ! -path "*/.git/*" 2>/dev/null || true)
+  stray=$(git ls-files -s examples \
+    | awk '$1 == "100755" { print $4 }' \
+    | grep -Ev '(^|/)(Makefile)$|(\.sh|\.py)$|/bin/' || true)
   [ -z "$stray" ]
 }
 run_check "Stray binary check" check_stray_binaries

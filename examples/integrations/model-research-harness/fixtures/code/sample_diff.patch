@@ -1,0 +1,4 @@
+diff --git a/app.py b/app.py
+@@
++def get_account(account_id):
++    return db.accounts.get(account_id)

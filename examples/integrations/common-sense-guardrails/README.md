@@ -17,7 +17,7 @@ Pro adds optional proof stages only when requested with `--stage pro` or `--stag
 - `solver-proof`: uses Solver artifacts for object-presence and dimensional feasibility scenarios.
 - `zen-policy`: uses ZEN decision artifacts for promotion policy and cold-chain handling scenarios.
 
-Mock Pro evidence is fixture-backed and does not require entitlement. Live Pro execution checks entitlement before Solver or ZEN calls and skips the Pro stage with a clear message when unavailable; Community stages remain runnable.
+Mock Pro evidence is fixture-backed and does not require entitlement. In live mode this example checks for the normal nxusKit Pro entitlement signal before labeling a Pro proof stage as live-entitled; without entitlement it skips the Pro stage with a clear message and leaves Community stages runnable. The first-release Python and Bash implementations do not execute Solver or ZEN engines directly; they show the handoff shape through checked-in proof artifacts.
 
 ## What this demonstrates
 
@@ -79,7 +79,22 @@ done
 - `--mode live`: requires a configured live provider and fails before scenario content is sent if preflight is unavailable.
 - `--mode auto`: uses live execution when provider preflight succeeds; otherwise it labels the run as fixture-backed mock mode.
 
+Live structured fact extraction prefers pure JSON. If the model wraps a valid JSON object in prose, the runners extract it and mark the structured-facts stage as `warn`; if no valid JSON object is recoverable after retry, the stage falls back to checked-in fact fixtures with a warning.
+
 Provider preflight order is explicit nxusKit provider/model environment, nxusKit-recognized cloud credentials, reachable Ollama, then reachable LM Studio. Do not commit provider credentials or license tokens.
+
+## Local Model Starting Points
+
+These are dated smoke-test starting points from the DevOps Ollama model-testing notes, not model rankings or product guarantees.
+
+| Model | Why try it |
+|-------|------------|
+| `qwen3.5:4b` | 2026-05-11/12 local smokes show the desired guardrail-demo shape: naive car-wash answer fails as `walk`, constrained output is parseable, and enhanced object-presence prompting recovers to `drive`; it also has local structured/document evidence. |
+| `qwen3.5:2b` | 2026-05-12 local smoke shows the same fail/recover car-wash shape at a smaller 2.7 GB footprint; use it when low-resource local testing matters more than tool-intent strength. |
+| `gemma3:1b` or `erukude/omni-json:1b` | 2026-05-09/12 small-model smokes found both useful for very small guardrail demos because they reproduce the naive failure and recover under the enhanced prompt. |
+| `nemotron-3-nano:4b` | 2026-05-12 smokes show the car-wash fail/recover target plus a native strict tool-call pass, making it a useful local comparison point. |
+
+Avoid using passing or unparsed baseline behavior as a demo failure source. For example, the same DevOps notes show `phi4-mini-reasoning:3.8b` answering `drive` on the naive prompt and `granite4:350m-h` failing to recover under the enhanced prompt, so neither is a good default for this specific guardrail walkthrough.
 
 ## Scenario Data Contract
 

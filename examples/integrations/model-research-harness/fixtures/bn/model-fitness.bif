@@ -1,0 +1,37 @@
+network model_fitness {
+}
+
+variable format_valid {
+  type discrete [ 2 ] { yes, no };
+}
+
+variable expected_label {
+  type discrete [ 2 ] { yes, no };
+}
+
+variable policy_pass {
+  type discrete [ 2 ] { yes, no };
+}
+
+variable model_fit {
+  type discrete [ 2 ] { good, weak };
+}
+
+probability ( model_fit ) {
+  table 0.5, 0.5;
+}
+
+probability ( format_valid | model_fit ) {
+  (good) 0.95, 0.05;
+  (weak) 0.40, 0.60;
+}
+
+probability ( expected_label | model_fit ) {
+  (good) 0.90, 0.10;
+  (weak) 0.30, 0.70;
+}
+
+probability ( policy_pass | model_fit ) {
+  (good) 0.98, 0.02;
+  (weak) 0.55, 0.45;
+}

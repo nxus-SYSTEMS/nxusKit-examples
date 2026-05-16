@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "id": "lifecycle-mutation-policy-fixture",
+  "description": "Fixture-backed lifecycle mutation gate; uses a harmless fixture command but requires mutation approval.",
+  "providers": [
+    {
+      "id": "external-fixture",
+      "provider": "external",
+      "label": "External runner fixture",
+      "model": "fixture-lifecycle-adapter",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "not_applicable",
+        "tool_calling": "adapter"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "lifecycle-mutation-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-capabilities", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "mutation": true,
+        "output_csv": "{adapter_output_dir}/capabilities.csv",
+        "summary_md": "{adapter_output_dir}/capabilities.md",
+        "result_strategy": "devops-capabilities",
+        "thresholds": { "min_json_output_level": 1 }
+      }
+    }
+  ],
+  "policy": {},
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run",
+    "allow_pull": false,
+    "allow_remove": false,
+    "allow_cache_evict": false
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "description": "Basic Promptfoo-compatible support ticket classification config.",
+  "prompts": [
+    "Classify this ticket as JSON with label and confidence: {{ ticket }}"
+  ],
+  "providers": [
+    {
+      "id": "mock",
+      "provider": "mock",
+      "label": "Mock provider",
+      "config": { "model": "fixture-promptfoo-basic" }
+    }
+  ],
+  "defaultTest": {
+    "assert": [
+      { "type": "is-json" },
+      { "type": "equals", "path": "$.label", "value": "billing" }
+    ]
+  },
+  "tests": [
+    {
+      "id": "promptfoo-basic-ticket",
+      "vars": {
+        "ticket": "I need a refund for a duplicate invoice."
+      },
+      "mock_response": {
+        "label": "billing",
+        "confidence": 0.9,
+        "rationale": "Refund and invoice request."
+      }
+    }
+  ]
+}

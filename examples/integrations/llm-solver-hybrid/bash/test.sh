@@ -16,10 +16,13 @@ echo "  call (LLM): PASS"
 
 # Test solver solve with mock_llm_response from shared scenario
 solver_out=$(tmpfile test-solver-out.json)
+set +e
 jq '.mock_llm_response' "$SCRIPT_DIR/../scenarios/seating/problem.json" | \
     run_cli solver solve --input - -f json -o "$solver_out" 2>/dev/null
+rc=$?
+set -e
 
-if [[ $? -eq 0 ]]; then
+if [[ $rc -eq 0 ]]; then
     require_jq_key "$solver_out" ".result.satisfiable"
     sat=$(jq -r '.result.satisfiable' "$solver_out")
     vars=$(jq '.result.assignments | length' "$solver_out")
@@ -28,7 +31,6 @@ if [[ $? -eq 0 ]]; then
     fi
     echo "  solver solve: PASS (satisfiable=$sat, $vars assignments)"
 else
-    rc=$?
     if [[ $rc -eq 3 ]]; then
         echo "  solver solve: PASS (exit 3 — entitlement gate)"
     else

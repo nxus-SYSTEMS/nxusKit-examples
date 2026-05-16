@@ -1,0 +1,15 @@
+{
+  "description": "Toy Bayesian scoring shape used by the public harness example.",
+  "nodes": [
+    "format_valid",
+    "expected_label",
+    "policy_pass",
+    "model_fit"
+  ],
+  "prior": {
+    "model_fit": {
+      "good": 0.5,
+      "weak": 0.5
+    }
+  }
+}

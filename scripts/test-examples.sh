@@ -21,7 +21,7 @@
 # (e.g. `set -a && source ../peeler/.env && set +a` before invoking). SMOKE_SKIP_CLOUD_LLM=1 skips rows that
 # need Anthropic/OpenAI for a full run.
 # LM Studio: SMOKE_INCLUDE_LOCAL_LMSTUDIO=1 to run those smokes.
-# Go rows that need Ollama: auto-run if GET $OLLAMA_HOST/api/tags succeeds (default http://127.0.0.1:11434); use
+# Rows that need Ollama: auto-run if GET $OLLAMA_HOST/api/tags succeeds (default http://127.0.0.1:11434); use
 # SMOKE_SKIP_LOCAL_OLLAMA=1 to skip, or SMOKE_INCLUDE_LOCAL_OLLAMA=1 to run even when the probe fails.
 
 set -euo pipefail
@@ -277,9 +277,9 @@ smoke_run_row() {
     return 0
   fi
 
-  local needs_ollama_go obase
-  needs_ollama_go="$(jq -r '.requires_local_ollama_go // false' <<<"$row")"
-  if [[ "$needs_ollama_go" == "true" ]]; then
+  local needs_ollama obase
+  needs_ollama="$(jq -r '.requires_local_ollama_go // false' <<<"$row")"
+  if [[ "$needs_ollama" == "true" ]]; then
     if [[ "${SMOKE_SKIP_LOCAL_OLLAMA:-}" == "1" ]]; then
       echo "skip smoke (SMOKE_SKIP_LOCAL_OLLAMA): $id" >&2
       return 0
@@ -367,6 +367,8 @@ smoke_all() {
 }
 
 BACKUPS=()
+CARGO_CONFIG_PATH="${REPO_ROOT}/.cargo/config.toml"
+CARGO_CONFIG_BACKUP=""
 restore_tomls() {
   if [[ ${#BACKUPS[@]} -eq 0 ]]; then
     return 0
@@ -376,18 +378,37 @@ restore_tomls() {
     mv "$b" "$orig"
   done
 }
-trap restore_tomls EXIT
+
+disable_cargo_paths_override() {
+  if [[ -f "$CARGO_CONFIG_PATH" && -z "$CARGO_CONFIG_BACKUP" ]]; then
+    CARGO_CONFIG_BACKUP="$(mktemp "${TMPDIR:-/tmp}/nxuskit-cargo-config.XXXXXX")"
+    mv "$CARGO_CONFIG_PATH" "$CARGO_CONFIG_BACKUP"
+  fi
+}
+
+restore_cargo_config() {
+  if [[ -n "$CARGO_CONFIG_BACKUP" && -f "$CARGO_CONFIG_BACKUP" ]]; then
+    mkdir -p "$(dirname "$CARGO_CONFIG_PATH")"
+    mv "$CARGO_CONFIG_BACKUP" "$CARGO_CONFIG_PATH"
+  fi
+}
+
+restore_state() {
+  restore_tomls
+  restore_cargo_config
+}
+trap restore_state EXIT
 
 patch_rust_tomls() {
   echo "== Rust: nxuskit path -> ${RUST_NXUSKIT_PATH}" >&2
   while IFS= read -r toml; do
-    if grep -q 'path.*packages/nxuskit' "$toml"; then
+    if grep -Eq 'path.*(packages/nxuskit|sdk/nxuskit-rust)' "$toml"; then
       cp "$toml" "${toml}.bak"
       BACKUPS+=("${toml}.bak")
       if sed --version >/dev/null 2>&1; then
-        sed -i "s|path = \"[^\"]*packages/nxuskit\"|path = \"${RUST_NXUSKIT_PATH}\"|g" "$toml"
+        sed -E -i "s#path = \"[^\"]*(packages/nxuskit|sdk/nxuskit-rust)\"#path = \"${RUST_NXUSKIT_PATH}\"#g" "$toml"
       else
-        sed -i '' "s|path = \"[^\"]*packages/nxuskit\"|path = \"${RUST_NXUSKIT_PATH}\"|g" "$toml"
+        sed -E -i '' "s#path = \"[^\"]*(packages/nxuskit|sdk/nxuskit-rust)\"#path = \"${RUST_NXUSKIT_PATH}\"#g" "$toml"
       fi
     fi
   done < <(find "${REPO_ROOT}/examples" -name Cargo.toml)
@@ -440,6 +461,7 @@ rust_build_one() {
 }
 
 rust_build() {
+  disable_cargo_paths_override
   patch_rust_tomls
   local failed="" d
   if [[ "$TIER" == "all" ]]; then

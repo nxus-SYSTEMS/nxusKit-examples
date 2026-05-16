@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Configure the environment for nxusKit **extracted bundle** workflows (v0.9.1+).
+# Configure the environment for nxusKit **extracted bundle** workflows (v0.9.4+).
 #
 # Usage (recommended — must *source* so exports apply to your shell):
-#   source scripts/setup-sdk.sh /path/to/nxuskit-sdk-0.9.1-oss-macos-arm64.tar.gz
-#   source scripts/setup-sdk.sh /path/to/nxuskit-sdk-0.9.1-oss-macos-arm64
+#   source scripts/setup-sdk.sh /path/to/nxuskit-sdk-0.9.4-oss-macos-arm64.tar.gz
+#   source scripts/setup-sdk.sh /path/to/nxuskit-sdk-0.9.4-oss-macos-arm64
 #
 # With a tarball, extracts to ./_sdk/<bundle-dir>/ at the nxusKit-examples repo root.
 #
 # Sets:
-#   NXUSKIT_SDK_DIR   — root of the bundle (rust/, lib/, include/, docs/; v0.9.1+ often also go/, python/)
+#   NXUSKIT_SDK_DIR   — root of the bundle (rust/, lib/, include/, docs/; v0.9.4+ often also go/, python/)
 #   NXUSKIT_LIB_DIR   — $NXUSKIT_SDK_DIR/lib
 #   DYLD_LIBRARY_PATH / LD_LIBRARY_PATH — so libnxuskit loads at runtime (macOS/Linux)
 #   CGO_LDFLAGS / CGO_CFLAGS — for Go nxuskit-go / cgo (when building against this SDK)
@@ -63,11 +63,16 @@ export LD_LIBRARY_PATH="${NXUSKIT_LIB_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}
 export CGO_LDFLAGS="${CGO_LDFLAGS:-} -L${NXUSKIT_LIB_DIR} -lnxuskit"
 export CGO_CFLAGS="${CGO_CFLAGS:-} -I${NXUSKIT_INCLUDE_DIR}"
 
+if [[ -d "${NXUSKIT_SDK_DIR}/python/src" ]]; then
+  export PYTHONPATH="${NXUSKIT_SDK_DIR}/python/src${PYTHONPATH:+:${PYTHONPATH}}"
+  echo "PYTHONPATH includes ${NXUSKIT_SDK_DIR}/python/src"
+fi
+
 echo "NXUSKIT_SDK_DIR=${NXUSKIT_SDK_DIR}"
 echo "NXUSKIT_LIB_DIR=${NXUSKIT_LIB_DIR}"
 
 if [[ ! -f "${NXUSKIT_SDK_DIR}/rust/Cargo.toml" ]]; then
-  echo "warning: expected ${NXUSKIT_SDK_DIR}/rust/Cargo.toml (nxuskit crate) — is this a full v0.9.1+ bundle?" >&2
+  echo "warning: expected ${NXUSKIT_SDK_DIR}/rust/Cargo.toml (nxuskit crate) — is this a full v0.9.4+ bundle?" >&2
 fi
 
 if [[ -f "${NXUSKIT_SDK_DIR}/conformance/example-tiers.json" ]]; then

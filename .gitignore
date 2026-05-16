@@ -46,6 +46,7 @@ Thumbs.db
 
 # Local tooling/runtime state
 .tmp/
+tmp/
 .vexp/
 __azurite_db_*.json
 /go

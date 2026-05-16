@@ -59,8 +59,11 @@ step_pause "Solving the base problem..." \
     "The Bash example converts shared ConstraintInput JSON into the CLI expression format"
 
 base_out="$(tmpfile base-output.json)"
-if ! run_cli solver solve -i "$cli_problem" -f json -o "$base_out" 2>"$(tmpfile base-error.json)"; then
-    rc=$?
+set +e
+run_cli solver solve -i "$cli_problem" -f json -o "$base_out" 2>"$(tmpfile base-error.json)"
+rc=$?
+set -e
+if [[ $rc -ne 0 ]]; then
     if [[ $rc -eq 3 ]]; then
         echo "This example requires a Pro license."
         jq -r '.message // "Entitlement required"' "$(tmpfile base-error.json)" 2>/dev/null || true
@@ -105,8 +108,11 @@ for idx in $(seq 0 $((what_if_count - 1))); do
         if [[ $VERBOSE -eq 1 ]]; then
             echo "[CMD] $NXUSKIT_CLI solver what-if --problem $cli_problem --assume '${assumptions[0]}' --compare --format json"
         fi
-        if ! "$NXUSKIT_CLI" solver what-if --problem "$cli_problem" --assume "${assumptions[0]}" --compare --format json > "$out_file" 2>"$err_file"; then
-            rc=$?
+        set +e
+        "$NXUSKIT_CLI" solver what-if --problem "$cli_problem" --assume "${assumptions[0]}" --compare --format json > "$out_file" 2>"$err_file"
+        rc=$?
+        set -e
+        if [[ $rc -ne 0 ]]; then
             if [[ $rc -eq 3 ]]; then
                 echo "  entitlement gate: Pro license required"
                 continue
@@ -131,8 +137,11 @@ for idx in $(seq 0 $((what_if_count - 1))); do
         augmented="$(tmpfile "augmented-${idx}.json")"
         jq --slurpfile adds "$assumptions_json" '.constraints += $adds[0]' "$cli_problem" > "$augmented"
 
-        if ! run_cli solver solve -i "$augmented" -f json -o "$out_file" 2>"$err_file"; then
-            rc=$?
+        set +e
+        run_cli solver solve -i "$augmented" -f json -o "$out_file" 2>"$err_file"
+        rc=$?
+        set -e
+        if [[ $rc -ne 0 ]]; then
             if [[ $rc -eq 3 ]]; then
                 echo "  entitlement gate: Pro license required"
                 continue

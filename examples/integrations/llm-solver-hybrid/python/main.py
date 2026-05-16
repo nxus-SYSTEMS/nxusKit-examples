@@ -89,12 +89,17 @@ def create_provider(provider_name: str, model: str, api_key: str | None):
         if not key:
             raise ValueError("GROQ_API_KEY not set")
         return Provider.groq(model=model, api_key=key)
+    if name == "xai":
+        key = api_key or os.environ.get("XAI_API_KEY")
+        if not key:
+            raise ValueError("XAI_API_KEY not set")
+        return Provider.xai(model=model, api_key=key)
     if name == "ollama":
         return Provider.ollama(model=model, api_url="http://localhost:11434")
     if name == "lmstudio":
         return Provider.lmstudio(model=model, api_url="http://localhost:1234/v1")
     raise ValueError(
-        "Unknown provider. Supported: claude, openai, groq, ollama, lmstudio"
+        "Unknown provider. Supported: claude, openai, groq, xai, ollama, lmstudio"
     )
 
 

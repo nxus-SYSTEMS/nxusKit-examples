@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import os
 import re
 import shutil
@@ -27,6 +28,17 @@ CE_IDS = (
     "repair-packet",
     "corrected-answer",
 )
+
+
+def load_example_module():
+    spec = importlib.util.spec_from_file_location("csg_main", PY_DIR / "main.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+CSG = load_example_module()
 
 
 def clean_env() -> dict[str, str]:
@@ -169,6 +181,90 @@ def test_live_without_provider_fails_clearly() -> None:
     proc = run_py("--scenario", "car-wash", "--mode", "live", "--stage", "ce")
     assert proc.returncode != 0
     assert "live mode requires" in proc.stderr
+
+
+def test_structured_json_accepts_pure_json_without_warning() -> None:
+    content = json.dumps(
+        {
+            "goal": "wash car",
+            "candidate_actions": [],
+            "objects_required": [],
+            "objects_moved": [],
+            "resources": [],
+            "constraints": [],
+            "policy_context": {},
+            "confidence": 0.9,
+        }
+    )
+    facts, warning = CSG.parse_facts_response(content)
+    assert facts["goal"] == "wash car"
+    assert warning is None
+
+
+def test_structured_json_extracts_embedded_fence_with_warning() -> None:
+    content = """Here are the extracted JSON facts:
+
+```json
+{
+  "goal": "wash car",
+  "candidate_actions": [],
+  "objects_required": [],
+  "objects_moved": [],
+  "resources": [],
+  "constraints": [],
+  "policy_context": {},
+  "confidence": 0.8
+}
+```
+
+Let me know if you need anything else.
+"""
+    facts, warning = CSG.parse_facts_response(content)
+    assert facts["goal"] == "wash car"
+    assert warning is not None
+    assert "wrapped JSON in prose" in warning
+
+
+def test_structured_json_errors_when_no_json_is_extractable() -> None:
+    try:
+        CSG.parse_facts_response("I found the facts, but I will not return JSON.")
+    except CSG.StructuredJsonError as exc:
+        assert "no valid JSON object" in str(exc)
+    else:
+        raise AssertionError("expected StructuredJsonError")
+
+
+def test_live_mode_falls_back_when_structured_fact_json_invalid() -> None:
+    scenario = CSG.load_scenario("car-wash")
+    responses = iter(
+        [
+            "Walk to the car wash because it is nearby.",
+            "I found the facts, but I will not return JSON.",
+            "Still no JSON object here.",
+            "Drive the car to the car wash, or walk only if the car is already there.",
+        ]
+    )
+
+    original_make_provider = CSG.make_provider
+    original_provider_chat = CSG.provider_chat
+    original_live_clips_findings = CSG.live_clips_findings
+    try:
+        CSG.make_provider = lambda: object()
+        CSG.provider_chat = lambda *_args, **_kwargs: next(responses)
+        CSG.live_clips_findings = lambda loaded, facts: {
+            "findings": CSG.expected_findings(loaded["expected"], facts)
+        }
+        stages = CSG.live_ce_stages(scenario, allow_fixture_fallback=False)
+    finally:
+        CSG.make_provider = original_make_provider
+        CSG.provider_chat = original_provider_chat
+        CSG.live_clips_findings = original_live_clips_findings
+
+    structured = next(stage for stage in stages if stage["id"] == "structured-facts")
+    assert structured["source"] == "mock"
+    assert structured["status"] == "warn"
+    assert "using checked-in fact fixture" in structured["message"]
+    assert structured["output"] == scenario["facts"]
 
 
 def test_missing_artifact_names_file() -> None:

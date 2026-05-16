@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "id": "nxuskit-bn-model-fitness",
+  "description": "Real nxusKit BN inference over model-fitness evidence with beta fallback when native BN is unavailable.",
+  "providers": [
+    {
+      "id": "bn-fixture",
+      "provider": "loopback",
+      "label": "BN fixture provider",
+      "model": "fixture-bn-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": true,
+        "thinking_control": "unavailable",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "format-valid",
+      "prompt": "Return JSON with label confidence rationale.",
+      "provider_ids": ["bn-fixture"],
+      "mock_response": { "label": "billing", "confidence": 0.93, "rationale": "refund request" },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "required-fields", "fields": ["label", "confidence", "rationale"] }
+      ]
+    },
+    {
+      "id": "expected-label",
+      "prompt": "Classify this support ticket.",
+      "provider_ids": ["bn-fixture"],
+      "mock_response": { "label": "billing", "confidence": 0.91, "rationale": "duplicate charge" },
+      "assertions": [
+        { "type": "equals", "path": "$.label", "value": "billing" }
+      ]
+    },
+    {
+      "id": "policy-pass",
+      "prompt": "Return safe policy-routed JSON.",
+      "provider_ids": ["bn-fixture"],
+      "mock_response": { "label": "billing", "confidence": 0.88, "rationale": "safe label" },
+      "assertions": [
+        { "type": "not-equals", "path": "$.label", "value": "unknown" }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence"]
+  },
+  "bayesian": {
+    "engine": "nxuskit-bn",
+    "on_engine_unavailable": "fallback-beta",
+    "model_file": "../fixtures/bn/model-fitness.bif",
+    "algorithm": "ve",
+    "query_variable": "model_fit",
+    "query_state": "good",
+    "prior_alpha": 2,
+    "prior_beta": 2,
+    "evidence_from_results": [
+      { "test_id": "format-valid", "variable": "format_valid", "threshold": 0.5, "pass_state": "yes", "fail_state": "no" },
+      { "test_id": "expected-label", "variable": "expected_label", "threshold": 0.5, "pass_state": "yes", "fail_state": "no" },
+      { "test_id": "policy-pass", "variable": "policy_pass", "threshold": 0.5, "pass_state": "yes", "fail_state": "no" }
+    ]
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

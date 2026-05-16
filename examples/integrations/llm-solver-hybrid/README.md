@@ -33,7 +33,7 @@ Demonstrates using an LLM to translate natural language constraints into structu
 | **JSON Parsing/Validation** | Parse LLM output into typed variable and constraint definitions | `serde_json` | `encoding/json` | `json` + validation stage |
 | **Retry Logic** | Re-prompt LLM on parse failure with error feedback (max 3 attempts) | `call_llm_with_retry()` | Retry loop in Stage 2 | Retry loop in `extract_variables_live()` |
 | **Mock Mode** | Deterministic offline testing with pre-computed LLM responses | `--mock` flag | `--mock` (default) | `--mock` / `--no-mock` |
-| **Provider Abstraction** | Same pipeline works with Ollama, LM Studio, OpenAI, Claude, Groq | `--provider` flag | `--provider` flag | `--provider` flag |
+| **Provider Abstraction** | Same pipeline works with Ollama, LM Studio, OpenAI, Claude, Groq, and xAI Grok | `--provider` flag | `--provider` flag | `--provider` flag |
 
 ## Real-World Application
 
@@ -143,7 +143,9 @@ cargo run -- --scenario seating --no-mock --provider ollama --model llama3.2
 python3 main.py --scenario seating --no-mock --provider ollama --model llama3.2
 ```
 
-**Supported providers**: `ollama`, `lmstudio`, `openai`, `claude`, `groq`
+**Supported providers**: `ollama`, `lmstudio`, `openai`, `claude`, `groq`, `xai`
+
+Use `groq` for Groq (`GROQ_API_KEY`) and `xai` for xAI Grok (`XAI_API_KEY`). The provider id `grok` is intentionally not an alias.
 
 **API key setup** (for cloud providers):
 
@@ -151,6 +153,7 @@ python3 main.py --scenario seating --no-mock --provider ollama --model llama3.2
 export OPENAI_API_KEY=sk-...
 export ANTHROPIC_API_KEY=sk-ant-...
 export GROQ_API_KEY=gsk_...
+export XAI_API_KEY=xai-...
 ```
 
 Local providers (Ollama, LM Studio) require the server to be running but no API key.

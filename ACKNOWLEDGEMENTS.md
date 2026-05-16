@@ -14,6 +14,13 @@ These projects provide the core AI paradigms that nxusKit wraps and that these e
 Decades of expert-system work that makes rule-focused capabilities possible.
 License: MIT-0
 
+A word about CLIPS: During its development at NASA from 1985 to 1996, the
+primary CLIPS contributors were: Robert Savely, who conceived and championed
+the project; Chris Culbert, who managed the project; Gary Riley and Brian
+Dantes, who were the lead developers; and Frank Lopez, who developed the first
+version. Since leaving NASA in 1996, Gary Riley has maintained CLIPS as public
+domain software.
+
 ### [Z3 Theorem Prover](https://github.com/Z3Prover/z3)
 
 Microsoft Research's constraint solver powering optimization and satisfiability across our solver examples.

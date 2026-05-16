@@ -1,0 +1,74 @@
+{
+  "cpds": {
+    "day_of_week": {
+      "probabilities": [
+        0.71,
+        0.29
+      ]
+    },
+    "demand_level": {
+      "probabilities": [
+        0.16,
+        0.05,
+        0.1,
+        0.25,
+        0.44
+      ]
+    },
+    "local_events": {
+      "probabilities": [
+        0.7,
+        0.2,
+        0.1
+      ]
+    },
+    "season": {
+      "probabilities": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ]
+    }
+  },
+  "edges": [],
+  "nodes": [
+    {
+      "name": "day_of_week",
+      "states": [
+        "weekday",
+        "weekend"
+      ]
+    },
+    {
+      "name": "local_events",
+      "states": [
+        "none",
+        "small",
+        "large"
+      ]
+    },
+    {
+      "name": "season",
+      "states": [
+        "spring",
+        "summer",
+        "fall",
+        "winter"
+      ]
+    },
+    {
+      "name": "demand_level",
+      "states": [
+        "very_low",
+        "low",
+        "medium",
+        "high",
+        "very_high"
+      ]
+    }
+  ],
+  "query_nodes": [
+    "demand_level"
+  ]
+}

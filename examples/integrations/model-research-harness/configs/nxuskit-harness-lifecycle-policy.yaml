@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "id": "lifecycle-policy-dry-run",
+  "description": "Dry-run cache and lifecycle recommendations bounded by policy.",
+  "providers": [
+    {
+      "id": "candidate-local",
+      "provider": "loopback",
+      "label": "Candidate local model",
+      "model": "fixture-candidate-local",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "prompt_only",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "lifecycle-smoke",
+      "prompt": "Return JSON classification for: {{ text }}",
+      "vars": { "text": "Need to update card details before renewal." },
+      "provider_ids": ["candidate-local"],
+      "mock_response": { "label": "billing", "confidence": 0.82, "rationale": "payment method update" },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "required-fields", "fields": ["label", "confidence"] }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence"]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run",
+    "allow_pull": false,
+    "allow_remove": false,
+    "allow_cache_evict": false,
+    "max_pull_gb": 0,
+    "protected_models": ["fixture-cloud-reference"],
+    "allowed_providers": []
+  }
+}

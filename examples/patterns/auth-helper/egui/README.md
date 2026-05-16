@@ -50,4 +50,4 @@ cargo run
 
 ## Supported Providers
 
-OpenAI, Claude, Groq, Ollama, LM Studio, Mistral, Fireworks, Together, OpenRouter, Perplexity.
+OpenAI, Claude, Groq, xAI Grok, Ollama, LM Studio, Mistral, Fireworks, Together, OpenRouter, Perplexity.

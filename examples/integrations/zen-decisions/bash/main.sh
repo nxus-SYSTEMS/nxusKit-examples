@@ -46,8 +46,11 @@ case "$SCENARIO" in
             jq -s '{ table: .[0], input: .[1] }' "$model_file" "$input_file" > "$zen_input"
 
             out="$(tmpfile "zen-${variant}-output.json")"
-            if ! run_cli zen eval -i "$zen_input" -f json -o "$out" 2>"$(tmpfile error.json)"; then
-                rc=$?
+            set +e
+            run_cli zen eval -i "$zen_input" -f json -o "$out" 2>"$(tmpfile error.json)"
+            rc=$?
+            set -e
+            if [[ $rc -ne 0 ]]; then
                 if [[ $rc -eq 3 ]]; then
                     echo "This example requires a Pro license."
                     exit 3
@@ -72,8 +75,11 @@ case "$SCENARIO" in
         jq -s '{ table: .[0], input: .[1] }' "$model_file" "$input_file" > "$zen_input"
 
         out="$(tmpfile zen-output.json)"
-        if ! run_cli zen eval -i "$zen_input" -f json -o "$out" 2>"$(tmpfile error.json)"; then
-            rc=$?
+        set +e
+        run_cli zen eval -i "$zen_input" -f json -o "$out" 2>"$(tmpfile error.json)"
+        rc=$?
+        set -e
+        if [[ $rc -ne 0 ]]; then
             if [[ $rc -eq 3 ]]; then
                 echo "This example requires a Pro license."
                 exit 3

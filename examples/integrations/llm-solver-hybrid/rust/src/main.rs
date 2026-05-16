@@ -6,6 +6,7 @@
 //!
 //! Usage:
 //!   cargo run -- --scenario seating [--verbose] [--step] [--no-mock --provider ollama --model llama3.2]
+//!   Supported live providers include ollama, lmstudio, openai, claude, groq, and xai.
 
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -40,7 +41,7 @@ struct Args {
     #[arg(long, default_value_t = true, action = clap::ArgAction::Set)]
     mock: bool,
 
-    /// LLM provider name (e.g., "ollama", "claude", "openai")
+    /// LLM provider name (e.g., "ollama", "claude", "openai", "groq", "xai")
     #[arg(long, default_value = "ollama")]
     provider: String,
 

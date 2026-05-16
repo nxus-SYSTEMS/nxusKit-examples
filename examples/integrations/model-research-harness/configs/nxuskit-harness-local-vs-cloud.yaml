@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "id": "local-vs-cloud-reference",
+  "description": "Compare a local fixture and cloud-reference fixture without requiring credentials.",
+  "providers": [
+    {
+      "id": "local-fixture",
+      "provider": "loopback",
+      "label": "Local model fixture",
+      "model": "fixture-local-small",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "prompt_only",
+        "tool_calling": "emulated"
+      }
+    },
+    {
+      "id": "cloud-reference-fixture",
+      "provider": "mock",
+      "label": "Cloud reference fixture",
+      "model": "fixture-cloud-reference",
+      "capabilities": {
+        "native_strict_schema": true,
+        "json_mode": true,
+        "thinking_control": "native",
+        "tool_calling": "native"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "support-routing-comparison",
+      "prompt": "Route this support ticket: {{ ticket }}",
+      "vars": { "ticket": "Payment succeeded but invoice is missing from the account." },
+      "provider_ids": ["local-fixture", "cloud-reference-fixture"],
+      "mock_response": { "label": "billing", "confidence": 0.9, "rationale": "invoice/payment issue" },
+      "assertions": [
+        { "type": "is-json" },
+        { "type": "equals", "path": "$.label", "value": "billing" }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

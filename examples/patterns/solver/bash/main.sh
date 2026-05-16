@@ -47,8 +47,11 @@ step_pause "Step 1: Solving for satisfiability..." \
     "Returns variable assignments if a solution exists"
 
 sat_out="$(tmpfile sat-output.json)"
-if ! run_cli solver solve -i "$problem_file" -f json -o "$sat_out" 2>"$(tmpfile error.json)"; then
-    exit_code=$?
+set +e
+run_cli solver solve -i "$problem_file" -f json -o "$sat_out" 2>"$(tmpfile error.json)"
+exit_code=$?
+set -e
+if [[ $exit_code -ne 0 ]]; then
     if [[ $exit_code -eq 3 ]]; then
         echo "This example requires a Pro license."
         jq -r '.message // "Entitlement required"' "$(tmpfile error.json)" 2>/dev/null || true

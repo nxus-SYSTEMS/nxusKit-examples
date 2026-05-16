@@ -17,7 +17,7 @@ Motorsport strategy advisor, real-time decision engine.
 ## Requirements
 
 **Edition**: nxusKit Pro  
-This example requires the Pro edition of nxusKit. [Purchase Pro](https://nxus.systems/pro) or start a free 30-day trial (automatic on first Pro feature call).
+This example requires the Pro edition of nxusKit. [Purchase Pro](https://nxus.systems/pricing) or start a free 30-day trial (automatic on first Pro feature call).
 
 ## Technologies
 

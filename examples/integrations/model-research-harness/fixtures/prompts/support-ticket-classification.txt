@@ -1,0 +1,2 @@
+Classify a support ticket into one of: billing, infrastructure, application, general.
+Return only JSON with label, confidence, and rationale.

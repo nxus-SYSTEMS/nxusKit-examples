@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "confidence": {
+      "type": "number"
+    },
+    "label": {
+      "type": "string"
+    },
+    "rationale": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "label",
+    "confidence",
+    "rationale"
+  ],
+  "type": "object"
+}

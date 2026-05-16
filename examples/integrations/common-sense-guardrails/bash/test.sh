@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+if [[ ${BASH_VERSINFO[0]:-0} -lt 4 ]]; then
+  for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$candidate" ]]; then
+      exec "$candidate" "$0" "$@"
+    fi
+  done
+fi
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -81,6 +89,71 @@ set -e
 [[ "$live_err" == *"live mode requires"* ]] || {
   echo "FAIL live error did not explain provider preflight" >&2
   echo "$live_err" >&2
+  exit 1
+}
+
+tmp_cli_dir="$(mktemp -d)"
+fake_cli="$tmp_cli_dir/nxuskit-cli"
+cat > "$fake_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+shift || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -i|--input) input="${2:-}"; shift 2 ;;
+    -o|--output) output="${2:-}"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+if [[ "$cmd" == "clips" ]]; then
+  printf '{}\n' > "$output"
+  exit 0
+fi
+
+prompt="$(jq -r '.messages[-1].content // empty' "$input")"
+if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  content='Here are the extracted JSON facts:
+
+```json
+{
+  "goal": "wash car",
+  "candidate_actions": [],
+  "objects_required": [],
+  "objects_moved": [],
+  "resources": [],
+  "constraints": [],
+  "policy_context": {},
+  "confidence": 0.8
+}
+```
+
+Trailing prose.'
+elif [[ "$prompt" == *"failed these feasibility checks"* ]]; then
+  content="Drive the car to the car wash, or walk only if the car is already there."
+else
+  content="Walk to the car wash because it is nearby."
+fi
+jq -n --arg content "$content" '{result:{content:$content}}' > "$output"
+EOF
+chmod +x "$fake_cli"
+wrapped_live="$(
+  NXUSKIT_CLI="$fake_cli" \
+  NXUSKIT_PROVIDER=ollama \
+  NXUSKIT_MODEL=llama3:8b \
+  bash "$BASH_MAIN" --scenario car-wash --mode live --stage ce --json
+)"
+rm -rf "$tmp_cli_dir"
+assert_eq "$(jq -r '.resolved_mode' <<<"$wrapped_live")" "live" "wrapped JSON live mode"
+assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .source' <<<"$wrapped_live")" "live" "wrapped JSON source"
+assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .status' <<<"$wrapped_live")" "warn" "wrapped JSON warning"
+[[ "$(jq -r '.stages[] | select(.id == "structured-facts") | .message' <<<"$wrapped_live")" == *"wrapped JSON in prose"* ]] || {
+  echo "FAIL wrapped JSON extraction did not emit warning" >&2
+  echo "$wrapped_live" >&2
   exit 1
 }
 

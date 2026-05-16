@@ -36,20 +36,30 @@ step_pause "Stage 1: Bayesian Network inference..." \
 
 evidence_file="$scenario_dir/evidence.json"
 model_file="$scenario_dir/model.bif"
+json_model_file="$scenario_dir/model.json"
 
-if [[ ! -f "$evidence_file" || ! -f "$model_file" ]]; then
-    die "Missing evidence.json or model.bif in $scenario_dir"
+if [[ ! -f "$evidence_file" ]]; then
+    die "Missing evidence.json in $scenario_dir"
 fi
 
 # Construct BN request from scenario files
 bn_input="$(tmpfile bn-input.json)"
-jq -s '{ network: .[0], evidence: .[1] }' "$model_file" "$evidence_file" > "$bn_input" 2>/dev/null || \
-    jq --arg model "$(cat "$model_file")" --slurpfile ev "$evidence_file" \
-        '{ network_file: $model, evidence: $ev[0] }' <<< '{}' > "$bn_input"
+if [[ -f "$json_model_file" ]]; then
+    jq --slurpfile ev "$evidence_file" \
+        '{ network: {nodes: .nodes, edges: .edges, cpds: .cpds}, evidence: $ev[0], query_nodes: .query_nodes }' \
+        "$json_model_file" > "$bn_input"
+elif [[ -f "$model_file" ]]; then
+    die "Bash CLI bn infer requires model.json; model.bif is used by SDK-language implementations."
+else
+    die "Missing model.json in $scenario_dir"
+fi
 
 bn_out="$(tmpfile bn-output.json)"
-if ! run_cli bn infer -i "$bn_input" -f json -o "$bn_out" 2>"$(tmpfile error.json)"; then
-    rc=$?
+set +e
+run_cli bn infer -i "$bn_input" -f json -o "$bn_out" 2>"$(tmpfile error.json)"
+rc=$?
+set -e
+if [[ $rc -ne 0 ]]; then
     if [[ $rc -eq 3 ]]; then
         echo "This example requires a Pro license."
         exit 3
@@ -72,8 +82,11 @@ if [[ ! -f "$problem_file" ]]; then
 fi
 
 solver_out="$(tmpfile solver-output.json)"
-if ! run_cli solver solve --provider ollama -i "$problem_file" -f json -o "$solver_out" 2>"$(tmpfile error.json)"; then
-    rc=$?
+set +e
+run_cli solver solve -i "$problem_file" -f json -o "$solver_out" 2>"$(tmpfile error.json)"
+rc=$?
+set -e
+if [[ $rc -ne 0 ]]; then
     if [[ $rc -eq 3 ]]; then
         echo "This example requires a Pro license."
         exit 3
@@ -81,8 +94,13 @@ if ! run_cli solver solve --provider ollama -i "$problem_file" -f json -o "$solv
     die "Solver failed with exit code $rc"
 fi
 
+satisfiable="$(jq -r '.result.satisfiable // empty' "$solver_out")"
+if [[ "$satisfiable" != "true" ]]; then
+    die "Solver result was not satisfiable=true"
+fi
+
 echo "Solver Result:"
-echo "  Satisfiable: $(jq -r '.result.satisfiable // "unknown"' "$solver_out")"
+echo "  Satisfiable: $satisfiable"
 jq -r '(.result.assignments // .result.solution // {}) | to_entries[] | "  \(.key) = \(.value)"' "$solver_out"
 echo
 

@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "id": "native-ollama-multimodal-template",
+  "description": "Template showing native Ollama schema, image, thinking, and tool-call knobs behind provider-neutral harness scoring.",
+  "providers": [
+    {
+      "id": "ollama-native",
+      "provider": "ollama",
+      "label": "Native Ollama local model",
+      "model": "qwen3.5:2b",
+      "native_ollama": true,
+      "temperature": 0,
+      "num_predict": 512,
+      "think": false,
+      "response_format": "json",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": true,
+        "thinking_control": "native_when_supported",
+        "tool_calling": "native_when_supported"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "native-ollama-json-schema",
+      "prompt": "Return JSON with label confidence rationale for: {{ text }}",
+      "vars": { "text": "Need a refund for duplicate billing." },
+      "provider_ids": ["ollama-native"],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "confidence": { "type": "number" },
+          "rationale": { "type": "string" }
+        },
+        "required": ["label", "confidence", "rationale"]
+      },
+      "mock_response": { "label": "billing", "confidence": 0.9, "rationale": "fixture" },
+      "assertions": [
+        { "type": "json-schema", "schema": {
+          "type": "object",
+          "required": ["label", "confidence", "rationale"],
+          "properties": {
+            "label": { "type": "string" },
+            "confidence": { "type": "number" },
+            "rationale": { "type": "string" }
+          }
+        } }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

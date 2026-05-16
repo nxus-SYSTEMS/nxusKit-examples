@@ -94,18 +94,38 @@ step_pause "Solving with translated constraints..." \
     "Pattern 2: File-based request/response"
 
 solver_req="$(tmpfile solver-request.json)"
-echo "$solver_input" | jq '.' > "$solver_req"
+echo "$solver_input" | jq '
+    if has("constraints") then
+        .constraints |= map(
+            if has("parameters") and (has("params") | not) then
+                . + {params: .parameters} | del(.parameters)
+            else
+                .
+            end
+        )
+    else
+        .
+    end
+' > "$solver_req"
 
 # Add objective from problem file
 objective=$(jq '.objective' "$problem_file")
 if [[ "$objective" != "null" ]]; then
-    jq --argjson obj "$objective" '. + { objectives: [$obj] }' "$solver_req" > "$(tmpfile solver-req2.json)"
-    mv "$(tmpfile solver-req2.json)" "$solver_req"
+    objective_expr=$(jq -r '.expression // .variable // empty' <<< "$objective")
+    if [[ -n "$objective_expr" ]] && jq -e --arg expr "$objective_expr" '[.variables[].name] | index($expr)' "$solver_req" >/dev/null; then
+        jq --argjson obj "$objective" '. + { objectives: [$obj] }' "$solver_req" > "$(tmpfile solver-req2.json)"
+        mv "$(tmpfile solver-req2.json)" "$solver_req"
+    else
+        echo "Objective skipped: '$objective_expr' is not present in the generated solver variables."
+    fi
 fi
 
 solver_out="$(tmpfile solver-output.json)"
-if ! run_cli solver solve --provider ollama -i "$solver_req" -f json -o "$solver_out" 2>"$(tmpfile error.json)"; then
-    rc=$?
+set +e
+run_cli solver solve -i "$solver_req" -f json -o "$solver_out" 2>"$(tmpfile error.json)"
+rc=$?
+set -e
+if [[ $rc -ne 0 ]]; then
     if [[ $rc -eq 3 ]]; then
         echo "This example requires a Pro license."
         exit 3
@@ -113,8 +133,13 @@ if ! run_cli solver solve --provider ollama -i "$solver_req" -f json -o "$solver
     die "Solver failed with exit code $rc"
 fi
 
+satisfiable="$(jq -r '.result.satisfiable // empty' "$solver_out")"
+if [[ "$satisfiable" != "true" ]]; then
+    die "Solver result was not satisfiable=true"
+fi
+
 echo "Solver Result:"
-echo "  Satisfiable: $(jq -r '.result.satisfiable // "unknown"' "$solver_out")"
+echo "  Satisfiable: $satisfiable"
 jq -r '(.result.assignments // .result.solution // {}) | to_entries[] | "  \(.key) = \(.value)"' "$solver_out"
 
 echo

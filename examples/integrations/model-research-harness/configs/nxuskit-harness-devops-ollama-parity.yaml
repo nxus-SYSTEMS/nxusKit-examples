@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0.0",
+  "id": "devops-ollama-operational-parity",
+  "description": "Opt-in adapter config that wraps an existing ollama-model-testing checkout without embedding private paths.",
+  "providers": [
+    {
+      "id": "local-devops-ollama",
+      "provider": "external",
+      "label": "Local DevOps Ollama runner",
+      "model": "configured-by-runner",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "measured_by_runner",
+        "tool_calling": "measured_by_runner"
+      }
+    }
+  ],
+  "vars": {
+    "models": "qwen3.5:2b",
+    "small_models": "auto-small",
+    "tool_intent_models": "qwen3.5:2b",
+    "vision_model": "qwen3.5:4b",
+    "reasoning_model": "gpt-oss:20b",
+    "ocr_model": "glm-ocr:latest",
+    "cache_model_ref": "library/qwen3.5:2b",
+    "safe_labs_documents": "core",
+    "safe_labs_prompt_variant": "table_cells_strict_rows",
+    "safe_labs_pipeline_prompt_variant": "table_cells_strict_rows",
+    "safe_labs_ocr_prompt_variant": "generic"
+  },
+  "tests": [
+    {
+      "id": "capabilities",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "capabilities",
+          "--only",
+          "{var:models}",
+          "--tests",
+          "json",
+          "--output",
+          "{adapter_output_dir}/capabilities.csv",
+          "{adapter_output_dir}/capabilities.md"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "summary_md": "{adapter_output_dir}/capabilities.md",
+        "output_csv": "{adapter_output_dir}/capabilities.csv",
+        "result_strategy": "devops-capabilities",
+        "thresholds": { "min_json_output_level": 1 },
+        "timeout_seconds": 900
+      }
+    },
+    {
+      "id": "structured-synthetic",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "structured",
+          "--models",
+          "{var:vision_model}",
+          "--formats",
+          "json",
+          "--presets",
+          "deterministic",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-vision",
+        "thresholds": { "pass_statuses": ["PASS"] },
+        "timeout_seconds": 1200
+      }
+    },
+    {
+      "id": "synthetic-pipeline",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "pipeline",
+          "--vision-model",
+          "{var:vision_model}",
+          "--reasoning-model",
+          "{var:reasoning_model}",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-pipeline",
+        "thresholds": { "min_score": 100.0 },
+        "timeout_seconds": 1200
+      }
+    },
+    {
+      "id": "compare-hba1c-helper",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "compare-hba1c",
+          "--ref",
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/fixtures/synthetic-hba1c/expected.csv",
+          "--out",
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/fixtures/synthetic-hba1c/expected.csv",
+          "--delimiter",
+          "csv",
+          "--quiet"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "result_strategy": "exit-code",
+        "timeout_seconds": 120
+      }
+    },
+    {
+      "id": "ollama-cache-status",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": ["ollama-cache", "status"],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "result_strategy": "exit-code",
+        "timeout_seconds": 120
+      }
+    },
+    {
+      "id": "ollama-cache-list",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": ["ollama-cache", "list"],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "result_strategy": "exit-code",
+        "timeout_seconds": 180
+      }
+    },
+    {
+      "id": "ollama-cache-plan-evict",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": ["ollama-cache", "plan-evict", "{var:cache_model_ref}"],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "result_strategy": "exit-code",
+        "timeout_seconds": 120
+      }
+    },
+    {
+      "id": "safe-labs-direct",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "safe-labs",
+          "--models",
+          "{var:vision_model}",
+          "--documents",
+          "{var:safe_labs_documents}",
+          "--prompt-variant",
+          "{var:safe_labs_prompt_variant}",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-safe-labs",
+        "thresholds": { "min_value_accuracy": 1.0, "pass_statuses": ["PASS"] },
+        "timeout_seconds": 2400
+      }
+    },
+    {
+      "id": "safe-labs-pipeline",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "safe-labs-pipeline",
+          "--ocr-model",
+          "{var:ocr_model}",
+          "--reasoning-model",
+          "{var:reasoning_model}",
+          "--documents",
+          "{var:safe_labs_documents}",
+          "--prompt-variant",
+          "{var:safe_labs_pipeline_prompt_variant}",
+          "--ocr-prompt-variant",
+          "{var:safe_labs_ocr_prompt_variant}",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-safe-labs",
+        "thresholds": { "min_value_accuracy": 1.0, "pass_statuses": ["PASS"] },
+        "timeout_seconds": 3600
+      }
+    },
+    {
+      "id": "common-sense-carwash",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "common-sense",
+          "--models",
+          "{var:small_models}",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-common-sense",
+        "thresholds": { "min_target_candidates": 1 },
+        "timeout_seconds": 1800
+      }
+    },
+    {
+      "id": "tool-intent-prompted",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "tool-intent",
+          "--models",
+          "{var:tool_intent_models}",
+          "--format-mode",
+          "schema",
+          "--call-mode",
+          "prompted",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-tool-intent",
+        "thresholds": { "min_pass_count": 1 },
+        "timeout_seconds": 900
+      }
+    },
+    {
+      "id": "tool-intent-native",
+      "adapter": "external-command",
+      "provider_ids": ["local-devops-ollama"],
+      "external_command": {
+        "argv": [
+          "{env:OLLAMA_MODEL_TESTING_ROOT}/bin/ollama-model-test",
+          "tool-intent",
+          "--models",
+          "{var:tool_intent_models}",
+          "--call-mode",
+          "native",
+          "--native-prompt-variant",
+          "force_validate",
+          "--output-dir",
+          "{adapter_output_dir}"
+        ],
+        "cwd": "{env:OLLAMA_MODEL_TESTING_ROOT}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-tool-intent",
+        "thresholds": { "min_pass_count": 1 },
+        "timeout_seconds": 900
+      }
+    }
+  ],
+  "policy": {},
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run",
+    "allow_pull": false,
+    "allow_remove": false,
+    "allow_cache_evict": false
+  }
+}

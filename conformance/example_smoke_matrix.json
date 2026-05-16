@@ -33,8 +33,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -87,8 +86,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -141,8 +139,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -195,8 +192,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -233,8 +229,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -271,8 +266,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -309,8 +303,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -363,8 +356,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -401,8 +393,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -455,8 +446,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -509,8 +499,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -563,8 +552,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -617,8 +605,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -671,8 +658,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -710,7 +696,6 @@
         "-tags",
         "nxuskit",
         ".",
-        "--",
         "--scenario",
         "fantasy-draft"
       ],
@@ -766,7 +751,6 @@
         "-tags",
         "nxuskit",
         ".",
-        "--",
         "--scenario",
         "coffee-shop"
       ],
@@ -821,8 +805,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": true,
       "requires_cloud_llm": false,
@@ -877,8 +860,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -899,7 +881,7 @@
       "entitlement_probe": false,
       "requires_cloud_llm": false,
       "requires_local_lmstudio": false,
-      "requires_local_ollama_go": false
+      "requires_local_ollama_go": true
     },
     {
       "id": "lmstudio|rust",
@@ -931,8 +913,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -969,8 +950,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -1007,8 +987,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": true,
@@ -1047,8 +1026,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -1085,8 +1063,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -1210,6 +1187,38 @@
       "requires_pro": false
     },
     {
+      "id": "model-research-harness|python",
+      "example": "model-research-harness",
+      "tier": "community",
+      "category": "integrations",
+      "language": "python",
+      "cwd_rel": "examples/integrations/model-research-harness/python",
+      "command": [
+        "python3",
+        "main.py"
+      ],
+      "entitlement_probe": false,
+      "requires_cloud_llm": false,
+      "requires_local_lmstudio": false,
+      "requires_local_ollama_go": false
+    },
+    {
+      "id": "model-research-harness|bash",
+      "example": "model-research-harness",
+      "tier": "community",
+      "category": "integrations",
+      "language": "bash",
+      "cwd_rel": "examples/integrations/model-research-harness/bash",
+      "command": [
+        "bash",
+        "main.sh"
+      ],
+      "entitlement_probe": false,
+      "requires_cloud_llm": false,
+      "requires_local_lmstudio": false,
+      "requires_local_ollama_go": false
+    },
+    {
       "id": "bn-solver-clips-pipeline|rust",
       "example": "bn-solver-clips-pipeline",
       "tier": "pro",
@@ -1240,7 +1249,6 @@
         "-tags",
         "nxuskit",
         ".",
-        "--",
         "--scenario",
         "bakery"
       ],
@@ -1280,7 +1288,6 @@
         "-tags",
         "nxuskit",
         ".",
-        "--",
         "--scenario",
         "dungeon"
       ],
@@ -1335,8 +1342,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": false,
       "requires_cloud_llm": false,
@@ -1389,8 +1395,7 @@
         "run",
         "-tags",
         "nxuskit",
-        ".",
-        "--"
+        "."
       ],
       "entitlement_probe": true,
       "requires_cloud_llm": false,
@@ -1449,7 +1454,6 @@
         "-tags",
         "nxuskit",
         "./cmd",
-        "--",
         "sudoku",
         "-p",
         "easy",
@@ -1494,7 +1498,6 @@
         "-tags",
         "nxuskit",
         "./cmd",
-        "--",
         "race",
         "einstein-riddle"
       ],
@@ -1535,7 +1538,6 @@
         "-tags",
         "nxuskit",
         "./cmd/riffer",
-        "--",
         "-help"
       ],
       "entitlement_probe": false,
@@ -1576,7 +1578,6 @@
         "-tags",
         "nxuskit",
         "./cmd",
-        "--",
         "generate",
         "classify adults"
       ],
@@ -1620,7 +1621,6 @@
         "-tags",
         "nxuskit",
         "./cmd",
-        "--",
         "-help"
       ],
       "entitlement_probe": true,

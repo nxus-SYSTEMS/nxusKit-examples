@@ -33,9 +33,15 @@ RUST_MULTI_BIN_PREFERRED: dict[str, str] = {
 # Examples that typically need a cloud API key (Anthropic/OpenAI) for a full happy-path run.
 # Needs LM Studio local server (skip unless SMOKE_INCLUDE_LOCAL_LMSTUDIO=1).
 REQUIRES_LOCAL_LMSTUDIO: frozenset[str] = frozenset({"lmstudio"})
-# Go examples that log.Fatal when Ollama is down (Rust counterparts often degrade gracefully).
-REQUIRES_LOCAL_OLLAMA_GO: frozenset[str] = frozenset(
-    {"ollama", "alert-triage", "clips-llm-hybrid"}
+# Matrix rows that require a reachable Ollama server for a non-zero-free smoke.
+# The field name remains requires_local_ollama_go for schema/backward compatibility.
+REQUIRES_LOCAL_OLLAMA: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("ollama", "go"),
+        ("ollama", "python"),
+        ("alert-triage", "go"),
+        ("clips-llm-hybrid", "go"),
+    }
 )
 
 ANTHROPIC_STYLE_LLM: frozenset[str] = frozenset(
@@ -123,10 +129,10 @@ def scenario_first(example_dir: Path) -> str | None:
 def go_run_prefix(impl_dir: Path) -> list[str]:
     riffer_main = impl_dir / "cmd" / "riffer" / "main.go"
     if riffer_main.exists():
-        return ["go", "run", "-tags", "nxuskit", "./cmd/riffer", "--"]
+        return ["go", "run", "-tags", "nxuskit", "./cmd/riffer"]
     if (impl_dir / "cmd" / "main.go").exists():
-        return ["go", "run", "-tags", "nxuskit", "./cmd", "--"]
-    return ["go", "run", "-tags", "nxuskit", ".", "--"]
+        return ["go", "run", "-tags", "nxuskit", "./cmd"]
+    return ["go", "run", "-tags", "nxuskit", "."]
 
 
 def rust_cargo_cmd(
@@ -199,7 +205,10 @@ def main() -> int:
             rel = impls.get(lang)
             if not rel:
                 continue
-            if lang == "bash" and name != "common-sense-guardrails":
+            if lang == "bash" and name not in {
+                "common-sense-guardrails",
+                "model-research-harness",
+            }:
                 continue
             impl_dir = REPO / rel
             if not impl_dir.is_dir():
@@ -210,7 +219,7 @@ def main() -> int:
             entitlement_probe = tier == "pro" and name not in NO_ENTITLEMENT_PROBE
             cloud = requires_cloud_llm(name, tags)
             local_lmstudio = name in REQUIRES_LOCAL_LMSTUDIO
-            local_ollama_go = lang == "go" and name in REQUIRES_LOCAL_OLLAMA_GO
+            local_ollama = (name, lang) in REQUIRES_LOCAL_OLLAMA
 
             if lang == "rust":
                 cmd = rust_cargo_cmd(impl_dir, name, category, example_dir) + (
@@ -234,7 +243,7 @@ def main() -> int:
                 "entitlement_probe": entitlement_probe,
                 "requires_cloud_llm": cloud,
                 "requires_local_lmstudio": local_lmstudio,
-                "requires_local_ollama_go": local_ollama_go,
+                "requires_local_ollama_go": local_ollama,
             }
             if name == "common-sense-guardrails":
                 row.update(

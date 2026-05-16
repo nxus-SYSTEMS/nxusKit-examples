@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "id": "software-dev-scenarios",
+  "description": "Small public-safe software-development model research scenarios.",
+  "providers": [
+    {
+      "id": "dev-fixture",
+      "provider": "loopback",
+      "label": "Software development fixture provider",
+      "model": "fixture-dev-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": true,
+        "thinking_control": "prompt_only",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "code-analysis",
+      "prompt": "Analyze fixtures/code/buggy_discount.py and return JSON findings.",
+      "provider_ids": ["dev-fixture"],
+      "mock_response": { "label": "analysis", "confidence": 0.9, "finding_id": "rounding-contract", "rationale": "Discount boundaries need explicit tests." },
+      "assertions": [
+        { "type": "equals", "path": "$.label", "value": "analysis" },
+        { "type": "required-fields", "fields": ["finding_id", "rationale"] }
+      ]
+    },
+    {
+      "id": "bug-finding",
+      "prompt": "Find the known bug in fixtures/code/buggy_discount.py.",
+      "provider_ids": ["dev-fixture"],
+      "mock_response": { "label": "bug", "confidence": 0.95, "finding_id": "negative-quantity-total", "rationale": "Negative quantities can produce negative totals." },
+      "assertions": [
+        { "type": "equals", "path": "$.finding_id", "value": "negative-quantity-total" }
+      ]
+    },
+    {
+      "id": "bugfixing",
+      "prompt": "Propose a minimal patch for fixtures/code/buggy_discount.py.",
+      "provider_ids": ["dev-fixture"],
+      "metadata": { "touched_paths": ["fixtures/code/buggy_discount.py"] },
+      "mock_response": { "label": "patch", "confidence": 0.87, "finding_id": "guard-negative-quantity", "rationale": "Reject negative quantity before computing totals." },
+      "assertions": [
+        { "type": "equals", "path": "$.label", "value": "patch" }
+      ]
+    },
+    {
+      "id": "code-generation",
+      "prompt": "Generate a tiny slugify helper from requirements.",
+      "provider_ids": ["dev-fixture"],
+      "mock_response": { "label": "generation", "confidence": 0.86, "finding_id": "slugify-helper", "rationale": "Lowercase, trim, replace non-alphanumerics with hyphens." },
+      "assertions": [
+        { "type": "equals", "path": "$.finding_id", "value": "slugify-helper" }
+      ]
+    },
+    {
+      "id": "refactoring",
+      "prompt": "Refactor fixtures/code/refactor_input.py while preserving behavior.",
+      "provider_ids": ["dev-fixture"],
+      "mock_response": { "label": "refactor", "confidence": 0.84, "finding_id": "dedupe-normalization", "rationale": "Extract shared normalization helper." },
+      "assertions": [
+        { "type": "equals", "path": "$.label", "value": "refactor" }
+      ]
+    },
+    {
+      "id": "code-review",
+      "prompt": "Review fixtures/code/sample_diff.patch and return prioritized findings.",
+      "provider_ids": ["dev-fixture"],
+      "mock_response": { "label": "review", "confidence": 0.93, "finding_id": "missing-auth-check", "rationale": "The new endpoint trusts caller-supplied account_id." },
+      "assertions": [
+        { "type": "equals", "path": "$.finding_id", "value": "missing-auth-check" }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "finding_id", "rationale"],
+    "protected_paths": [
+      { "id": "do-not-touch-secrets", "paths": [".env", "secrets.json"] }
+    ]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

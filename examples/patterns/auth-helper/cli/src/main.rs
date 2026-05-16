@@ -28,7 +28,7 @@ enum Command {
     Status,
     /// Set (store) an API key for a provider
     Set {
-        /// Provider identifier (e.g., openai, claude, groq)
+        /// Provider identifier (e.g., openai, claude, groq, xai)
         provider: String,
     },
     /// Remove a stored API key for a provider

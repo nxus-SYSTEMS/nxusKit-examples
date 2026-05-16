@@ -26,6 +26,7 @@
 - **SDK:** installed tree (`NXUSKIT_SDK_DIR`, `NXUSKIT_LIB_PATH`) — root [README.md](../README.md), `setup-sdk.sh`, `test-examples.sh`
 - **Languages:** which of rust / go / python exist for this example (paths in **Language implementations**)
 - **Models / CLIPS / MCP:** add only when `tech_tags` imply them (LLM, Vision, Streaming → provider keys / Ollama; CLIPS → CLIPS-enabled SDK; MCP → host/fixtures)
+- **CLIPS attribution:** for CLIPS-heavy examples, link to the root README's "A Word About CLIPS" section instead of duplicating the full attribution in every generated README.
 
 ## Build
 

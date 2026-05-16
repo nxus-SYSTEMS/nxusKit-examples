@@ -325,7 +325,7 @@
       "difficulty": "starter",
       "tagline": "Stop paying for tokens you don't need — enforce real-time streaming budgets and cancel LLM requests the moment your limit is reached.",
       "blurb": "The token-budget pattern gives you precise cost control over streaming LLM responses by cancelling generation the moment an estimated token limit is hit. It works by counting characters in real time as chunks arrive — using a simple four-characters-per-token heuristic — and gracefully terminating the stream when the budget is exhausted. The result includes the partial content, estimated token count, and a flag indicating whether the budget was reached. Implementations are available in Go, Rust, Python, and CLI/Bash, and the pattern works with any streaming-capable provider including Claude, OpenAI, and Ollama.",
-      "content_hash": "eb824ee23b1edf0a6f82e9d15b616f8636d270a4fa083b67caa3db1ed6f0b3a8"
+      "content_hash": "42ccdc34740f1d589b8dd134f7c72783fc34565e90c72274f18e79a7c43a8a8c"
     },
     {
       "name": "vision",
@@ -446,7 +446,7 @@
       "difficulty": "intermediate",
       "tagline": "Define variables, add constraints, and solve complex planning problems with Z3 — without leaving your nxusKit workflow.",
       "blurb": "The solver example gives you a complete, runnable constraint solver integrated directly into nxusKit — covering satisfaction checking, single- and multi-objective optimization, soft constraints, and reversible what-if analysis. It works by wrapping a Z3 solver session through the nxusKit SDK, letting you build and query constraint models incrementally without managing solver state manually. Three scenario-driven problem definitions — theme park planning, space colony design, and fantasy sports drafting — demonstrate each technique against realistic decision variables. Implementations are available in Go, Rust, and Python, and no LLM provider is required.",
-      "content_hash": "d5853504bf3af76ceb8fbbae3dfd7e3a85bb08b6916ea2c081bb64b5586cc8c4",
+      "content_hash": "7ce5f2a327bd3d7fb9c85d4df7ff9244c12cc80e0da390dc1e9f4a332b2cd035",
       "real_world_applications": [
         {
           "label": "Theme Park Planning",
@@ -504,8 +504,8 @@
       "tier": "community",
       "difficulty": "intermediate",
       "tagline": "Run exact and approximate Bayesian inference on real-world diagnostic models using four algorithms and three themed scenarios — all from a single SDK call.",
-      "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms — exact and approximate — through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, and Python are included, and no LLM provider is required.",
-      "content_hash": "8f9ffecd2acd21be20e0d427826454c8bfba909cc8a004d29b49c61a65e9f4a0",
+      "blurb": "Compute posterior probabilities over unobserved variables in a Bayesian Network using four inference algorithms — exact and approximate — through the nxusKit SDK. The example loads a BIF model, clamps observed variables as evidence, then runs Variable Elimination, Junction Tree, Loopy Belief Propagation, and Gibbs Sampling in sequence, printing a side-by-side comparison of results. Three themed diagnostic scenarios (haunted house, coffee shop, plant doctor) provide concrete, relatable networks to explore. Implementations in Go, Rust, Python, and CLI/Bash are included, and no LLM provider is required.",
+      "content_hash": "474d4cda2a5617a1c88b81a5591eb0afde02cc83399473c6fe348ae523341364",
       "real_world_applications": [
         {
           "label": "Haunted House",
@@ -564,7 +564,7 @@
       "difficulty": "intermediate",
       "tagline": "Explore alternative outcomes without rebuilding your model — push constraints, solve, compare, and pop back to baseline in one clean pattern.",
       "blurb": "The solver-what-if example gives developers a reusable pattern for exploring how constraint changes affect optimal solutions — without ever rebuilding the model from scratch. It works by wrapping each alternative scenario in a push/pop scope: push the current solver state, inject temporary constraints, solve, diff the results against the baseline, then pop back to restore the original model. When a scenario is infeasible, the unsat core surfaces the exact constraint labels causing the conflict. Three themed scenarios — wedding budget, Mars colony resource allocation, and recipe scaling — provide concrete starting points. Available in Go, Rust, Python, and CLI/Bash.",
-      "content_hash": "eba4742ceb763b05222d0f5607065738f71911768eeac098c1038618edf71e59",
+      "content_hash": "22cd64bb5d3c714310fc375cf234cf06405444d71125f3329b9d5469cad75794",
       "real_world_applications": [
         {
           "label": "Wedding Budget Planning",
@@ -856,7 +856,120 @@
       "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, rule findings, repair packets, and optional Pro evidence.",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
       "blurb": "The common-sense-guardrails example shows how to make LLM recommendations safer without hiding behind vague prompt advice. Each scenario captures a plausible bad answer, extracts typed facts, applies Community CLIPS findings, builds a deterministic repair packet, and returns a corrected recommendation. Four launch scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. Python and CLI/Bash implementations share the same fixtures, and optional mock Pro stages show where Solver or ZEN evidence can strengthen the audit trail.",
-      "content_hash": "40d79b226fe25a1b5893bbc3018a9efe23c1b2d3cf817dfb14282d024e79a64d"
+      "content_hash": "926924c467aa68ee344a9dabf94c368e3f6135e34c77f2beb96b32c4d3a54e4f"
+    },
+    {
+      "name": "model-research-harness",
+      "description": "Python-first harness for provider-neutral model research, Promptfoo import, CLIPS policy, Bayesian scoring, and dry-run lifecycle recommendations",
+      "category": "integrations",
+      "required": true,
+      "scenario": "Research, test, score, rank, and report on provider/model fitness",
+      "scenarios": [
+        {
+          "name": "basic-ticket-routing",
+          "cli": "--config ../configs/nxuskit-harness-basic.yaml",
+          "description": "Run a credentials-free support ticket classification research smoke"
+        },
+        {
+          "name": "promptfoo-import",
+          "cli": "--import-promptfoo ../configs/promptfoo-basic.yaml",
+          "description": "Import a Promptfoo config and run the converted nxusKit harness matrix"
+        },
+        {
+          "name": "software-dev",
+          "cli": "--config ../configs/nxuskit-harness-software-dev.yaml",
+          "description": "Evaluate code analysis, bug finding, patching, generation, refactoring, and review outputs"
+        }
+      ],
+      "real_world_application": "Model evaluation, provider comparison, lifecycle policy, software development workflow research",
+      "real_world_applications": [
+        {
+          "label": "Model evaluation",
+          "description": "Score model candidates against task-specific outputs and report confidence instead of relying on ad hoc impressions"
+        },
+        {
+          "label": "Provider comparison",
+          "description": "Compare local and cloud providers through one provider-neutral workflow while keeping capability claims honest"
+        },
+        {
+          "label": "Lifecycle policy",
+          "description": "Generate dry-run pull, pin, keep, or retest recommendations bounded by deterministic policy"
+        },
+        {
+          "label": "Software development workflow research",
+          "description": "Exercise code analysis, bug finding, bugfixing, generation, refactoring, and review scenarios with public-safe fixtures"
+        }
+      ],
+      "tech_tags": [
+        "LLM",
+        "CLIPS",
+        "BN"
+      ],
+      "languages": [
+        "python",
+        "bash"
+      ],
+      "implementations": {
+        "python": "examples/integrations/model-research-harness/python",
+        "bash": "examples/integrations/model-research-harness/bash"
+      },
+      "tier": "community",
+      "edition_note": "Runs in Community Edition. Future Pro profiles may add Solver portfolio optimization and ZEN decision tables.",
+      "tier_profile": {
+        "schema_version": "1.0.0",
+        "minimum_tier": "community",
+        "tiers": [
+          "community",
+          "pro"
+        ],
+        "default_stage": "mock",
+        "summary": "Community research harness with optional future Pro optimization profiles.",
+        "badges": [
+          {
+            "label": "Community",
+            "kind": "primary"
+          },
+          {
+            "label": "Pro profile optional",
+            "kind": "enhancement"
+          }
+        ],
+        "stages": [
+          {
+            "id": "mock",
+            "label": "Mock research harness",
+            "tier": "community",
+            "required": true,
+            "enabled_by_default": true,
+            "requires_entitlement": false,
+            "capabilities": [
+              "LLM",
+              "CLIPS",
+              "BN"
+            ],
+            "fallback": "not_applicable"
+          },
+          {
+            "id": "pro-portfolio",
+            "label": "Solver portfolio optimization",
+            "tier": "pro",
+            "required": false,
+            "enabled_by_default": false,
+            "requires_entitlement": true,
+            "capabilities": [
+              "Solver",
+              "ZEN"
+            ],
+            "fallback": "skip_with_clear_message"
+          }
+        ]
+      },
+      "difficulty": "advanced",
+      "difficulty_override": true,
+      "difficulty_override_reason": "Advanced config-driven harness with Promptfoo import, policy, Bayesian scoring, reports, and lifecycle recommendations.",
+      "tagline": "Research model fitness with provider-neutral runs, Promptfoo import, deterministic policy checks, Bayesian confidence, and dry-run lifecycle recommendations.",
+      "blurb": "The model-research-harness example gives teams a practical way to compare model and provider fitness through nxusKit instead of one-off scripts. Python owns config loading, Promptfoo import, provider execution, scoring, CLIPS-style policy checks, Bayesian confidence aggregation, reports, and dry-run lifecycle recommendations. Mock mode runs without credentials, Promptfoo, Ollama, or Pro entitlement, while live mode can use configured Ollama, LM Studio, OpenAI, Claude, Groq, or xAI Grok providers. Software-development fixtures cover analysis, bug finding, bugfixing, generation, refactoring, and review.",
+      "content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd"
     },
     {
       "name": "bn-solver-clips-pipeline",
@@ -901,7 +1014,7 @@
       "difficulty": "advanced",
       "tagline": "Chain probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single production-ready pipeline using one unified SDK.",
       "blurb": "Wire probabilistic prediction, constraint optimization, and rule-based safety enforcement into a single coherent pipeline without managing three separate integrations. nxusKit threads a Bayesian Network's posterior outputs into a Z3 solver, then feeds the solver's assignments directly into a CLIPS rule engine that fires domain-specific safety alerts. The example ships runnable festival, rescue, and bakery scenarios in both Go and Rust, demonstrating that the same three-stage data flow works whether you prefer the Session API or provider chat.",
-      "content_hash": "900eda5aba1ba69cdfd28c1c8cac4bacc2f13489ce6dc83236c2e75be460af26",
+      "content_hash": "ad6bc6d1f1df14446c296a093c91d0aed1a7d5335672bae1b4d4feb9c1c79e71",
       "real_world_applications": [
         {
           "label": "Event planning",
@@ -968,8 +1081,8 @@
       "tier": "pro",
       "difficulty": "intermediate",
       "tagline": "Bridge natural language and constraint solvers — let an LLM parse human intent, let Z3 find the optimal answer.",
-      "blurb": "Connect a language model to a constraint solver so that plain-English problem descriptions produce mathematically optimized solutions. The pipeline prompts an LLM to extract typed variables and constraints as structured JSON, validates them, then feeds them directly into a Z3 solver session. Automatic retry logic re-prompts the model on parse failures, and a mock mode lets you develop and test the full pipeline without an API key. Available in Go, Rust, and Python, with provider-agnostic support for Ollama, OpenAI, Claude, and Groq.",
-      "content_hash": "1834f8b88e4962e1ca671cb59f6a58c68b320def389477c339b853a387db3a78"
+      "blurb": "Connect a language model to a constraint solver so that plain-English problem descriptions produce mathematically optimized solutions. The pipeline prompts an LLM to extract typed variables and constraints as structured JSON, validates them, then feeds them directly into a Z3 solver session. Automatic retry logic re-prompts the model on parse failures, and a mock mode lets you develop and test the full pipeline without an API key. Available in Go, Rust, and Python, with provider-agnostic support for Ollama, OpenAI, Claude, Groq, and xAI Grok.",
+      "content_hash": "cbcd656ff1b2502c1dd45dc550243149b701b58ef7adf6c0b6cc66b0acdd438a"
     },
     {
       "name": "bn-structure-learning",
@@ -1079,7 +1192,7 @@
       "difficulty": "starter",
       "tagline": "Evaluate business decision tables in Go, Rust, and Python using the ZEN engine — from pricing rules to eligibility checks, with first-hit and collect hit policies.",
       "blurb": "zen-decisions gives you a working blueprint for evaluating JSON Decision Models against live business inputs — pricing rules, eligibility checks, or policy logic — without hand-rolling conditional logic. It calls nxusKit's ZEN evaluate API to run stateless JDM evaluation across three scenarios: a maze-navigating rat that swaps personality variants via first-hit policy, a potion selector that returns every matching recipe using collect hit policy, and a food-truck planner that chains decision tables with expression nodes. Implementations are provided in Go, Rust, and Python, all driven by the same shared scenario data.",
-      "content_hash": "f43a0ff908efa8bc9b0c4e1bcb54f3cfddd8989e653f5e4b9be1b718be66f365"
+      "content_hash": "40c7122b9c2d5c703a6891438dd4d52cda1b5b1ca3e6b5ff7b882e16c6ed240c"
     },
     {
       "name": "puzzler",

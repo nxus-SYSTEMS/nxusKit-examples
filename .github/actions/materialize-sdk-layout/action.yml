@@ -1,0 +1,138 @@
+name: Materialize SDK install layout
+description: Create a bundle-shaped SDK root from the checked-out nxusKit source tree.
+
+inputs:
+  sdk-source:
+    description: Path to the checked-out SDK source, relative to GITHUB_WORKSPACE.
+    required: false
+    default: _sdk
+  sdk-install:
+    description: Path to create for the SDK install layout, relative to GITHUB_WORKSPACE.
+    required: false
+    default: _sdk_install
+  build-native:
+    description: Build libnxuskit from source if no native library is already present.
+    required: false
+    default: 'true'
+  native-profile:
+    description: 'Cargo profile to use for fallback native builds: debug or release.'
+    required: false
+    default: debug
+  native-features:
+    description: Comma-separated Cargo features to use for fallback native builds.
+    required: false
+    default: 'provider-z3,provider-zen'
+
+runs:
+  using: composite
+  steps:
+    - name: Materialize SDK install layout
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        ROOT="${GITHUB_WORKSPACE}/${{ inputs.sdk-install }}"
+        SRC="${GITHUB_WORKSPACE}/${{ inputs.sdk-source }}"
+
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)
+            go_platform="linux_amd64"
+            lib_name="libnxuskit.so"
+            core_lib_name="libnxuskit_core.so"
+            ;;
+          Darwin-arm64)
+            go_platform="darwin_arm64"
+            lib_name="libnxuskit.dylib"
+            core_lib_name="libnxuskit_core.dylib"
+            ;;
+          Darwin-x86_64)
+            go_platform="darwin_amd64"
+            lib_name="libnxuskit.dylib"
+            core_lib_name="libnxuskit_core.dylib"
+            ;;
+          *)
+            echo "::error::Unsupported runner platform: $(uname -s)-$(uname -m)"
+            exit 1
+            ;;
+        esac
+
+        find_native_lib() {
+          find \
+            "$SRC/lib" \
+            "$SRC/target/release" \
+            "$SRC/target/debug" \
+            "$SRC/packages" \
+            -type f \( -name "$lib_name" -o -name "$core_lib_name" \) 2>/dev/null | head -1 || true
+        }
+
+        rm -rf "$ROOT"
+        mkdir -p "$ROOT"
+
+        ln -sfn "$SRC/packages/nxuskit" "$ROOT/rust"
+        ln -sfn "$SRC/packages/nxuskit-go" "$ROOT/go"
+        ln -sfn "$SRC/packages/nxuskit-py" "$ROOT/python"
+
+        lib="$(find_native_lib)"
+        if [[ -z "${lib:-}" && "${{ inputs.build-native }}" == "true" ]]; then
+          if [[ ! -f "$SRC/Cargo.toml" ]]; then
+            echo "::error::No Cargo.toml found in ${SRC}; cannot build ${lib_name}."
+            exit 1
+          fi
+          profile="${{ inputs.native-profile }}"
+          case "$profile" in
+            debug)
+              cargo_profile_args=()
+              export CARGO_PROFILE_DEV_DEBUG=0
+              ;;
+            release)
+              cargo_profile_args=(--release)
+              ;;
+            *)
+              echo "::error::Unsupported native-profile '${profile}'. Expected debug or release."
+              exit 1
+              ;;
+          esac
+          if [[ -n "${NXUSKIT_INTERNAL_TOKEN:-}" ]]; then
+            git config --global url."https://x-access-token:${NXUSKIT_INTERNAL_TOKEN}@github.com/nxus-SYSTEMS/".insteadOf "https://github.com/nxus-SYSTEMS/"
+          fi
+          export CARGO_NET_GIT_FETCH_WITH_CLI=true
+          export GIT_TERMINAL_PROMPT=0
+          native_features="${{ inputs.native-features }}"
+          cargo_feature_args=(--no-default-features)
+          if [[ -n "$native_features" ]]; then
+            cargo_feature_args+=(--features "$native_features")
+          fi
+          echo "Building ${lib_name} from SDK source with Cargo profile '${profile}' and features '${native_features:-none}'..."
+          (
+            cd "$SRC"
+            cargo build "${cargo_profile_args[@]}" -p nxuskit-core "${cargo_feature_args[@]}"
+          )
+          lib="$(find_native_lib)"
+        fi
+
+        if [[ -z "${lib:-}" ]]; then
+          if [[ "${{ inputs.build-native }}" == "true" ]]; then
+            echo "::error::${lib_name} not found under ${SRC}; SDK examples need a native library in the bundle layout."
+            exit 1
+          fi
+
+          echo "Native library: skipped"
+          exit 0
+        fi
+
+        mkdir -p "$ROOT/lib"
+        install -m 0755 "$lib" "$ROOT/lib/$lib_name"
+
+        mkdir -p "$ROOT/go/lib/$go_platform"
+        install -m 0755 "$lib" "$ROOT/go/lib/$go_platform/$lib_name"
+
+        for cand in "$SRC/include" "$SRC/packages/nxuskit/include" "$SRC/packages/nxuskit-engine/include" "$ROOT/go/include"; do
+          if [[ -d "$cand" ]]; then
+            ln -sfn "$cand" "$ROOT/include"
+            break
+          fi
+        done
+
+        echo "SDK install root: $ROOT"
+        echo "Native library: $ROOT/lib/$lib_name"
+        echo "Go native library: $ROOT/go/lib/$go_platform/$lib_name"

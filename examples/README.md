@@ -2,9 +2,9 @@
 
 # nxusKit Examples
 
-A curated collection of **33 production-ready examples** demonstrating LLM integration, rule engines, constraint solvers, Bayesian networks, and decision tables using the nxusKit SDK (nxuskit, nxuskit-go, nxuskit-py).
+A curated collection of **34 production-ready examples** demonstrating LLM integration, rule engines, constraint solvers, Bayesian networks, and decision tables using the nxusKit SDK (nxuskit, nxuskit-go, nxuskit-py).
 
-> **5 apps** | **17 patterns** | **11 integrations** — start with [Basic Chat](patterns/basic-chat/) or [Streaming](patterns/streaming/).
+> **5 apps** | **17 patterns** | **12 integrations** — start with [Basic Chat](patterns/basic-chat/) or [Streaming](patterns/streaming/).
 
 **Browse by:** [Scenario](#by-scenario) | [Real-World Application](#by-real-world-application) | [Technology](#by-technology) | [Language](#by-language) | [Acronym and Tag Key](#acronym-and-tag-key)
 
@@ -82,6 +82,14 @@ A curated collection of **33 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ real-world: **LLM answer validation** | | | | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | | |
 | &nbsp;&nbsp;↳ real-world: **Policy enforcement** | | | | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | | |
 | &nbsp;&nbsp;↳ real-world: **Operational decision support** | | | | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | | |
+| [Model Research Harness](integrations/model-research-harness/) | Community | Integration | Research, test, score, rank, and report on provider/model fitness | Model evaluation; Provider comparison; Lifecycle policy; Software development workflow research | LLM, CLIPS, BN | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `basic-ticket-routing` | | | Run a credentials-free support ticket classification research smoke | | | |
+| &nbsp;&nbsp;↳ `promptfoo-import` | | | Import a Promptfoo config and run the converted nxusKit harness matrix | | | |
+| &nbsp;&nbsp;↳ `software-dev` | | | Evaluate code analysis, bug finding, patching, generation, refactoring, and review outputs | | | |
+| &nbsp;&nbsp;↳ real-world: **Model evaluation** | | | | Score model candidates against task-specific outputs and report confidence instead of relying on ad hoc impressions | | |
+| &nbsp;&nbsp;↳ real-world: **Provider comparison** | | | | Compare local and cloud providers through one provider-neutral workflow while keeping capability claims honest | | |
+| &nbsp;&nbsp;↳ real-world: **Lifecycle policy** | | | | Generate dry-run pull, pin, keep, or retest recommendations bounded by deterministic policy | | |
+| &nbsp;&nbsp;↳ real-world: **Software development workflow research** | | | | Exercise code analysis, bug finding, bugfixing, generation, refactoring, and review scenarios with public-safe fixtures | | |
 | [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | Pro | Integration | Chain Bayesian Network prediction into Solver optimization with CLIPS safety enforcement | Event planning; Emergency response; Manufacturing; Logistics; Healthcare | CLIPS, Solver, BN | Rust, Go, CLI/Bash |
 | &nbsp;&nbsp;↳ `festival` | | | Music festival staging — crowd predictions drive band scheduling and safety | | | |
 | &nbsp;&nbsp;↳ `rescue` | | | Search and rescue — survivor probability drives team assignment and safety checks | | | |
@@ -257,6 +265,12 @@ Catch plausible recommendations that fail physical, operational, or policy preco
 
 - [timeout-config](patterns/timeout-config/)
 
+### Lifecycle policy
+
+Generate dry-run pull, pin, keep, or retest recommendations bounded by deterministic policy
+
+- [model-research-harness](integrations/model-research-harness/)
+
 ### Logistics
 
 Predict delivery volumes, optimize fleet routing, enforce regulatory compliance
@@ -279,6 +293,12 @@ Forecast demand, schedule production, enforce quality and safety standards
 Infrastructure sizing, supply chain planning, disaster preparedness
 
 - [solver-what-if](patterns/solver-what-if/)
+
+### Model evaluation
+
+Score model candidates against task-specific outputs and report confidence instead of relying on ad hoc impressions
+
+- [model-research-harness](integrations/model-research-harness/)
 
 ### Multi-vendor AI gateway, provider comparison tool
 
@@ -322,6 +342,12 @@ Turn free-form answers into facts, apply deterministic rules, and produce audita
 
 - [zen-decisions](integrations/zen-decisions/)
 
+### Provider comparison
+
+Compare local and cloud providers through one provider-neutral workflow while keeping capability claims honest
+
+- [model-research-harness](integrations/model-research-harness/)
+
 ### Quality control
 
 Find which process parameters affect product quality
@@ -349,6 +375,12 @@ Manufacturing scaling, formulation optimization, process engineering
 ### SOC alert triage, IT incident management
 
 - [alert-triage](integrations/alert-triage/)
+
+### Software development workflow research
+
+Exercise code analysis, bug finding, bugfixing, generation, refactoring, and review scenarios with public-safe fixtures
+
+- [model-research-harness](integrations/model-research-harness/)
 
 ### Space Colony Planning
 
@@ -397,6 +429,7 @@ Event planning, capital budgeting, portfolio allocation
 - [CLI Assistant](integrations/cli-assistant/)
 - [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/)
 - [Common Sense Guardrails](integrations/common-sense-guardrails/)
+- [Model Research Harness](integrations/model-research-harness/)
 - [LLM Solver Hybrid](integrations/llm-solver-hybrid/)
 - [Puzzler](apps/puzzler/)
 - [Racer](apps/racer/)
@@ -409,6 +442,7 @@ Event planning, capital budgeting, portfolio allocation
 - [CLIPS Basics](integrations/clips-basics/)
 - [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/)
 - [Common Sense Guardrails](integrations/common-sense-guardrails/)
+- [Model Research Harness](integrations/model-research-harness/)
 - [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/)
 - [Puzzler](apps/puzzler/)
 - [Racer](apps/racer/)
@@ -427,6 +461,7 @@ Event planning, capital budgeting, portfolio allocation
 ### BN
 
 - [Bayesian Inference](patterns/bayesian-inference/)
+- [Model Research Harness](integrations/model-research-harness/)
 - [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/)
 - [BN Structure Learning](integrations/bn-structure-learning/)
 
@@ -472,6 +507,7 @@ Event planning, capital budgeting, portfolio allocation
 | [CLIPS Basics](integrations/clips-basics/) | integrations | Yes | Yes | - | Yes |
 | [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | integrations | Yes | Yes | Yes | Yes |
 | [Common Sense Guardrails](integrations/common-sense-guardrails/) | integrations | - | - | Yes | Yes |
+| [Model Research Harness](integrations/model-research-harness/) | integrations | - | - | Yes | Yes |
 | [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/) | integrations | Yes | Yes | - | Yes |
 | [LLM Solver Hybrid](integrations/llm-solver-hybrid/) | integrations | Yes | Yes | Yes | Yes |
 | [BN Structure Learning](integrations/bn-structure-learning/) | integrations | Yes | Yes | Yes | - |

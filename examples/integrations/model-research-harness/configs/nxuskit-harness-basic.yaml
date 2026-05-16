@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "id": "basic-ticket-routing",
+  "description": "Small provider-neutral support ticket classification research run.",
+  "providers": [
+    {
+      "id": "local-fixture",
+      "provider": "loopback",
+      "label": "Local fixture provider",
+      "model": "fixture-ticket-v1",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "unavailable",
+        "tool_calling": "emulated"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "ticket-billing-refund",
+      "prompt": "Classify this support ticket as JSON with label, confidence, and rationale: {{ ticket }}",
+      "vars": {
+        "ticket": "I was charged twice after cancelling my renewal. Please refund the duplicate payment."
+      },
+      "provider_ids": ["local-fixture"],
+      "mock_response": {
+        "label": "billing",
+        "confidence": 0.94,
+        "rationale": "The ticket asks for a duplicate-payment refund."
+      },
+      "assertions": [
+        { "type": "is-json", "weight": 1.0 },
+        { "type": "required-fields", "fields": ["label", "confidence", "rationale"], "weight": 1.0 },
+        { "type": "equals", "path": "$.label", "value": "billing", "weight": 2.0 }
+      ]
+    }
+  ],
+  "policy": {
+    "required_fields": ["label", "confidence", "rationale"],
+    "forbidden_values": [
+      { "id": "no-unknown-label", "field": "label", "values": ["unknown"], "severity": "high" }
+    ]
+  },
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run",
+    "allow_pull": false,
+    "allow_remove": false,
+    "allow_cache_evict": false,
+    "max_pull_gb": 0,
+    "protected_models": [],
+    "allowed_providers": []
+  }
+}

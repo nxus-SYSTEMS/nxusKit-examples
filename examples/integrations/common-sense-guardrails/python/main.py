@@ -527,6 +527,90 @@ def strip_json_fences(content: str) -> str:
     return text.strip()
 
 
+class StructuredJsonError(ValueError):
+    """Raised when a live structured-output response cannot produce facts."""
+
+
+def json_object_candidates(text: str) -> list[str]:
+    candidates: list[str] = []
+    for start, char in enumerate(text):
+        if char != "{":
+            continue
+        depth = 0
+        in_string = False
+        escaped = False
+        for index in range(start, len(text)):
+            current = text[index]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif current == "\\":
+                    escaped = True
+                elif current == '"':
+                    in_string = False
+                continue
+            if current == '"':
+                in_string = True
+            elif current == "{":
+                depth += 1
+            elif current == "}":
+                depth -= 1
+                if depth == 0:
+                    candidates.append(text[start : index + 1])
+                    break
+    return candidates
+
+
+def fenced_json_candidates(text: str) -> list[str]:
+    candidates: list[str] = []
+    search_from = 0
+    while True:
+        fence_start = text.find("```", search_from)
+        if fence_start == -1:
+            return candidates
+        body_start = text.find("\n", fence_start + 3)
+        if body_start == -1:
+            return candidates
+        fence_end = text.find("```", body_start + 1)
+        if fence_end == -1:
+            return candidates
+        candidates.append(text[body_start + 1 : fence_end].strip())
+        search_from = fence_end + 3
+
+
+def parse_json_object(payload: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise StructuredJsonError(f"invalid JSON: {exc.msg}") from exc
+    if not isinstance(parsed, dict):
+        raise StructuredJsonError("JSON payload must be an object")
+    return parsed
+
+
+def extract_json_object(content: str) -> tuple[dict[str, Any], str | None]:
+    text = content.strip()
+    if not text:
+        raise StructuredJsonError("empty structured-output response")
+
+    try:
+        return parse_json_object(strip_json_fences(text)), None
+    except StructuredJsonError:
+        pass
+
+    for candidate in [*fenced_json_candidates(text), *json_object_candidates(text)]:
+        try:
+            return (
+                parse_json_object(candidate),
+                "Live structured extraction wrapped JSON in prose; extracted the JSON object and continuing.",
+            )
+        except StructuredJsonError:
+            continue
+    raise StructuredJsonError(
+        "no valid JSON object found in structured-output response"
+    )
+
+
 def validate_facts_shape(facts: dict[str, Any]) -> list[str]:
     errors = []
     for key in (
@@ -542,6 +626,42 @@ def validate_facts_shape(facts: dict[str, Any]) -> list[str]:
         if key not in facts:
             errors.append(f"missing key '{key}'")
     return errors
+
+
+def parse_facts_response(content: str) -> tuple[dict[str, Any], str | None]:
+    facts, warning = extract_json_object(content)
+    errors = validate_facts_shape(facts)
+    if errors:
+        raise StructuredJsonError("; ".join(errors))
+    return facts, warning
+
+
+def live_structured_facts(
+    provider: Any, extraction_prompt: str
+) -> tuple[dict[str, Any], str, str]:
+    prompt = extraction_prompt
+    system = "Extract typed JSON facts. Return JSON only."
+    attempts: list[str] = []
+
+    for attempt in (1, 2):
+        try:
+            content = provider_chat(provider, prompt, system=system, max_tokens=900)
+            facts, warning = parse_facts_response(content)
+        except Exception as exc:
+            attempts.append(f"attempt {attempt}: {exc}")
+            prompt = (
+                extraction_prompt
+                + "\n\nValidation feedback: "
+                + str(exc)
+                + ". Return only valid JSON with all required fact keys and no prose."
+            )
+            system = "Repair the JSON extraction. Return JSON only."
+            continue
+        if warning:
+            return facts, "warn", warning
+        return facts, "pass", "Facts came from live structured extraction."
+
+    raise StructuredJsonError("; ".join(attempts))
 
 
 def live_ce_stages(
@@ -563,42 +683,19 @@ def live_ce_stages(
         f"Prompt:\n{problem['baseline_prompt']}\n\nAnswer:\n{raw}"
     )
     fact_source = "live"
+    fact_status = "pass"
     fact_message = "Facts came from live structured extraction."
     try:
-        facts = json.loads(
-            strip_json_fences(
-                provider_chat(
-                    provider,
-                    extraction_prompt,
-                    system="Extract typed JSON facts.",
-                    max_tokens=900,
-                )
-            )
+        facts, fact_status, fact_message = live_structured_facts(
+            provider, extraction_prompt
         )
-        errors = validate_facts_shape(facts)
-        if errors:
-            retry_prompt = (
-                extraction_prompt + "\n\nValidation feedback: " + "; ".join(errors)
-            )
-            facts = json.loads(
-                strip_json_fences(
-                    provider_chat(
-                        provider,
-                        retry_prompt,
-                        system="Repair the JSON extraction.",
-                        max_tokens=900,
-                    )
-                )
-            )
-            errors = validate_facts_shape(facts)
-        if errors:
-            raise ValueError("; ".join(errors))
-    except Exception:
-        if not allow_fixture_fallback:
-            raise
+    except StructuredJsonError as exc:
         facts = scenario["facts"]
         fact_source = "mock"
-        fact_message = "Live structured extraction failed validation; using checked-in fact fixture."
+        fact_status = "warn"
+        fact_message = (
+            f"Live structured extraction failed ({exc}); using checked-in fact fixture."
+        )
 
     clips_source = fact_source
     clips_message = "Findings produced through nxusKit ClipsSession."
@@ -658,7 +755,7 @@ def live_ce_stages(
             "Structured fact extraction",
             "community",
             fact_source,
-            "pass",
+            fact_status,
             facts,
             fact_message,
         ),

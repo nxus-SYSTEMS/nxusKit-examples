@@ -20,7 +20,7 @@
 // ## LLM Mode
 // - `--mock` (default): Use pre-defined mock LLM response from problem.json
 // - `--no-mock`: Call a live LLM provider for constraint extraction
-// - `--provider <name>`: LLM provider to use (default: ollama)
+// - `--provider <name>`: LLM provider to use (default: ollama; supported: ollama, lmstudio, openai, claude, groq, xai)
 // - `--model <name>`: Model to use (default: llama3.2)
 //
 // Usage:
@@ -620,8 +620,10 @@ func createProvider(name, model string) (nxuskit.LLMProvider, error) {
 		return nxuskit.NewClaudeFFIProvider()
 	case "groq":
 		return nxuskit.NewGroqFFIProvider()
+	case "xai":
+		return nxuskit.NewXaiFFIProvider()
 	default:
-		return nil, fmt.Errorf("unknown provider %q (supported: ollama, lmstudio, openai, claude, groq)", name)
+		return nil, fmt.Errorf("unknown provider %q (supported: ollama, lmstudio, openai, claude, groq, xai)", name)
 	}
 }
 

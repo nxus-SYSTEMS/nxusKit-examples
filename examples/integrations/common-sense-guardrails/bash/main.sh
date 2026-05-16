@@ -4,6 +4,14 @@
 # Community path: raw answer -> structured facts -> CLIPS findings -> repair -> corrected answer.
 # Optional Pro stages use checked-in mock Solver/ZEN evidence unless live entitlement is available.
 
+if [[ ${BASH_VERSINFO[0]:-0} -lt 4 ]]; then
+  for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$candidate" ]]; then
+      exec "$candidate" "$0" "$@"
+    fi
+  done
+fi
+
 set -euo pipefail
 source "$(dirname "$0")/../../../shared/bash/nxuskit-common.sh"
 
@@ -133,8 +141,64 @@ live_call_fixture() {
     '{source:"live", content:$content, notes:["Live answer captured through nxuskit-cli call."]}' > "$outfile"
 }
 
+LIVE_FACT_SOURCE="live"
+LIVE_FACT_STATUS="pass"
+LIVE_FACT_MESSAGE="Facts came from live structured extraction."
+
+facts_json_valid() {
+  jq -e '.goal and .candidate_actions and .objects_required and .objects_moved and .resources and .constraints and .policy_context and (.confidence != null)' >/dev/null 2>&1
+}
+
+extract_facts_json() {
+  local content="$1" outfile="$2" fenced object
+  if facts_json_valid <<<"$content"; then
+    jq --sort-keys '.' <<<"$content" > "$outfile"
+    LIVE_FACT_SOURCE="live"
+    LIVE_FACT_STATUS="pass"
+    LIVE_FACT_MESSAGE="Facts came from live structured extraction."
+    return 0
+  fi
+
+  fenced="$(awk '
+    /^```/ {
+      if (capture) {
+        exit
+      }
+      capture = 1
+      next
+    }
+    capture {
+      print
+    }
+  ' <<<"$content")"
+  if [[ -n "$fenced" ]] && facts_json_valid <<<"$fenced"; then
+    jq --sort-keys '.' <<<"$fenced" > "$outfile"
+    LIVE_FACT_SOURCE="live"
+    LIVE_FACT_STATUS="warn"
+    LIVE_FACT_MESSAGE="Live structured extraction wrapped JSON in prose; extracted the JSON object and continuing."
+    return 0
+  fi
+
+  object=""
+  if command -v perl >/dev/null 2>&1; then
+    object="$(perl -0ne 'if (/\{.*\}/s) { print $& }' <<<"$content")"
+  fi
+  if [[ -n "$object" ]] && facts_json_valid <<<"$object"; then
+    jq --sort-keys '.' <<<"$object" > "$outfile"
+    LIVE_FACT_SOURCE="live"
+    LIVE_FACT_STATUS="warn"
+    LIVE_FACT_MESSAGE="Live structured extraction wrapped JSON in prose; extracted the JSON object and continuing."
+    return 0
+  fi
+
+  return 1
+}
+
 live_extract_facts_fixture() {
-  local problem="$1" baseline_file="$2" fallback_facts="$3" outfile="$4" req out content retry_req
+  local problem="$1" baseline_file="$2" fallback_facts="$3" outfile="$4" req out content retry_req error
+  LIVE_FACT_SOURCE="live"
+  LIVE_FACT_STATUS="pass"
+  LIVE_FACT_MESSAGE="Facts came from live structured extraction."
   req="$(tmpfile "csg-live-extract-request.json")"
   out="$(tmpfile "csg-live-extract-output.json")"
   jq -n \
@@ -143,26 +207,34 @@ live_extract_facts_fixture() {
     '{messages:[{role:"user",content:($prompt + "\nReturn only JSON with keys goal, candidate_actions, objects_required, objects_moved, resources, constraints, policy_context, confidence.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$req"
   if run_cli call --provider "$(live_provider_name)" -i "$req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
-    if jq -e '.goal and .candidate_actions and .objects_required and .objects_moved and .resources and .constraints and .policy_context and (.confidence != null)' <<<"$content" >/dev/null 2>&1; then
-      jq --sort-keys '.' <<<"$content" > "$outfile"
+    if extract_facts_json "$content" "$outfile"; then
       return 0
     fi
+    error="no valid JSON object found in structured-output response"
+  else
+    error="nxuskit-cli structured extraction call failed"
   fi
 
   retry_req="$(tmpfile "csg-live-extract-retry-request.json")"
   jq -n \
     --arg prompt "$(jq -r '.extraction_prompt' "$problem")" \
     --arg baseline "$(jq -r '.content' "$baseline_file")" \
-    '{messages:[{role:"user",content:($prompt + "\nThe previous extraction was invalid. Return only valid JSON with all required fact keys.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$retry_req"
+    --arg error "$error" \
+    '{messages:[{role:"user",content:($prompt + "\nThe previous extraction was invalid: " + $error + ". Return only valid JSON with all required fact keys and no prose.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$retry_req"
   if run_cli call --provider "$(live_provider_name)" -i "$retry_req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
-    if jq -e '.goal and .candidate_actions and .objects_required and .objects_moved and .resources and .constraints and .policy_context and (.confidence != null)' <<<"$content" >/dev/null 2>&1; then
-      jq --sort-keys '.' <<<"$content" > "$outfile"
+    if extract_facts_json "$content" "$outfile"; then
       return 0
     fi
+    error="$error; retry also returned no valid JSON object"
+  else
+    error="$error; retry call failed"
   fi
 
   jq --sort-keys '.' "$fallback_facts" > "$outfile"
+  LIVE_FACT_SOURCE="mock"
+  LIVE_FACT_STATUS="warn"
+  LIVE_FACT_MESSAGE="Live structured extraction failed ($error); using checked-in fact fixture."
 }
 
 clips_facts_json() {
@@ -222,11 +294,14 @@ resolution_json() {
 }
 
 build_report() {
-  local dir resolution source problem expected baseline facts repair corrected pro_artifact pro_json entitled
+  local dir resolution source facts_source facts_status facts_message problem expected baseline facts repair corrected pro_artifact pro_json entitled
   dir="$(scenario_dir "$SCENARIO")"
   validate_one "$SCENARIO" >/dev/null
   resolution="$(resolution_json)"
   source="$(jq -r '.source' <<<"$resolution")"
+  facts_source="$source"
+  facts_status="pass"
+  facts_message="Facts are typed before rule evaluation."
 
   problem="$dir/problem.json"
   expected="$dir/expected-output.json"
@@ -250,6 +325,9 @@ build_report() {
       baseline="$live_baseline"
       live_extract_facts_fixture "$problem" "$baseline" "$facts" "$live_facts"
       facts="$live_facts"
+      facts_source="$LIVE_FACT_SOURCE"
+      facts_status="$LIVE_FACT_STATUS"
+      facts_message="$LIVE_FACT_MESSAGE"
       if ! live_clips_eval "$dir" "$facts"; then
         if [[ "$MODE" == "live" ]]; then
           die "nxuskit-cli clips eval failed in live mode" 1
@@ -279,6 +357,9 @@ build_report() {
     --arg mode "$MODE" \
     --arg requested_stage "$STAGE" \
     --arg source "$source" \
+    --arg facts_source "$facts_source" \
+    --arg facts_status "$facts_status" \
+    --arg facts_message "$facts_message" \
     --argjson resolution "$resolution" \
     --argjson pro_entitled "$entitled" \
     --slurpfile problem "$problem" \
@@ -318,9 +399,9 @@ build_report() {
       } as $packet |
       [
         stage("raw-baseline"; "Raw LLM baseline"; "community"; $source; "fail"; {content:$b.content, expected_bad_answer:$p.expected_bad_answer, notes:($b.notes // [])}; "Baseline answer violates at least one common-sense guardrail."),
-        stage("structured-facts"; "Structured fact extraction"; "community"; $source; "pass"; $f; "Facts are typed before rule evaluation."),
-        stage("clips-validation"; "Community CLIPS validation"; "community"; $source; (if any($findings[]; .status == "fail") then "fail" else "pass" end); {findings:$findings, rules_file:"../scenarios/\($scenario)/rules.clp"}; "Validation failed; building deterministic repair packet."),
-        stage("repair-packet"; "Deterministic repair packet"; "community"; $source; "pass"; $packet; "Repair prompt is assembled from findings, not free-form guesswork."),
+        stage("structured-facts"; "Structured fact extraction"; "community"; $facts_source; $facts_status; $f; $facts_message),
+        stage("clips-validation"; "Community CLIPS validation"; "community"; $facts_source; (if any($findings[]; .status == "fail") then "fail" else "pass" end); {findings:$findings, rules_file:"../scenarios/\($scenario)/rules.clp"}; "Validation failed; building deterministic repair packet."),
+        stage("repair-packet"; "Deterministic repair packet"; "community"; $facts_source; "pass"; $packet; "Repair prompt is assembled from findings, not free-form guesswork."),
         stage("corrected-answer"; "Corrected answer"; "community"; $source; ($c.validation_status // "pass"); {content:$c.content, validation_status:($c.validation_status // "pass"), expected_corrected_answer:$p.expected_corrected_answer}; "Corrected recommendation passes Community guardrails.")
       ] as $ce |
       ($p.pro_stage // {id:"solver-proof", engine:"solver", artifact:""}) as $ps |

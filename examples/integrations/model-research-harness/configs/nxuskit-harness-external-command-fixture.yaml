@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "id": "external-command-fixture-parity",
+  "description": "Fixture-backed operational adapter contract for DevOps-style runner outputs.",
+  "providers": [
+    {
+      "id": "external-fixture",
+      "provider": "external",
+      "label": "External runner fixture",
+      "model": "fixture-operational-adapter",
+      "capabilities": {
+        "native_strict_schema": false,
+        "json_mode": false,
+        "thinking_control": "not_applicable",
+        "tool_calling": "adapter"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "capabilities-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-capabilities", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_csv": "{adapter_output_dir}/capabilities.csv",
+        "summary_md": "{adapter_output_dir}/capabilities.md",
+        "result_strategy": "devops-capabilities",
+        "thresholds": { "min_json_output_level": 1 }
+      }
+    },
+    {
+      "id": "common-sense-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-common-sense", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-common-sense",
+        "thresholds": { "min_target_candidates": 1 }
+      }
+    },
+    {
+      "id": "tool-intent-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-tool-intent", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-tool-intent",
+        "thresholds": { "min_pass_count": 1 }
+      }
+    },
+    {
+      "id": "safe-labs-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-safe-labs", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-safe-labs",
+        "thresholds": { "min_value_accuracy": 1.0 }
+      }
+    },
+    {
+      "id": "pipeline-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-pipeline", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-pipeline",
+        "thresholds": { "min_score": 100.0 }
+      }
+    },
+    {
+      "id": "vision-fixture",
+      "adapter": "external-command",
+      "provider_ids": ["external-fixture"],
+      "external_command": {
+        "argv": ["{python}", "{root}/fixtures/runners/devops_parity_fixture.py", "--strategy", "devops-vision", "--output-dir", "{adapter_output_dir}"],
+        "cwd": "{root}",
+        "output_json": "{adapter_output_dir}/detailed_results.json",
+        "summary_md": "{adapter_output_dir}/summary.md",
+        "result_strategy": "devops-vision",
+        "thresholds": { "pass_statuses": ["PASS"] }
+      }
+    }
+  ],
+  "policy": {},
+  "bayesian": {
+    "prior_alpha": 2,
+    "prior_beta": 2
+  },
+  "actions": {
+    "mode": "dry-run"
+  }
+}

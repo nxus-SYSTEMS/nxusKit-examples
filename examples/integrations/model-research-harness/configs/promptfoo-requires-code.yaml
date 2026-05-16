@@ -1,0 +1,23 @@
+{
+  "description": "Promptfoo config that intentionally requires a trust or native-reference flag.",
+  "prompts": [
+    "Classify this ticket: {{ ticket }}"
+  ],
+  "providers": [
+    "mock"
+  ],
+  "tests": [
+    {
+      "id": "requires-js-assertion",
+      "vars": {
+        "ticket": "Need invoice help."
+      },
+      "assert": [
+        {
+          "type": "javascript",
+          "value": "json.label === 'billing'"
+        }
+      ]
+    }
+  ]
+}
