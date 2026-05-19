@@ -5,7 +5,8 @@
 # workflow_dispatch for manual syncs.
 #
 # Pushes content to: nxus-docs/src/content/docs/nxuskit/examples/
-# Source of truth:   README.md (examples index page)
+# Source of truth:   README.md, canonical example READMEs, and
+#                    conformance/docs_export_manifest.json companions
 #
 # Required secrets:
 #   NXUS_DOCS_TOKEN  — fine-grained PAT with Contents write access to
@@ -19,6 +20,9 @@ on:
     paths:
       - "README.md"
       - "conformance/**"
+      - "examples/**/*.md"
+      - "scripts/verify-docs-export-manifest.mjs"
+      - ".github/workflows/publish-to-docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -37,6 +41,9 @@ jobs:
         run: |
           set -eu -o pipefail
           SCAN_PATHS=()
+          for d in examples conformance; do
+            [[ -d "$d" ]] && SCAN_PATHS+=("$d")
+          done
           for f in README.md; do
             [[ -f "$f" ]] && SCAN_PATHS+=("$f")
           done
@@ -60,32 +67,8 @@ jobs:
           done
           echo "Leak gate passed."
 
-      # ── Export examples doc content ──────────────────────────────
-      - name: Export examples documentation
-        run: |
-          set -eu -o pipefail
-          EXPORT=/tmp/nxuskit-examples-docs-export
-
-          rm -rf "$EXPORT"
-          mkdir -p "$EXPORT"
-
-          # README.md becomes the examples index page in nxus-docs.
-          # Add Starlight frontmatter in the exported copy only so the GitHub
-          # README stays clean.
-          if [[ -f "README.md" ]]; then
-            {
-              echo "---"
-              echo "title: nxusKit Examples"
-              echo "description: Production-ready nxusKit examples across Rust, Go, Python, and CLI/Bash."
-              echo "---"
-              echo ""
-              cat README.md
-            } > "$EXPORT/index.md"
-            echo "Exported: README.md → examples/index.md"
-          fi
-
-          echo ""
-          echo "Export complete: $(find "$EXPORT" -name '*.md' -o -name '*.mdx' | wc -l | tr -d ' ') doc files"
+      - name: Validate docs export manifest
+        run: node scripts/verify-docs-export-manifest.mjs
 
       # ── Commit message ───────────────────────────────────────────
       - name: Build commit message
@@ -107,7 +90,6 @@ jobs:
           COMMIT_MSG: ${{ steps.commit-msg.outputs.msg }}
         run: |
           set -eu -o pipefail
-          EXPORT=/tmp/nxuskit-examples-docs-export
 
           if [[ -z "${NXUS_DOCS_TOKEN:-}" ]]; then
             echo "::notice::NXUS_DOCS_TOKEN not configured — skipping push."
@@ -120,11 +102,9 @@ jobs:
           git clone --depth=1 "$REMOTE_URL" /tmp/nxus-docs-clone
           cd /tmp/nxus-docs-clone
 
-          # Sync exported examples docs into the nxuskit/examples/ subtree only.
-          mkdir -p src/content/docs/nxuskit/examples
-          rsync -a --delete \
-            --exclude='.git' \
-            "$EXPORT/" src/content/docs/nxuskit/examples/
+          # Use the docs site's transform so Starlight frontmatter, route
+          # generation, link rewrites, and docs-owned gates stay authoritative.
+          NXUSKIT_EXAMPLES_REPO="${GITHUB_WORKSPACE}" node scripts/sync-local-docs.mjs --examples
 
           git add -A
           if git diff --cached --quiet; then
