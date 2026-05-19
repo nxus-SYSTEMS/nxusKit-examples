@@ -1,8 +1,8 @@
 # CD — Create a tagged release matching the SDK version.
 #
-# Reads the SDK version from conformance/examples_manifest.json (the schema
-# version tracks SDK compatibility) and creates a GitHub Release with
-# auto-generated source archives (.tar.gz, .zip).
+# Reads the SDK version from the latest nxusKit SDK GitHub Release tag
+# (sdk-vX.Y.Z) and creates a GitHub Release with auto-generated source
+# archives (.tar.gz, .zip).
 #
 # Skips if the tag already exists (idempotent on re-runs / unchanged version).
 
@@ -24,12 +24,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read version and stats
+      - name: Read SDK version and stats
         id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Hybrid tag: SDK version + date (e.g., v0.9.3-20260501)
+          SDK_TAG="$(gh release view --repo nxus-SYSTEMS/nxusKit --json tagName --jq .tagName)"
+          if [[ "$SDK_TAG" != sdk-v* ]]; then
+            echo "Unexpected SDK release tag: $SDK_TAG" >&2
+            exit 1
+          fi
+
+          # Hybrid tag: SDK version + date (e.g., v0.9.4-20260519)
           # Allows interim examples releases between SDK versions
-          SDK_VERSION="0.9.3"
+          SDK_VERSION="${SDK_TAG#sdk-v}"
           TAG="v${SDK_VERSION}-$(date -u +%Y%m%d)"
 
           EXAMPLES=$(python3 -c "

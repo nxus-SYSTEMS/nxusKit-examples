@@ -89,9 +89,8 @@ Live runs can use one provider/model for every phase or override phases independ
 
 ```bash
 export NXUSKIT_PROVIDER=ollama
-export NXUSKIT_MODEL=llama3.2
-export NXUSKIT_COMMON_SENSE_FACTS_MODEL=qwen3:4b
-export NXUSKIT_COMMON_SENSE_REPAIR_MODEL=gemma3
+export NXUSKIT_MODEL=qwen3.5:4b
+export OLLAMA_HOST=http://127.0.0.1:11434
 ```
 
 Phase-specific provider overrides are also supported with `NXUSKIT_COMMON_SENSE_BASELINE_PROVIDER`, `NXUSKIT_COMMON_SENSE_FACTS_PROVIDER`, and `NXUSKIT_COMMON_SENSE_REPAIR_PROVIDER`. See [OLLAMA_MODELS.md](./OLLAMA_MODELS.md) for local Ollama model notes from the repository walkthrough.
