@@ -166,7 +166,7 @@ Each run can write:
 - Provider/model recommendation table
 - Capability truth table
 
-The capability truth table separates native provider guarantees from harness-side validation and repair. For v0.9.4, Groq remains provider id `groq` with `GROQ_API_KEY`; xAI Grok uses provider id `xai` with `XAI_API_KEY`.
+The capability truth table separates native provider guarantees from harness-side validation and repair. For v1.0.0, Groq remains provider id `groq` with `GROQ_API_KEY`; xAI Grok uses provider id `xai` with `XAI_API_KEY`.
 
 ## Live Mode
 
