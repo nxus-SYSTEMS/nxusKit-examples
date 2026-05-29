@@ -6,10 +6,10 @@
       "Tamara Storm"
     ]
   },
-  "baseline_prompt": "The car wash is about 50 meters away from my house. I want to wash my car. What should I do?",
+  "baseline_prompt": "I need to get my car washed and the carwash is only 50 meters away. Should I drive there or just walk?",
   "expected_bad_answer": "Walk to the nearby car wash because the distance is short.",
   "expected_corrected_answer": "Drive the car to the car wash, or walk only if the car is already at the car wash.",
-  "extraction_prompt": "Extract the user's goal, candidate action, objects required at each location, objects moved by each action, and feasibility constraints.",
+  "extraction_prompt": "Extract the user's goal and the single action the answer recommends most strongly. Return the exact fields goal, candidate_actions, objects_required, objects_moved, resources, constraints, policy_context, and confidence; use arrays for candidate_actions, objects_required, objects_moved, resources, and constraints. Do not use singular keys such as candidate_action or feasibility_constraints. For the car-wash scenario, the car itself is required at car_wash before it can be washed. If the answer recommends walking, walking moves the person only and leaves the car at home; include candidate_actions entry {id:\"walk_to_car_wash\", recommendation:\"walk\", target_location:\"car_wash\", moves:[\"person\"]}, objects_required entry {object:\"car\", required_location:\"car_wash\", current_location:\"home\", present_at_required_location:false}, and objects_moved entry {action_id:\"walk_to_car_wash\", object:\"person\", from:\"home\", to:\"car_wash\"}. Do not treat walking as moving the car.",
   "failure_class": "implicit object-presence precondition",
   "guardrail_summary": "Washing the car requires the car to be at the wash location.",
   "id": "car-wash",
