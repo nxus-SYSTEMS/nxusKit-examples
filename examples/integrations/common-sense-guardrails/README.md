@@ -83,7 +83,7 @@ Live structured fact extraction prefers pure JSON. If the model wraps a valid JS
 
 Provider preflight order is explicit nxusKit provider/model environment, phase-specific model environment, nxusKit-recognized cloud credentials, reachable Ollama, then reachable LM Studio. Do not commit provider credentials or license tokens.
 
-For local Ollama live runs, the Python runner honors `OLLAMA_HOST` and uses a short 5 second connect timeout with a 120 second read timeout because local model responses can be slower than cloud providers. The Bash runner forwards model settings to `nxuskit-cli call`; CLI timeout behavior comes from the installed SDK.
+For local Ollama live runs, the Python runner honors `OLLAMA_HOST` and uses a short 5 second connect timeout with a 120 second read timeout because local model responses can be slower than cloud providers. The Python runner requests JSON response format for fact extraction when the installed SDK exposes it, but v1.0.0 does not expose provider-level `thinking_mode` in Python. Use the Bash/CLI runner for the strict local proof path because it can pass both `thinking_mode` and `response_format` through `nxuskit-cli call`.
 
 Live runs can use one provider/model for every phase or override phases independently:
 
@@ -94,6 +94,13 @@ export OLLAMA_HOST=http://127.0.0.1:11434
 ```
 
 Phase-specific provider overrides are also supported with `NXUSKIT_COMMON_SENSE_BASELINE_PROVIDER`, `NXUSKIT_COMMON_SENSE_FACTS_PROVIDER`, and `NXUSKIT_COMMON_SENSE_REPAIR_PROVIDER`. See [OLLAMA_MODELS.md](./OLLAMA_MODELS.md) for local Ollama model notes from the repository walkthrough.
+
+Strict live smoke is gated separately so mock fallback output is not mistaken for live provider output:
+
+```bash
+cd examples/integrations/common-sense-guardrails/bash
+RUN_LIVE_SMOKE=1 ./strict_live_smoke.sh
+```
 
 ## Local Model Starting Points
 

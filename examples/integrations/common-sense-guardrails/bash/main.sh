@@ -158,12 +158,70 @@ live_call_fixture() {
   req="$(tmpfile "csg-live-call-request.json")"
   out="$(tmpfile "csg-live-call-output.json")"
   jq -n --arg prompt "$prompt" \
-    '{messages:[{role:"user",content:$prompt}], temperature:0.1, max_tokens:700}' > "$req"
+    '{
+      messages:[{role:"user",content:$prompt}],
+      temperature:0.1,
+      max_tokens:700,
+      thinking_mode:"disabled",
+      response_format:{type:"text"}
+    }' > "$req"
   run_cli call "${provider_args[@]}" -i "$req" -f json -o "$out" >/dev/null
   content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
   [[ -n "$content" ]] || return 1
   jq -n --arg content "$content" \
     '{source:"live", content:$content, notes:["Live answer captured through nxuskit-cli call."]}' > "$outfile"
+}
+
+facts_response_schema_jq() {
+  cat <<'EOF'
+def facts_schema: {
+  type:"object",
+  required:[
+    "goal",
+    "candidate_actions",
+    "objects_required",
+    "objects_moved",
+    "resources",
+    "constraints",
+    "policy_context",
+    "confidence"
+  ],
+  properties:{
+    goal:{},
+    candidate_actions:{type:"array", items:{type:"object"}},
+    objects_required:{
+      type:"array",
+      items:{
+        type:"object",
+        required:["object", "required_location", "present_at_required_location"],
+        properties:{
+          object:{type:"string"},
+          required_location:{type:"string"},
+          current_location:{type:"string"},
+          present_at_required_location:{type:"boolean"}
+        }
+      }
+    },
+    objects_moved:{
+      type:"array",
+      items:{
+        type:"object",
+        required:["action_id", "object", "from", "to"],
+        properties:{
+          action_id:{type:"string"},
+          object:{type:"string"},
+          from:{type:"string"},
+          to:{type:"string"}
+        }
+      }
+    },
+    resources:{type:"array"},
+    constraints:{type:"array"},
+    policy_context:{type:"object"},
+    confidence:{type:"number"}
+  }
+};
+EOF
 }
 
 LIVE_FACT_SOURCE="live"
@@ -296,7 +354,14 @@ live_extract_facts_fixture() {
   jq -n \
     --arg prompt "$(jq -r '.extraction_prompt' "$problem")" \
     --arg baseline "$(jq -r '.content' "$baseline_file")" \
-    '{messages:[{role:"user",content:($prompt + "\nReturn only JSON with keys goal, candidate_actions, objects_required, objects_moved, resources, constraints, policy_context, confidence.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$req"
+    "$(facts_response_schema_jq)"'
+    {
+      messages:[{role:"user",content:($prompt + "\nReturn only JSON with keys goal, candidate_actions, objects_required, objects_moved, resources, constraints, policy_context, confidence. Match the provided JSON schema exactly; use arrays for candidate_actions, objects_required, objects_moved, resources, and constraints. Do not use singular keys such as candidate_action or feasibility_constraints.\n\nRequired shape; replace placeholders with facts extracted from the answer:\n{\"goal\":{\"object\":\"<object>\",\"outcome\":\"<outcome>\",\"target_location\":\"<location>\"},\"candidate_actions\":[{\"id\":\"<action-id>\",\"recommendation\":\"<action>\",\"target_location\":\"<location>\",\"moves\":[\"<object-or-actor>\"]}],\"objects_required\":[{\"object\":\"<object>\",\"required_location\":\"<location>\",\"current_location\":\"<location>\",\"present_at_required_location\":false}],\"objects_moved\":[{\"action_id\":\"<action-id>\",\"object\":\"<object-or-actor>\",\"from\":\"<location>\",\"to\":\"<location>\"}],\"resources\":[{\"id\":\"<resource>\",\"type\":\"<type>\",\"state\":\"<state>\"}],\"constraints\":[{\"id\":\"<constraint-id>\",\"type\":\"<type>\"}],\"policy_context\":{\"domain\":\"physical_planning\",\"distance_meters\":50},\"confidence\":0.8}\n\nAnswer:\n" + $baseline)}],
+      temperature:0.1,
+      max_tokens:900,
+      thinking_mode:"disabled",
+      response_format:{type:"json_schema", schema:facts_schema}
+    }' > "$req"
   if run_cli call "${provider_args[@]}" -i "$req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
     if extract_facts_json "$content" "$outfile"; then
@@ -312,7 +377,14 @@ live_extract_facts_fixture() {
     --arg prompt "$(jq -r '.extraction_prompt' "$problem")" \
     --arg baseline "$(jq -r '.content' "$baseline_file")" \
     --arg error "$error" \
-    '{messages:[{role:"user",content:($prompt + "\nThe previous extraction was invalid: " + $error + ". Return only valid JSON with all required fact keys and no prose.\n\nAnswer:\n" + $baseline)}], temperature:0.1, max_tokens:900}' > "$retry_req"
+    "$(facts_response_schema_jq)"'
+    {
+      messages:[{role:"user",content:($prompt + "\nThe previous extraction was invalid: " + $error + ". Return only valid JSON with all required fact keys, schema-compatible shapes, and no prose. Do not use singular keys such as candidate_action or feasibility_constraints. Use the exact required shape from the previous instruction.\n\nAnswer:\n" + $baseline)}],
+      temperature:0.1,
+      max_tokens:900,
+      thinking_mode:"disabled",
+      response_format:{type:"json_schema", schema:facts_schema}
+    }' > "$retry_req"
   if run_cli call "${provider_args[@]}" -i "$retry_req" -f json -o "$out" >/dev/null; then
     content="$(jq -r '.result.content // .content // .message.content // empty' "$out")"
     if extract_facts_json "$content" "$outfile"; then
@@ -333,37 +405,55 @@ clips_facts_json() {
   local facts_file="$1"
   case "$SCENARIO" in
     car-wash)
-      jq -c '[
-        (.objects_required[] | "(required-object (object \(.object)) (required-location \(.required_location)) (current-location \(.current_location)) (present-at-required-location \(.present_at_required_location)))"),
-        (.objects_moved[] | "(moved-object (action-id \(.action_id)) (object \(.object)) (from \(.from)) (to \(.to)))")
+      jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
+      [
+        (.objects_required[] | "(required-object (object \(.object | atom)) (required-location \(.required_location | atom)) (current-location \(.current_location | atom)) (present-at-required-location \(.present_at_required_location | atom)))"),
+        (.objects_moved[] | "(moved-object (action-id \(.action_id | atom)) (object \(.object | atom)) (from \(.from | atom)) (to \(.to | atom)))")
       ]' "$facts_file"
       ;;
     coupon-stack)
-      jq -c '[.candidate_actions[0] as $a | "(promotion-action (id \($a.id)) (discounts \($a.discounts | join(" "))) (free-shipping \($a.free_shipping)) (margin-after-stack \(.policy_context.margin_percent_after_stack)))"]' "$facts_file"
+      jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
+      [.candidate_actions[0] as $a | "(promotion-action (id \($a.id | atom)) (discounts \($a.discounts | map(atom) | join(" "))) (free-shipping \($a.free_shipping | atom)) (margin-after-stack \(.policy_context.margin_percent_after_stack | atom)))"]' "$facts_file"
       ;;
     pallet-door)
-      jq -c '[
-        "(clearance (pallet-width \(.policy_context.pallet_width_inches)) (door-width \(.policy_context.door_width_inches)) (load-state \(.policy_context.load_state)))",
-        "(action (id \(.candidate_actions[0].id)) (movement \(.candidate_actions[0].recommendation)))"
+      jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
+      [
+        "(clearance (pallet-width \(.policy_context.pallet_width_inches | atom)) (door-width \(.policy_context.door_width_inches | atom)) (load-state \(.policy_context.load_state | atom)))",
+        "(action (id \(.candidate_actions[0].id | atom)) (movement \(.candidate_actions[0].recommendation | atom)))"
       ]' "$facts_file"
       ;;
     cold-chain)
-      jq -c '. as $root | [
-        ($root.resources[] | select(.id == "cheap-courier") | "(carrier (id \(.id)) (refrigerated \(.refrigerated)) (temperature-logging \(.temperature_logging)) (certified \($root.policy_context.carrier_certified // false)))"),
-        "(custody (handoff-record \($root.policy_context.handoff_record)) (audit-record \($root.policy_context.temperature_monitoring)))"
+      jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
+      . as $root | [
+        ($root.resources[] | select(.id == "cheap-courier") | "(carrier (id \(.id | atom)) (refrigerated \(.refrigerated | atom)) (temperature-logging \(.temperature_logging | atom)) (certified \(($root.policy_context.carrier_certified // false) | atom)))"),
+        "(custody (handoff-record \($root.policy_context.handoff_record | atom)) (audit-record \($root.policy_context.temperature_monitoring | atom)))"
       ]' "$facts_file"
       ;;
   esac
 }
 
 live_clips_eval() {
-  local dir="$1" facts_file="$2" input out facts_json
+  local dir="$1" facts_file="$2" findings_file="${3:-}" input out facts_json
   input="$(tmpfile "csg-live-clips-input.json")"
   out="$(tmpfile "csg-live-clips-output.json")"
   facts_json="$(clips_facts_json "$facts_file")"
   jq -n --rawfile rules "$dir/rules.clp" --argjson facts "$facts_json" \
     '{rules:$rules, facts:$facts, queries:["guardrail-finding"]}' > "$input"
   run_cli clips eval -i "$input" -f json -o "$out" >/dev/null
+  if [[ -n "$findings_file" ]]; then
+    jq '[
+      .result.derived_facts[]?
+      | select(.template == "guardrail-finding")
+      | .slots
+      | {
+          status:(.status // "fail"),
+          rule_id:(."rule-id" // "unknown-rule"),
+          severity:(.severity // "error"),
+          message:(.message // ""),
+          evidence:{engine:"nxuskit-cli clips eval"}
+        }
+    ]' "$out" > "$findings_file"
+  fi
 }
 
 resolution_json() {
@@ -399,9 +489,11 @@ build_report() {
   expected="$dir/expected-output.json"
   baseline="$dir/mock-baseline.json"
   facts="$dir/mock-facts.json"
+  findings="$(tmpfile "csg-findings.json")"
   repair="$dir/mock-repair.json"
   corrected="$dir/mock-corrected.json"
   pro_artifact="$(jq -r '.pro_stage.artifact // empty' "$problem")"
+  jq '.expected_findings' "$expected" > "$findings"
   if [[ -n "$pro_artifact" ]]; then
     pro_json="$dir/$pro_artifact"
   else
@@ -420,7 +512,7 @@ build_report() {
       facts_source="$LIVE_FACT_SOURCE"
       facts_status="$LIVE_FACT_STATUS"
       facts_message="$LIVE_FACT_MESSAGE"
-      if ! live_clips_eval "$dir" "$facts"; then
+      if ! live_clips_eval "$dir" "$facts" "$findings"; then
         if [[ "$MODE" == "live" ]]; then
           die "nxuskit-cli clips eval failed in live mode" 1
         fi
@@ -458,6 +550,7 @@ build_report() {
     --slurpfile expected "$expected" \
     --slurpfile baseline "$baseline" \
     --slurpfile facts "$facts" \
+    --slurpfile findings "$findings" \
     --slurpfile repair "$repair" \
     --slurpfile corrected "$corrected" \
     --slurpfile pro "$pro_json" '
@@ -478,7 +571,7 @@ build_report() {
       ($facts[0]) as $f |
       ($repair[0]) as $r |
       ($corrected[0]) as $c |
-      ($e.expected_findings | map(finding(.; $f))) as $findings |
+      ($findings[0] | map(finding(.; $f))) as $findings |
       ($findings | map(.rule_id + ": " + .message) | join("; ")) as $finding_text |
       {
         original_prompt: $p.baseline_prompt,
@@ -492,8 +585,8 @@ build_report() {
       [
         stage("raw-baseline"; "Raw LLM baseline"; "community"; $source; "fail"; {content:$b.content, expected_bad_answer:$p.expected_bad_answer, notes:($b.notes // [])}; "Baseline answer violates at least one common-sense guardrail."),
         stage("structured-facts"; "Structured fact extraction"; "community"; $facts_source; $facts_status; $f; $facts_message),
-        stage("clips-validation"; "Community CLIPS validation"; "community"; $facts_source; (if any($findings[]; .status == "fail") then "fail" else "pass" end); {findings:$findings, rules_file:"../scenarios/\($scenario)/rules.clp"}; "Validation failed; building deterministic repair packet."),
-        stage("repair-packet"; "Deterministic repair packet"; "community"; $facts_source; "pass"; $packet; "Repair prompt is assembled from findings, not free-form guesswork."),
+        stage("clips-validation"; "Community CLIPS validation"; "community"; $facts_source; (if any($findings[]; .status == "fail") then "fail" else "pass" end); {findings:$findings, rules_file:"../scenarios/\($scenario)/rules.clp"}; (if any($findings[]; .status == "fail") then "Validation failed; building deterministic repair packet." else "Validation passed; no guardrail finding was emitted." end)),
+        stage("repair-packet"; "Deterministic repair packet"; "community"; $facts_source; "pass"; $packet; (if any($findings[]; .status == "fail") then "Repair prompt is assembled from findings, not free-form guesswork." else "Repair packet is retained for walkthrough parity; live findings were empty." end)),
         stage("corrected-answer"; "Corrected answer"; "community"; $source; ($c.validation_status // "pass"); {content:$c.content, validation_status:($c.validation_status // "pass"), expected_corrected_answer:$p.expected_corrected_answer}; "Corrected recommendation passes Community guardrails.")
       ] as $ce |
       ($p.pro_stage // {id:"solver-proof", engine:"solver", artifact:""}) as $ps |

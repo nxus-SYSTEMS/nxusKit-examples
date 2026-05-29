@@ -112,6 +112,24 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+assert_call_controls() {
+  local expected_format="$1"
+  jq -e '.thinking_mode == "disabled"' "$input" >/dev/null || {
+    echo "missing thinking_mode disabled in $input" >&2
+    exit 9
+  }
+  jq -e --arg expected "$expected_format" '.response_format.type == $expected' "$input" >/dev/null || {
+    echo "unexpected response_format in $input" >&2
+    exit 9
+  }
+  if [[ "$expected_format" == "json_schema" ]]; then
+    jq -e '.response_format.schema.required | index("objects_required")' "$input" >/dev/null || {
+      echo "facts response schema missing required fields" >&2
+      exit 9
+    }
+  fi
+}
+
 if [[ "$cmd" == "clips" ]]; then
   printf '{}\n' > "$output"
   exit 0
@@ -119,6 +137,7 @@ fi
 
 prompt="$(jq -r '.messages[-1].content // empty' "$input")"
 if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  assert_call_controls json_schema
   if [[ "$model" != "qwen3:4b" ]]; then
     echo "expected facts model qwen3:4b, got ${model:-<unset>}" >&2
     exit 9
@@ -161,12 +180,14 @@ if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction wa
 
 Trailing prose.'
 elif [[ "$prompt" == *"failed these feasibility checks"* || "$prompt" == *"washing the car requires"* ]]; then
+  assert_call_controls text
   if [[ "$model" != "gemma3" ]]; then
     echo "expected repair model gemma3, got ${model:-<unset>}" >&2
     exit 9
   fi
   content="Drive the car to the car wash, or walk only if the car is already there."
 else
+  assert_call_controls text
   if [[ "$model" != "llama3.2" ]]; then
     echo "expected baseline model llama3.2, got ${model:-<unset>}" >&2
     exit 9
@@ -224,8 +245,21 @@ if [[ "$cmd" == "call" && "$model" != "llama3:8b" ]]; then
   exit 9
 fi
 
+assert_call_controls() {
+  local expected_format="$1"
+  jq -e '.thinking_mode == "disabled"' "$input" >/dev/null || {
+    echo "missing thinking_mode disabled in $input" >&2
+    exit 9
+  }
+  jq -e --arg expected "$expected_format" '.response_format.type == $expected' "$input" >/dev/null || {
+    echo "unexpected response_format in $input" >&2
+    exit 9
+  }
+}
+
 prompt="$(jq -r '.messages[-1].content // empty' "$input")"
 if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  assert_call_controls json_schema
   content='{
     "goal": "Get a car washed",
     "candidate_actions": [{"name": "Walk or jog"}],
@@ -237,8 +271,10 @@ if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction wa
     "confidence": 0.8
   }'
 elif [[ "$prompt" == *"failed these feasibility checks"* || "$prompt" == *"washing the car requires"* ]]; then
+  assert_call_controls text
   content="Drive the car to the car wash, or walk only if the car is already there."
 else
+  assert_call_controls text
   content="Walk to the car wash because it is nearby."
 fi
 jq -n --arg content "$content" '{result:{content:$content}}' > "$output"
@@ -258,6 +294,20 @@ assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .status' <<<
 [[ "$(jq -r '.stages[] | select(.id == "structured-facts") | .message' <<<"$malformed_live")" == *"using checked-in fact fixture"* ]] || {
   echo "FAIL malformed fact extraction did not fall back to fixture" >&2
   echo "$malformed_live" >&2
+  exit 1
+}
+
+[[ -x "$SCRIPT_DIR/strict_live_smoke.sh" ]] || {
+  echo "FAIL strict live smoke script must be executable" >&2
+  exit 1
+}
+set +e
+strict_gate_msg="$(RUN_LIVE_SMOKE=0 "$SCRIPT_DIR/strict_live_smoke.sh" 2>&1 >/dev/null)"
+strict_gate_rc=$?
+set -e
+[[ "$strict_gate_rc" -eq 2 && "$strict_gate_msg" == *"RUN_LIVE_SMOKE=1"* ]] || {
+  echo "FAIL strict live smoke should be gated behind RUN_LIVE_SMOKE=1" >&2
+  echo "$strict_gate_msg" >&2
   exit 1
 }
 

@@ -39,6 +39,20 @@ REQUIRED_SCENARIO_FILES = (
     "mock-repair.json",
     "mock-corrected.json",
 )
+FACTS_JSON_SHAPE = (
+    '{"goal":{"object":"<object>","outcome":"<outcome>",'
+    '"target_location":"<location>"},'
+    '"candidate_actions":[{"id":"<action-id>","recommendation":"<action>",'
+    '"target_location":"<location>","moves":["<object-or-actor>"]}],'
+    '"objects_required":[{"object":"<object>","required_location":"<location>",'
+    '"current_location":"<location>","present_at_required_location":false}],'
+    '"objects_moved":[{"action_id":"<action-id>","object":"<object-or-actor>",'
+    '"from":"<location>","to":"<location>"}],'
+    '"resources":[{"id":"<resource>","type":"<type>","state":"<state>"}],'
+    '"constraints":[{"id":"<constraint-id>","type":"<type>"}],'
+    '"policy_context":{"domain":"physical_planning","distance_meters":50},'
+    '"confidence":0.8}'
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIO_ROOT = ROOT / "scenarios"
@@ -375,6 +389,16 @@ def unwrap_clips(value: Any) -> Any:
     return value
 
 
+def normalize_clips_slot_values(value: Any) -> dict[str, Any]:
+    if isinstance(value, str):
+        parsed = json.loads(value)
+    elif isinstance(value, dict):
+        parsed = value
+    else:
+        raise TypeError(f"unsupported CLIPS slot value shape: {type(value).__name__}")
+    return parsed
+
+
 def live_clips_findings(
     scenario: dict[str, Any], facts: dict[str, Any]
 ) -> dict[str, Any]:
@@ -390,7 +414,7 @@ def live_clips_findings(
         fact_indices = clips.facts_by_template("guardrail-finding")
         findings = []
         for fact_index in fact_indices:
-            slots = json.loads(clips.fact_slot_values(fact_index))
+            slots = normalize_clips_slot_values(clips.fact_slot_values(fact_index))
             findings.append(
                 {
                     "status": str(unwrap_clips(slots.get("status", "fail"))),
@@ -538,15 +562,22 @@ def make_provider(phase: str | None = None):
 
 
 def provider_chat(
-    provider: Any, prompt: str, *, system: str, max_tokens: int = 700
+    provider: Any,
+    prompt: str,
+    *,
+    system: str,
+    max_tokens: int = 700,
+    response_format: Any | None = None,
 ) -> str:
     from nxuskit import Message
 
-    response = provider.chat(
-        [Message.system(system), Message.user(prompt)],
-        temperature=0.1,
-        max_tokens=max_tokens,
-    )
+    kwargs: dict[str, Any] = {
+        "temperature": 0.1,
+        "max_tokens": max_tokens,
+    }
+    if response_format is not None:
+        kwargs["response_format"] = response_format
+    response = provider.chat([Message.system(system), Message.user(prompt)], **kwargs)
     return str(response.content).strip()
 
 
@@ -694,16 +725,31 @@ def parse_facts_response(content: str) -> tuple[dict[str, Any], str | None]:
     return facts, warning
 
 
+def structured_json_response_format() -> Any | None:
+    try:
+        from nxuskit import ResponseFormat
+    except Exception:
+        return None
+    return getattr(ResponseFormat, "JSON", None)
+
+
 def live_structured_facts(
     provider: Any, extraction_prompt: str
 ) -> tuple[dict[str, Any], str, str]:
     prompt = extraction_prompt
     system = "Extract typed JSON facts. Return JSON only."
     attempts: list[str] = []
+    response_format = structured_json_response_format()
 
     for attempt in (1, 2):
         try:
-            content = provider_chat(provider, prompt, system=system, max_tokens=900)
+            content = provider_chat(
+                provider,
+                prompt,
+                system=system,
+                max_tokens=900,
+                response_format=response_format,
+            )
             facts, warning = parse_facts_response(content)
         except Exception as exc:
             attempts.append(f"attempt {attempt}: {exc}")
@@ -739,7 +785,12 @@ def live_ce_stages(
     extraction_prompt = (
         f"{problem['extraction_prompt']}\n\n"
         "Return only JSON with keys goal, candidate_actions, objects_required, "
-        "objects_moved, resources, constraints, policy_context, confidence.\n\n"
+        "objects_moved, resources, constraints, policy_context, confidence. "
+        "Use arrays for candidate_actions, objects_required, objects_moved, "
+        "resources, and constraints. Do not use singular keys such as "
+        "candidate_action or feasibility_constraints.\n\n"
+        "Required shape; replace placeholders with facts extracted from the answer:\n"
+        f"{FACTS_JSON_SHAPE}\n\n"
         f"Prompt:\n{problem['baseline_prompt']}\n\nAnswer:\n{raw}"
     )
     fact_source = "live"

@@ -24,12 +24,12 @@
     {
       "date_observed": "2026-05-06",
       "label": "Opper.ai",
-      "note": "Public discussion of common-sense evaluation examples referenced in the launch PoR."
+      "note": "Public discussion of common-sense evaluation examples used as scenario context."
     },
     {
       "date_observed": "2026-05-06",
       "label": "Focus AI",
-      "note": "Public article lineage referenced by the launch PoR for common-sense prompt failures."
+      "note": "Public discussion of common-sense prompt failures used as scenario context."
     },
     {
       "date_observed": "2026-05-06",

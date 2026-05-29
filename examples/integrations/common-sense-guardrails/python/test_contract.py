@@ -336,6 +336,60 @@ def test_live_mode_falls_back_when_structured_fact_json_invalid() -> None:
     assert structured["output"] == scenario["facts"]
 
 
+def test_clips_slot_values_accept_string_and_dict() -> None:
+    encoded = json.dumps(
+        {
+            "status": {"value": "fail"},
+            "rule-id": {"value": "car-required-at-wash"},
+        }
+    )
+    parsed = CSG.normalize_clips_slot_values(encoded)
+    assert parsed["status"]["value"] == "fail"
+    direct = CSG.normalize_clips_slot_values({"status": "pass"})
+    assert direct["status"] == "pass"
+
+
+def test_live_structured_facts_requests_json_response_format() -> None:
+    captured: list[object] = []
+
+    class FakeResponseFormat:
+        JSON = object()
+
+    original_module = sys.modules.get("nxuskit")
+    fake_module = type(sys)("nxuskit")
+    fake_module.ResponseFormat = FakeResponseFormat
+    sys.modules["nxuskit"] = fake_module
+
+    original_provider_chat = CSG.provider_chat
+    try:
+        CSG.provider_chat = lambda *_args, **kwargs: (
+            captured.append(kwargs.get("response_format"))
+            or json.dumps(
+                {
+                    "goal": "wash car",
+                    "candidate_actions": [],
+                    "objects_required": [],
+                    "objects_moved": [],
+                    "resources": [],
+                    "constraints": [],
+                    "policy_context": {},
+                    "confidence": 0.9,
+                }
+            )
+        )
+        facts, status, _message = CSG.live_structured_facts(object(), "extract")
+    finally:
+        CSG.provider_chat = original_provider_chat
+        if original_module is None:
+            sys.modules.pop("nxuskit", None)
+        else:
+            sys.modules["nxuskit"] = original_module
+
+    assert facts["goal"] == "wash car"
+    assert status == "pass"
+    assert captured == [FakeResponseFormat.JSON]
+
+
 def test_structured_json_rejects_wrong_fact_shape() -> None:
     content = json.dumps(
         {
