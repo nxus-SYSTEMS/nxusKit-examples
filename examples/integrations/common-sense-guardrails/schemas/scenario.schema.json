@@ -10,6 +10,34 @@
       "minLength": 1,
       "type": "string"
     },
+    "bn_stage": {
+      "additionalProperties": true,
+      "properties": {
+        "artifact": {
+          "type": "string"
+        },
+        "engine": {
+          "const": "bn"
+        },
+        "guardrail": {
+          "type": "string"
+        },
+        "id": {
+          "const": "bn-risk"
+        },
+        "tier": {
+          "const": "community"
+        }
+      },
+      "required": [
+        "id",
+        "engine",
+        "artifact",
+        "guardrail",
+        "tier"
+      ],
+      "type": "object"
+    },
     "expected_bad_answer": {
       "minLength": 1,
       "type": "string"

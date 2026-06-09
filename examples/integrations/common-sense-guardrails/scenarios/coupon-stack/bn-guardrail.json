@@ -1,0 +1,70 @@
+{
+  "engine": "bn",
+  "evidence_mapping": [
+    {
+      "node": "non_stackable_conflict",
+      "source": "policy_context.non_stackable_count",
+      "threshold": 1,
+      "transform": "greater_than"
+    },
+    {
+      "node": "margin_floor_breach",
+      "source": "policy_context.margin_percent_after_stack",
+      "threshold": 20,
+      "transform": "less_than"
+    },
+    {
+      "high_min": 2,
+      "node": "discount_count_bucket",
+      "source": "candidate_action.discounts",
+      "transform": "count_bucket"
+    },
+    {
+      "equals": "clearance",
+      "node": "clearance_item",
+      "source": "policy_context.item_type",
+      "transform": "equals"
+    }
+  ],
+  "fail_message": "Bayesian promotion risk model marks this checkout recommendation as review-required.",
+  "fail_rule_id": "coupon-stack-bn-needs-review",
+  "fail_state": "yes",
+  "label": "Bayesian risk / confidence",
+  "mock_results": {
+    "baseline": {
+      "evidence": {
+        "clearance_item": "yes",
+        "discount_count_bucket": "high",
+        "margin_floor_breach": "yes",
+        "non_stackable_conflict": "yes"
+      },
+      "posteriors": {
+        "needs_review": {
+          "no": 0.04,
+          "yes": 0.96
+        }
+      }
+    },
+    "corrected": {
+      "evidence": {
+        "clearance_item": "yes",
+        "discount_count_bucket": "low",
+        "margin_floor_breach": "no",
+        "non_stackable_conflict": "no"
+      },
+      "posteriors": {
+        "needs_review": {
+          "no": 0.78,
+          "yes": 0.22
+        }
+      }
+    }
+  },
+  "network": "bn-network.json",
+  "pass_message": "Bayesian promotion risk model marks this checkout recommendation as acceptable.",
+  "pass_rule_id": "bn-risk-acceptable",
+  "query_node": "needs_review",
+  "repair_hint": "Choose a single eligible discount path and preserve the margin floor.",
+  "stage_id": "bn-risk",
+  "threshold": 0.5
+}

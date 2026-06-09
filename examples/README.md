@@ -74,11 +74,11 @@ A curated collection of **34 production-ready examples** demonstrating LLM integ
 | [CLI Assistant](integrations/cli-assistant/) | Community | Integration | Build an interactive terminal assistant powered by an LLM | Developer productivity tool, command-line copilot | LLM | Rust, Go |
 | [CLIPS Basics](integrations/clips-basics/) | Community | Integration | Load rules, assert facts, and run the CLIPS inference engine | Business rules engine, compliance checking | CLIPS | Rust, Go, CLI/Bash |
 | [CLIPS LLM Hybrid](integrations/clips-llm-hybrid/) | Community | Integration | Combine deterministic CLIPS rules with LLM-based reasoning | Explainable AI decisions, regulated industry automation | LLM, CLIPS | Rust, Go, Python, CLI/Bash |
-| [Common Sense Guardrails](integrations/common-sense-guardrails/) | Community | Integration | Refine LLM recommendations with structured extraction, rules, retry repair, and optional Pro proof | LLM answer validation; Policy enforcement; Operational decision support | LLM, CLIPS | Python, CLI/Bash |
-| &nbsp;&nbsp;↳ `car-wash` | | | Catch the classic car-wash walk-vs-drive failure with object-presence rules and optional solver proof | | | |
-| &nbsp;&nbsp;↳ `coupon-stack` | | | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation | | | |
-| &nbsp;&nbsp;↳ `pallet-door` | | | Block unsafe warehouse advice that ignores dimensional clearance, with optional solver what-if | | | |
-| &nbsp;&nbsp;↳ `cold-chain` | | | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation | | | |
+| [Common Sense Guardrails](integrations/common-sense-guardrails/) | Community | Integration | Refine LLM recommendations with structured extraction, selected guardrails, retry repair, and reevaluation | LLM answer validation; Policy enforcement; Operational decision support | LLM, CLIPS, Solver, BN, ZEN | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `car-wash` | | | Catch the classic car-wash walk-vs-drive failure with CLIPS rules and optional Solver/Z3 feasibility | | | |
+| &nbsp;&nbsp;↳ `coupon-stack` | | | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation and BN risk scoring | | | |
+| &nbsp;&nbsp;↳ `pallet-door` | | | Block unsafe warehouse advice that ignores dimensional clearance, with optional Solver/Z3 feasibility | | | |
+| &nbsp;&nbsp;↳ `cold-chain` | | | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation and BN review-risk scoring | | | |
 | &nbsp;&nbsp;↳ real-world: **LLM answer validation** | | | | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | | |
 | &nbsp;&nbsp;↳ real-world: **Policy enforcement** | | | | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | | |
 | &nbsp;&nbsp;↳ real-world: **Operational decision support** | | | | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | | |
@@ -454,6 +454,7 @@ Event planning, capital budgeting, portfolio allocation
 
 - [Solver](patterns/solver/)
 - [Solver What If](patterns/solver-what-if/)
+- [Common Sense Guardrails](integrations/common-sense-guardrails/)
 - [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/)
 - [LLM Solver Hybrid](integrations/llm-solver-hybrid/)
 - [Puzzler](apps/puzzler/)
@@ -461,12 +462,14 @@ Event planning, capital budgeting, portfolio allocation
 ### BN
 
 - [Bayesian Inference](patterns/bayesian-inference/)
+- [Common Sense Guardrails](integrations/common-sense-guardrails/)
 - [Model Research Harness](integrations/model-research-harness/)
 - [BN Solver CLIPS Pipeline](integrations/bn-solver-clips-pipeline/)
 - [BN Structure Learning](integrations/bn-structure-learning/)
 
 ### ZEN
 
+- [Common Sense Guardrails](integrations/common-sense-guardrails/)
 - [ZEN Decisions](integrations/zen-decisions/)
 
 ### Vision

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# fmt: off
 """Emit conformance/example_smoke_matrix.json from conformance/examples_manifest.json.
 
 The matrix is consumed by scripts/test-examples.sh --smoke-run. Re-run this script
@@ -272,6 +273,29 @@ def main() -> int:
                         "requires_local_ollama_go": False,
                         "stage": "pro",
                         "stage_tier": "pro",
+                        "requires_pro": False,
+                    }
+                )
+                bn_cmd = (
+                    ["bash", "main.sh"]
+                    if lang == "bash"
+                    else ["python3", "main.py"]
+                ) + ["--scenario", "coupon-stack", "--mode", "mock", "--guardrails", "bn"]
+                runs.append(
+                    {
+                        "id": f"{name}|{lang}|bn",
+                        "example": name,
+                        "tier": tier,
+                        "category": category,
+                        "language": lang,
+                        "cwd_rel": rel.replace("\\", "/"),
+                        "command": bn_cmd,
+                        "entitlement_probe": False,
+                        "requires_cloud_llm": False,
+                        "requires_local_lmstudio": False,
+                        "requires_local_ollama_go": False,
+                        "stage": "bn",
+                        "stage_tier": "community",
                         "requires_pro": False,
                     }
                 )

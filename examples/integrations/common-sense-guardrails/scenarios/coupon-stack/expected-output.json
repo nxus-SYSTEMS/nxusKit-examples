@@ -1,4 +1,10 @@
 {
+  "bn_stage": {
+    "id": "bn-risk",
+    "mode": "mock-fixture",
+    "query_node": "needs_review",
+    "threshold": 0.5
+  },
   "expected_correction_contains": [
     "single",
     "eligible"

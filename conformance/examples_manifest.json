@@ -737,30 +737,30 @@
     },
     {
       "name": "common-sense-guardrails",
-      "description": "Progressive LLM guardrails with Community CLIPS validation and optional Pro proof stages",
+      "description": "Progressive LLM guardrails with CE CLIPS/BN and optional Pro Solver/ZEN repair feedback",
       "category": "integrations",
       "required": true,
-      "scenario": "Refine LLM recommendations with structured extraction, rules, retry repair, and optional Pro proof",
+      "scenario": "Refine LLM recommendations with structured extraction, selected guardrails, retry repair, and reevaluation",
       "scenarios": [
         {
           "name": "car-wash",
           "cli": "--scenario car-wash",
-          "description": "Catch the classic car-wash walk-vs-drive failure with object-presence rules and optional solver proof"
+          "description": "Catch the classic car-wash walk-vs-drive failure with CLIPS rules and optional Solver/Z3 feasibility"
         },
         {
           "name": "coupon-stack",
           "cli": "--scenario coupon-stack",
-          "description": "Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation"
+          "description": "Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation and BN risk scoring"
         },
         {
           "name": "pallet-door",
           "cli": "--scenario pallet-door",
-          "description": "Block unsafe warehouse advice that ignores dimensional clearance, with optional solver what-if"
+          "description": "Block unsafe warehouse advice that ignores dimensional clearance, with optional Solver/Z3 feasibility"
         },
         {
           "name": "cold-chain",
           "cli": "--scenario cold-chain",
-          "description": "Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation"
+          "description": "Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation and BN review-risk scoring"
         }
       ],
       "real_world_application": "LLM answer validation, policy enforcement, operational decision support",
@@ -780,7 +780,10 @@
       ],
       "tech_tags": [
         "LLM",
-        "CLIPS"
+        "CLIPS",
+        "Solver",
+        "BN",
+        "ZEN"
       ],
       "languages": [
         "python",
@@ -791,7 +794,7 @@
         "bash": "examples/integrations/common-sense-guardrails/bash"
       },
       "tier": "community",
-      "edition_note": "Runs in Community Edition. Pro adds optional Solver and ZEN proof stages.",
+      "edition_note": "Runs in Community Edition with CLIPS and selected BN risk scoring. Pro adds Solver/Z3 and ZEN guardrails for repair feedback when selected.",
       "tier_profile": {
         "schema_version": "1.0.0",
         "minimum_tier": "community",
@@ -799,8 +802,8 @@
           "community",
           "pro"
         ],
-        "default_stage": "ce",
-        "summary": "Community guardrails with optional Pro proof stages.",
+        "default_stage": "auto",
+        "summary": "Selected guardrail repair loop: CE CLIPS and BN mechanisms plus optional Pro Solver/ZEN mechanisms.",
         "badges": [
           {
             "label": "Community",
@@ -826,37 +829,49 @@
             "fallback": "not_applicable"
           },
           {
+            "id": "bn-risk",
+            "label": "Bayesian risk / confidence",
+            "tier": "community",
+            "required": false,
+            "enabled_by_default": true,
+            "requires_entitlement": false,
+            "capabilities": [
+              "BN"
+            ],
+            "fallback": "not_applicable"
+          },
+          {
             "id": "solver-proof",
             "label": "Solver proof",
             "tier": "pro",
             "required": false,
-            "enabled_by_default": false,
+            "enabled_by_default": true,
             "requires_entitlement": true,
             "capabilities": [
               "Solver"
             ],
-            "fallback": "skip_with_clear_message"
+            "fallback": "auto_downgrade_with_warning"
           },
           {
             "id": "zen-policy",
             "label": "ZEN policy table",
             "tier": "pro",
             "required": false,
-            "enabled_by_default": false,
+            "enabled_by_default": true,
             "requires_entitlement": true,
             "capabilities": [
               "ZEN"
             ],
-            "fallback": "skip_with_clear_message"
+            "fallback": "auto_downgrade_with_warning"
           }
         ]
       },
       "difficulty": "advanced",
       "difficulty_override": true,
-      "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, rule findings, repair packets, and optional Pro evidence.",
+      "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, selected CLIPS/BN findings, iterative repair packets, and optional Pro repair feedback.",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
-      "blurb": "The common-sense-guardrails example shows how to make LLM recommendations safer without hiding behind vague prompt advice. Each scenario captures a plausible bad answer, extracts typed facts, applies Community CLIPS findings, builds a deterministic repair packet, and returns a corrected recommendation. Four launch scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. Python and CLI/Bash implementations share the same fixtures, and optional mock Pro stages show where Solver or ZEN evidence can strengthen the audit trail.",
-      "content_hash": "3075873d98867f751dd42dacee3ba2d003b00667eb619a3ebec1ebf8381dde17"
+      "blurb": "The common-sense-guardrails example turns LLM recommendations into typed facts, runs selected CLIPS, BN, Solver/Z3, or ZEN guardrails, builds a deterministic repair packet from failed findings, retries the answer, and reevaluates it. Four scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. BN is used only where uncertainty or risk scoring fits coupon-stack and cold-chain evidence; car-wash and pallet-door stay with crisp rule and feasibility mechanisms. Python and Bash share fixtures, and live local guardrails call nxuskit-cli for CLIPS, BN, Solver, and ZEN where selected.",
+      "content_hash": "5a0615f1a81f4c9b847340f449725594b1f4a89e136417139dcb674a748ec6ce"
     },
     {
       "name": "model-research-harness",

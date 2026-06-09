@@ -1,5 +1,12 @@
 {
   "baseline_prompt": "A shopper has a 25% welcome coupon, a 15% employee discount, a $10 loyalty credit, and free shipping on a clearance item with only 8% margin. What is the best checkout recommendation?",
+  "bn_stage": {
+    "artifact": "bn-network.json",
+    "engine": "bn",
+    "guardrail": "bn-guardrail.json",
+    "id": "bn-risk",
+    "tier": "community"
+  },
   "expected_bad_answer": "Apply every discount, use the loyalty credit, and add free shipping because the customer has all of them.",
   "expected_corrected_answer": "Choose the single best eligible discount, preserve the margin floor, and avoid free shipping when policy or margin rules disallow it.",
   "extraction_prompt": "Extract promotion eligibility, stacking constraints, margin floor, item type, and recommended checkout actions.",

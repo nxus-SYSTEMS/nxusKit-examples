@@ -90,11 +90,11 @@ python examples/patterns/basic-chat/python/main.py                        # Pyth
 | [cli-assistant](examples/integrations/cli-assistant/) | Interactive CLI assistant with LLM backend | Rust, Go |
 | [clips-basics](examples/integrations/clips-basics/) | CLIPS rule engine basics via nxusKit SDK | Rust, Go, CLI/Bash |
 | [clips-llm-hybrid](examples/integrations/clips-llm-hybrid/) | Hybrid CLIPS rules + LLM reasoning | Rust, Go, Python, CLI/Bash |
-| [common-sense-guardrails](examples/integrations/common-sense-guardrails/) | Progressive LLM guardrails with Community CLIPS validation and optional Pro proof stages | Python, CLI/Bash |
-| &nbsp;&nbsp;↳ `car-wash` | Catch the classic car-wash walk-vs-drive failure with object-presence rules and optional solver proof | |
-| &nbsp;&nbsp;↳ `coupon-stack` | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation | |
-| &nbsp;&nbsp;↳ `pallet-door` | Block unsafe warehouse advice that ignores dimensional clearance, with optional solver what-if | |
-| &nbsp;&nbsp;↳ `cold-chain` | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation | |
+| [common-sense-guardrails](examples/integrations/common-sense-guardrails/) | Progressive LLM guardrails with CE CLIPS/BN and optional Pro Solver/ZEN repair feedback | Python, CLI/Bash |
+| &nbsp;&nbsp;↳ `car-wash` | Catch the classic car-wash walk-vs-drive failure with CLIPS rules and optional Solver/Z3 feasibility | |
+| &nbsp;&nbsp;↳ `coupon-stack` | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation and BN risk scoring | |
+| &nbsp;&nbsp;↳ `pallet-door` | Block unsafe warehouse advice that ignores dimensional clearance, with optional Solver/Z3 feasibility | |
+| &nbsp;&nbsp;↳ `cold-chain` | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation and BN review-risk scoring | |
 | &nbsp;&nbsp;↳ real-world: **LLM answer validation** | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | |
 | &nbsp;&nbsp;↳ real-world: **Policy enforcement** | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | |
 | &nbsp;&nbsp;↳ real-world: **Operational decision support** | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | |

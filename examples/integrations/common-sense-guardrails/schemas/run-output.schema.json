@@ -14,6 +14,50 @@
       ],
       "type": "string"
     },
+    "guardrail_selection": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "auto",
+            "explicit"
+          ],
+          "type": "string"
+        },
+        "requested": {
+          "type": "string"
+        },
+        "selected": {
+          "items": {
+            "enum": [
+              "clips",
+              "solver",
+              "zen",
+              "bn"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "requested",
+        "selected",
+        "mode",
+        "warnings"
+      ],
+      "type": "object"
+    },
+    "max_repair_attempts": {
+      "minimum": 1,
+      "type": "integer"
+    },
     "mode": {
       "enum": [
         "auto",
@@ -54,6 +98,9 @@
         "message"
       ],
       "type": "object"
+    },
+    "requested_guardrails": {
+      "type": "string"
     },
     "requested_stage": {
       "enum": [
@@ -136,6 +183,9 @@
     "mode",
     "resolved_mode",
     "requested_stage",
+    "requested_guardrails",
+    "guardrail_selection",
+    "max_repair_attempts",
     "mode_resolution",
     "stages",
     "final_status",

@@ -1,0 +1,144 @@
+{
+  "cpds": {
+    "audit_fit": {
+      "probabilities": [
+        0.94,
+        0.06,
+        0.45,
+        0.55,
+        0.4,
+        0.6,
+        0.08,
+        0.92
+      ]
+    },
+    "carrier_certified": {
+      "probabilities": [
+        0.7,
+        0.3
+      ]
+    },
+    "carrier_fit": {
+      "probabilities": [
+        0.95,
+        0.05,
+        0.35,
+        0.65,
+        0.45,
+        0.55,
+        0.05,
+        0.95
+      ]
+    },
+    "handoff_record": {
+      "probabilities": [
+        0.75,
+        0.25
+      ]
+    },
+    "needs_review": {
+      "probabilities": [
+        0.06,
+        0.94,
+        0.62,
+        0.38,
+        0.7,
+        0.3,
+        0.96,
+        0.04
+      ]
+    },
+    "refrigerated": {
+      "probabilities": [
+        0.7,
+        0.3
+      ]
+    },
+    "temperature_logging": {
+      "probabilities": [
+        0.75,
+        0.25
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "carrier_certified",
+      "to": "carrier_fit"
+    },
+    {
+      "from": "refrigerated",
+      "to": "carrier_fit"
+    },
+    {
+      "from": "temperature_logging",
+      "to": "audit_fit"
+    },
+    {
+      "from": "handoff_record",
+      "to": "audit_fit"
+    },
+    {
+      "from": "carrier_fit",
+      "to": "needs_review"
+    },
+    {
+      "from": "audit_fit",
+      "to": "needs_review"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "carrier_certified",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "refrigerated",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "temperature_logging",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "handoff_record",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "carrier_fit",
+      "states": [
+        "acceptable",
+        "risky"
+      ]
+    },
+    {
+      "name": "audit_fit",
+      "states": [
+        "complete",
+        "incomplete"
+      ]
+    },
+    {
+      "name": "needs_review",
+      "states": [
+        "yes",
+        "no"
+      ]
+    }
+  ],
+  "query_nodes": [
+    "needs_review"
+  ]
+}

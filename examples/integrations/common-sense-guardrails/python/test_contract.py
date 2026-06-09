@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# fmt: off
 """Contract tests for the common-sense guardrails example."""
 
 from __future__ import annotations
@@ -21,6 +22,8 @@ REPO = ROOT.parents[2]
 MANIFEST = REPO / "conformance" / "examples_manifest.json"
 SMOKE_MATRIX = REPO / "conformance" / "example_smoke_matrix.json"
 SCENARIOS = ("car-wash", "coupon-stack", "pallet-door", "cold-chain")
+BN_SCENARIOS = ("coupon-stack", "cold-chain")
+NO_BN_SCENARIOS = ("car-wash", "pallet-door")
 CE_IDS = (
     "raw-baseline",
     "structured-facts",
@@ -52,6 +55,8 @@ def clean_env() -> dict[str, str]:
         "LMSTUDIO_BASE_URL",
         "NXUSKIT_LICENSE_TOKEN",
         "ENT_TOKEN_FILE",
+        "NXUSKIT_COMMON_SENSE_FIXTURE_LLM",
+        "NXUSKIT_COMMON_SENSE_SIMULATE_LIVE",
     ):
         env.pop(key, None)
     return env
@@ -82,24 +87,57 @@ def load_expected(scenario: str) -> dict:
     )
 
 
+def scenario_pro_engine(scenario: str) -> str:
+    problem = json.loads((ROOT / "scenarios" / scenario / "problem.json").read_text())
+    return problem.get("pro_stage", {}).get("engine", "solver")
+
+
+def scenario_pro_stage_id(scenario: str) -> str:
+    problem = json.loads((ROOT / "scenarios" / scenario / "problem.json").read_text())
+    pro_stage = problem.get("pro_stage", {})
+    return pro_stage.get(
+        "id", "zen-policy" if scenario_pro_engine(scenario) == "zen" else "solver-proof"
+    )
+
+
+def scenario_supports_bn(scenario: str) -> bool:
+    problem = json.loads((ROOT / "scenarios" / scenario / "problem.json").read_text())
+    return bool(problem.get("bn_stage"))
+
+
+def expected_auto_selection(scenario: str) -> list[str]:
+    selected = ["clips", scenario_pro_engine(scenario)]
+    if scenario_supports_bn(scenario):
+        selected.append("bn")
+    return selected
+
+
+def stage_by_id(report: dict, stage_id: str) -> dict:
+    return next(stage for stage in report["stages"] if stage["id"] == stage_id)
+
+
 def assert_ce_report(report: dict, scenario: str) -> None:
     expected = load_expected(scenario)
     assert report["example"] == "common-sense-guardrails"
     assert report["scenario"] == scenario
     assert report["final_status"] == "pass"
+    assert report["guardrail_selection"]["selected"] == ["clips"]
+    assert report["max_repair_attempts"] == 3
     stage_ids = [stage["id"] for stage in report["stages"]]
     for stage_id in CE_IDS:
         assert stage_id in stage_ids
     assert expected["required_stage_ids"] == list(CE_IDS)
-    clips = next(
-        stage for stage in report["stages"] if stage["id"] == "clips-validation"
-    )
-    got_rule_ids = {finding["rule_id"] for finding in clips["output"]["findings"]}
+    clips = stage_by_id(report, "clips-validation")
+    got_rule_ids = {
+        finding["rule_id"]
+        for finding in clips["output"]["attempts"][0]["findings"]
+    }
     want_rule_ids = {finding["rule_id"] for finding in expected["expected_findings"]}
     assert want_rule_ids <= got_rule_ids
-    corrected = next(
-        stage for stage in report["stages"] if stage["id"] == "corrected-answer"
+    assert all(
+        finding["status"] == "pass" for finding in clips["output"]["findings"]
     )
+    corrected = stage_by_id(report, "corrected-answer")
     content = corrected["output"]["content"].lower()
     for token in expected["expected_correction_contains"]:
         assert token.lower() in content
@@ -129,26 +167,109 @@ def test_car_wash_repair_packet_and_order() -> None:
     assert packet["raw_response"]
     assert packet["extracted_facts"]["objects_required"]
     assert packet["findings"][0]["rule_id"] == "car-required-at-wash"
+    assert packet["findings"][0]["mechanism"] == "clips"
     assert "car" in packet["retry_prompt"].lower()
 
 
 def test_all_scenarios_mock_pro_and_all() -> None:
     for scenario in SCENARIOS:
+        engine = scenario_pro_engine(scenario)
+        pro_stage_id = scenario_pro_stage_id(scenario)
         pro = run_json("--scenario", scenario, "--mode", "mock", "--stage", "pro")
-        assert len(pro["stages"]) == 1
-        assert pro["stages"][0]["tier"] == "pro"
-        assert pro["stages"][0]["source"] == "mock"
-        assert pro["stages"][0]["output"]["entitlement_mode"] == "mock-fixture"
+        assert [stage["id"] for stage in pro["stages"]] == [
+            "raw-baseline",
+            "structured-facts",
+            pro_stage_id,
+            "repair-packet",
+            "corrected-answer",
+        ]
+        assert pro["guardrail_selection"]["selected"] == [engine]
+        pro_stage = next(stage for stage in pro["stages"] if stage["id"] == pro_stage_id)
+        assert pro_stage["tier"] == "pro"
+        assert pro_stage["source"] == "mock"
+        assert pro_stage["output"]["mechanism"] == engine
+        assert pro_stage["output"]["attempts"][0]["status"] == "fail"
+        assert pro_stage["output"]["attempts"][1]["status"] == "pass"
+        assert pro_stage["output"]["attempts"][0]["findings"][0]["evidence"][
+            "runtime_executed"
+        ] is False
+
         combined = run_json("--scenario", scenario, "--mode", "mock", "--stage", "all")
-        assert len(combined["stages"]) == 6
-        assert combined["stages"][-1]["tier"] == "pro"
+        expected_stage_count = 7 if scenario_supports_bn(scenario) else 6
+        assert len(combined["stages"]) == expected_stage_count
+        assert combined["guardrail_selection"]["selected"] == expected_auto_selection(scenario)
+        combined_pro_stage = stage_by_id(combined, pro_stage_id)
+        assert combined_pro_stage["tier"] == "pro"
+        if scenario_supports_bn(scenario):
+            combined_bn_stage = stage_by_id(combined, "bn-risk")
+            assert combined_bn_stage["tier"] == "community"
+            assert combined_bn_stage["output"]["mechanism"] == "bn"
+            assert combined_bn_stage["output"]["attempts"][0]["status"] == "fail"
+            assert combined_bn_stage["output"]["attempts"][1]["status"] == "pass"
+        assert combined["stages"][-1]["id"] == "corrected-answer"
+        assert combined["stages"][-1]["tier"] == "community"
 
 
-def test_simulated_live_all_skips_pro_without_entitlement() -> None:
+def test_bn_guardrails_selected_only_for_uncertainty_scenarios() -> None:
+    for scenario in BN_SCENARIOS:
+        report = run_json("--scenario", scenario, "--mode", "mock", "--guardrails", "bn")
+        assert report["guardrail_selection"]["selected"] == ["bn"]
+        assert [stage["id"] for stage in report["stages"]] == [
+            "raw-baseline",
+            "structured-facts",
+            "bn-risk",
+            "repair-packet",
+            "corrected-answer",
+        ]
+        bn_stage = stage_by_id(report, "bn-risk")
+        assert bn_stage["label"] == "Bayesian risk / confidence"
+        assert bn_stage["tier"] == "community"
+        assert bn_stage["source"] == "mock"
+        assert bn_stage["output"]["mechanism"] == "bn"
+        assert bn_stage["output"]["attempts"][0]["status"] == "fail"
+        assert bn_stage["output"]["attempts"][1]["status"] == "pass"
+        first_finding = bn_stage["output"]["attempts"][0]["findings"][0]
+        assert first_finding["mechanism"] == "bn"
+        assert first_finding["status"] == "fail"
+        assert first_finding["evidence"]["query_node"] == "needs_review"
+        assert first_finding["evidence"]["runtime_executed"] is False
+        repair = stage_by_id(report, "repair-packet")["output"]
+        assert [finding["mechanism"] for finding in repair["findings"]] == ["bn"]
+
+    for scenario in NO_BN_SCENARIOS:
+        proc = run_py("--scenario", scenario, "--mode", "mock", "--guardrails", "bn", "--json")
+        assert proc.returncode != 0
+        assert "does not support BN" in proc.stderr
+
+
+def test_combined_bn_guardrails_and_auto_selection() -> None:
+    for scenario in BN_SCENARIOS:
+        engine = scenario_pro_engine(scenario)
+        for requested in ("clips,bn", f"clips,{engine},bn"):
+            report = run_json("--scenario", scenario, "--mode", "mock", "--guardrails", requested)
+            assert report["guardrail_selection"]["selected"] == requested.split(",")
+            assert stage_by_id(report, "clips-validation")["output"]["mechanism"] == "clips"
+            assert stage_by_id(report, "bn-risk")["output"]["mechanism"] == "bn"
+            if engine in requested.split(","):
+                assert stage_by_id(report, scenario_pro_stage_id(scenario))["output"]["mechanism"] == engine
+
+        auto = run_json("--scenario", scenario, "--mode", "mock", "--guardrails", "auto")
+        assert auto["guardrail_selection"]["selected"] == expected_auto_selection(scenario)
+        assert "bn-risk" in [stage["id"] for stage in auto["stages"]]
+
+    for scenario in NO_BN_SCENARIOS:
+        auto = run_json("--scenario", scenario, "--mode", "mock", "--guardrails", "auto")
+        assert auto["guardrail_selection"]["selected"] == expected_auto_selection(scenario)
+        assert "bn-risk" not in [stage["id"] for stage in auto["stages"]]
+
+
+def test_simulated_live_all_runs_fixture_backed_pro_shape() -> None:
     env = clean_env()
     env["NXUSKIT_COMMON_SENSE_SIMULATE_LIVE"] = "1"
     env["ENT_TOKEN_FILE"] = str(PY_DIR / ".no-license-token")
     for scenario in SCENARIOS:
+        engine = scenario_pro_engine(scenario)
+        pro_stage_id = "zen-policy" if engine == "zen" else "solver-proof"
         proc = run_py(
             "--scenario",
             scenario,
@@ -164,9 +285,202 @@ def test_simulated_live_all_skips_pro_without_entitlement() -> None:
         assert report["resolved_mode"] == "live"
         assert report["final_status"] == "pass"
         assert report["stages"][0]["source"] == "live"
-        assert report["stages"][-1]["tier"] == "pro"
-        assert report["stages"][-1]["status"] == "skipped"
-        assert report["stages"][-1]["output"]["entitlement_mode"] == "unavailable"
+        assert report["guardrail_selection"]["selected"] == expected_auto_selection(scenario)
+        pro_stage = stage_by_id(report, pro_stage_id)
+        assert pro_stage["tier"] == "pro"
+        assert pro_stage["status"] == "pass"
+        assert pro_stage["output"]["attempts"][0]["findings"][0]["evidence"][
+            "runtime_executed"
+        ] is False
+
+
+def test_live_pro_adapters_use_nxuskit_cli() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp)
+        fake_cli = scratch / "nxuskit-cli"
+        log = scratch / "cli.log"
+        fake_cli.write_text(
+            """#!/usr/bin/env bash
+set -euo pipefail
+cmd="${1:-}"
+sub="${2:-}"
+shift 2 || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --input|-i) input="${2:-}"; shift 2 ;;
+    --output|-o) output="${2:-}"; shift 2 ;;
+    --format|-f) shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '%s %s\\n' "$cmd" "$sub" >> "$NXUSKIT_FAKE_CLI_LOG"
+if [[ "$cmd $sub" == "solver solve" ]]; then
+  grep -q 'required_object_present_after_action' "$input"
+  printf '{"result":{"satisfiable":false}}\\n' > "$output"
+elif [[ "$cmd $sub" == "zen eval" ]]; then
+  grep -q 'discount_count' "$input"
+  printf '{"result":{"output":{"allowed":false,"decision":"rejected","repair_hint":"choose one eligible promotion"}}}\\n' > "$output"
+elif [[ "$cmd $sub" == "bn infer" ]]; then
+  grep -q 'needs_review' "$input"
+  printf '{"result":{"posteriors":{"needs_review":{"yes":0.96,"no":0.04}}}}\\n' > "$output"
+else
+  echo "unexpected command: $cmd $sub" >&2
+  exit 9
+fi
+""",
+            encoding="utf-8",
+        )
+        fake_cli.chmod(0o755)
+
+        original_env = os.environ.copy()
+        try:
+            os.environ["NXUSKIT_CLI"] = str(fake_cli)
+            os.environ["NXUSKIT_FAKE_CLI_LOG"] = str(log)
+            car = CSG.load_scenario("car-wash")
+            coupon = CSG.load_scenario("coupon-stack")
+            solver_findings = CSG.live_solver_findings(car, car["facts"])
+            zen_findings = CSG.live_zen_findings(coupon, coupon["facts"])
+            bn_findings = CSG.live_bn_findings(coupon, coupon["facts"])
+            commands = log.read_text().splitlines()
+        finally:
+            os.environ.clear()
+            os.environ.update(original_env)
+
+    assert solver_findings[0]["mechanism"] == "solver"
+    assert solver_findings[0]["status"] == "fail"
+    assert solver_findings[0]["evidence"]["runtime_executed"] is True
+    assert zen_findings[0]["mechanism"] == "zen"
+    assert zen_findings[0]["status"] == "fail"
+    assert zen_findings[0]["evidence"]["runtime_executed"] is True
+    assert bn_findings[0]["mechanism"] == "bn"
+    assert bn_findings[0]["status"] == "fail"
+    assert bn_findings[0]["evidence"]["runtime_executed"] is True
+    assert commands == ["solver solve", "zen eval", "bn infer"]
+
+
+def test_fixture_llm_live_pro_loop_uses_nxuskit_cli() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp)
+        fake_cli = scratch / "nxuskit-cli"
+        log = scratch / "cli.log"
+        fake_cli.write_text(
+            """#!/usr/bin/env bash
+set -euo pipefail
+cmd="${1:-}"
+sub="${2:-}"
+shift 2 || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --input|-i) input="${2:-}"; shift 2 ;;
+    --output|-o) output="${2:-}"; shift 2 ;;
+    --format|-f) shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '%s %s\\n' "$cmd" "$sub" >> "$NXUSKIT_FAKE_CLI_LOG"
+if [[ "$cmd $sub" == "solver solve" ]]; then
+  if jq -e '.variables[] | select(.name == "required_object_present_after_action") | .domain.min == 1' "$input" >/dev/null; then
+    printf '{"result":{"satisfiable":true}}\\n' > "$output"
+  else
+    printf '{"result":{"satisfiable":false}}\\n' > "$output"
+  fi
+elif [[ "$cmd $sub" == "zen eval" ]]; then
+  if jq -e '(.input.discount_count // 99) <= 1 and (.input.combined_margin_percent // -99) >= 0' "$input" >/dev/null; then
+    printf '{"result":{"output":{"allowed":true,"decision":"allow_single_discount"}}}\\n' > "$output"
+  else
+    printf '{"result":{"output":{"allowed":false,"decision":"deny_stack","repair_hint":"choose one eligible promotion"}}}\\n' > "$output"
+  fi
+elif [[ "$cmd $sub" == "bn infer" ]]; then
+  if jq -e '.evidence.discount_count_bucket == "low" and .evidence.margin_floor_breach == "no" and .evidence.non_stackable_conflict == "no"' "$input" >/dev/null; then
+    printf '{"result":{"posteriors":{"needs_review":{"yes":0.22,"no":0.78}}}}\\n' > "$output"
+  else
+    printf '{"result":{"posteriors":{"needs_review":{"yes":0.96,"no":0.04}}}}\\n' > "$output"
+  fi
+else
+  echo "unexpected command: $cmd $sub" >&2
+  exit 9
+fi
+""",
+            encoding="utf-8",
+        )
+        fake_cli.chmod(0o755)
+        env = clean_env()
+        env["NXUSKIT_CLI"] = str(fake_cli)
+        env["NXUSKIT_FAKE_CLI_LOG"] = str(log)
+        env["NXUSKIT_COMMON_SENSE_FIXTURE_LLM"] = "1"
+
+        solver_proc = run_py(
+            "--scenario",
+            "car-wash",
+            "--mode",
+            "live",
+            "--stage",
+            "pro",
+            "--json",
+            env=env,
+        )
+        zen_proc = run_py(
+            "--scenario",
+            "coupon-stack",
+            "--mode",
+            "live",
+            "--stage",
+            "pro",
+            "--json",
+            env=env,
+        )
+        bn_proc = run_py(
+            "--scenario",
+            "coupon-stack",
+            "--mode",
+            "live",
+            "--guardrails",
+            "bn",
+            "--json",
+            env=env,
+        )
+        commands = log.read_text().splitlines()
+
+    assert solver_proc.returncode == 0, solver_proc.stderr
+    assert zen_proc.returncode == 0, zen_proc.stderr
+    assert bn_proc.returncode == 0, bn_proc.stderr
+    solver = json.loads(solver_proc.stdout)
+    zen = json.loads(zen_proc.stdout)
+    bn = json.loads(bn_proc.stdout)
+    solver_stage = next(stage for stage in solver["stages"] if stage["id"] == "solver-proof")
+    zen_stage = next(stage for stage in zen["stages"] if stage["id"] == "zen-policy")
+    bn_stage = stage_by_id(bn, "bn-risk")
+    assert solver["mode_resolution"]["message"].startswith("fixture LLM answers")
+    assert solver_stage["source"] == "live"
+    assert solver_stage["output"]["attempts"][0]["status"] == "fail"
+    assert solver_stage["output"]["attempts"][1]["status"] == "pass"
+    assert solver_stage["output"]["attempts"][0]["findings"][0]["evidence"][
+        "runtime_executed"
+    ] is True
+    assert zen_stage["source"] == "live"
+    assert zen_stage["output"]["attempts"][0]["status"] == "fail"
+    assert zen_stage["output"]["attempts"][1]["status"] == "pass"
+    assert zen_stage["output"]["attempts"][0]["findings"][0]["evidence"][
+        "runtime_executed"
+    ] is True
+    assert bn_stage["source"] == "live"
+    assert bn_stage["output"]["attempts"][0]["status"] == "fail"
+    assert bn_stage["output"]["attempts"][1]["status"] == "pass"
+    assert bn_stage["output"]["attempts"][0]["findings"][0]["evidence"][
+        "runtime_executed"
+    ] is True
+    assert commands == [
+        "solver solve",
+        "solver solve",
+        "zen eval",
+        "zen eval",
+        "bn infer",
+        "bn infer",
+    ]
 
 
 def test_auto_mode_falls_back_to_mock_without_provider() -> None:
@@ -179,6 +493,12 @@ def test_auto_mode_falls_back_to_mock_without_provider() -> None:
 
 def test_live_without_provider_fails_clearly() -> None:
     proc = run_py("--scenario", "car-wash", "--mode", "live", "--stage", "ce")
+    assert proc.returncode != 0
+    assert "live mode requires" in proc.stderr
+
+
+def test_default_mode_is_live_and_fails_without_provider() -> None:
+    proc = run_py("--scenario", "car-wash", "--stage", "ce")
     assert proc.returncode != 0
     assert "live mode requires" in proc.stderr
 
@@ -457,6 +777,7 @@ def test_temporary_scenario_skeleton_contract() -> None:
             "rules.clp",
             "mock-baseline.json",
             "mock-facts.json",
+            "mock-corrected-facts.json",
             "mock-repair.json",
             "mock-corrected.json",
         ):
@@ -485,6 +806,7 @@ def test_manifest_tier_profile_contract() -> None:
     assert ex["tier"] != "mixed"
     assert ex["difficulty"] == "advanced"
     assert ex["languages"] == ["python", "bash"]
+    assert ex["tech_tags"] == ["LLM", "CLIPS", "Solver", "BN", "ZEN"]
     assert ex["edition_note"]
     assert len(ex["scenarios"]) == 4
     profile = ex["tier_profile"]
@@ -492,6 +814,12 @@ def test_manifest_tier_profile_contract() -> None:
     assert "community" in profile["tiers"]
     assert any(
         stage["id"] == "ce" and not stage["requires_entitlement"]
+        for stage in profile["stages"]
+    )
+    assert any(
+        stage["id"] == "bn-risk"
+        and stage["tier"] == "community"
+        and not stage["requires_entitlement"]
         for stage in profile["stages"]
     )
     assert any(
@@ -508,11 +836,13 @@ def test_smoke_matrix_stage_rows() -> None:
     ids = {row["id"] for row in rows}
     assert "common-sense-guardrails|python|ce" in ids
     assert "common-sense-guardrails|python|pro" in ids
+    assert "common-sense-guardrails|python|bn" in ids
     assert "common-sense-guardrails|bash|ce" in ids
     assert "common-sense-guardrails|bash|pro" in ids
+    assert "common-sense-guardrails|bash|bn" in ids
     for row in rows:
         assert row["tier"] == "community"
-        assert row["stage"] in {"ce", "pro"}
+        assert row["stage"] in {"ce", "pro", "bn"}
         assert row["requires_pro"] is False
 
 
@@ -533,6 +863,7 @@ def test_readme_authoring_sections() -> None:
         "rules.clp",
         "mock-baseline.json",
         "mock-facts.json",
+        "mock-corrected-facts.json",
         "mock-repair.json",
         "mock-corrected.json",
     ):

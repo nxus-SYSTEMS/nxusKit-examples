@@ -2,6 +2,36 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": true,
   "properties": {
+    "bn_stage": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "const": "bn-risk"
+        },
+        "mode": {
+          "enum": [
+            "mock-fixture",
+            "live-runtime",
+            "unavailable"
+          ],
+          "type": "string"
+        },
+        "query_node": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "threshold": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "mode",
+        "query_node",
+        "threshold"
+      ],
+      "type": "object"
+    },
     "expected_correction_contains": {
       "items": {
         "minLength": 1,

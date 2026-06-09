@@ -1137,6 +1137,31 @@
       "requires_pro": false
     },
     {
+      "id": "common-sense-guardrails|python|bn",
+      "example": "common-sense-guardrails",
+      "tier": "community",
+      "category": "integrations",
+      "language": "python",
+      "cwd_rel": "examples/integrations/common-sense-guardrails/python",
+      "command": [
+        "python3",
+        "main.py",
+        "--scenario",
+        "coupon-stack",
+        "--mode",
+        "mock",
+        "--guardrails",
+        "bn"
+      ],
+      "entitlement_probe": false,
+      "requires_cloud_llm": false,
+      "requires_local_lmstudio": false,
+      "requires_local_ollama_go": false,
+      "stage": "bn",
+      "stage_tier": "community",
+      "requires_pro": false
+    },
+    {
       "id": "common-sense-guardrails|bash|ce",
       "example": "common-sense-guardrails",
       "tier": "community",
@@ -1184,6 +1209,31 @@
       "requires_local_ollama_go": false,
       "stage": "pro",
       "stage_tier": "pro",
+      "requires_pro": false
+    },
+    {
+      "id": "common-sense-guardrails|bash|bn",
+      "example": "common-sense-guardrails",
+      "tier": "community",
+      "category": "integrations",
+      "language": "bash",
+      "cwd_rel": "examples/integrations/common-sense-guardrails/bash",
+      "command": [
+        "bash",
+        "main.sh",
+        "--scenario",
+        "coupon-stack",
+        "--mode",
+        "mock",
+        "--guardrails",
+        "bn"
+      ],
+      "entitlement_probe": false,
+      "requires_cloud_llm": false,
+      "requires_local_lmstudio": false,
+      "requires_local_ollama_go": false,
+      "stage": "bn",
+      "stage_tier": "community",
       "requires_pro": false
     },
     {

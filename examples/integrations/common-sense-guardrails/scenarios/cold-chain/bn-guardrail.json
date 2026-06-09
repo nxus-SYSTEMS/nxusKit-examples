@@ -1,0 +1,62 @@
+{
+  "engine": "bn",
+  "evidence_mapping": [
+    {
+      "node": "carrier_certified",
+      "source": "policy_context.carrier_certified"
+    },
+    {
+      "node": "refrigerated",
+      "source": "selected_resource.refrigerated"
+    },
+    {
+      "node": "temperature_logging",
+      "source": "selected_resource.temperature_logging"
+    },
+    {
+      "node": "handoff_record",
+      "source": "policy_context.handoff_record"
+    }
+  ],
+  "fail_message": "Bayesian cold-chain risk model marks this shipment as requiring review.",
+  "fail_rule_id": "cold-chain-bn-needs-review",
+  "fail_state": "yes",
+  "label": "Bayesian risk / confidence",
+  "mock_results": {
+    "baseline": {
+      "evidence": {
+        "carrier_certified": "no",
+        "handoff_record": "no",
+        "refrigerated": "no",
+        "temperature_logging": "no"
+      },
+      "posteriors": {
+        "needs_review": {
+          "no": 0.06,
+          "yes": 0.94
+        }
+      }
+    },
+    "corrected": {
+      "evidence": {
+        "carrier_certified": "yes",
+        "handoff_record": "yes",
+        "refrigerated": "yes",
+        "temperature_logging": "yes"
+      },
+      "posteriors": {
+        "needs_review": {
+          "no": 0.92,
+          "yes": 0.08
+        }
+      }
+    }
+  },
+  "network": "bn-network.json",
+  "pass_message": "Bayesian cold-chain risk model marks this shipment path as acceptable.",
+  "pass_rule_id": "bn-risk-acceptable",
+  "query_node": "needs_review",
+  "repair_hint": "Use a certified refrigerated carrier with temperature logging and documented handoff.",
+  "stage_id": "bn-risk",
+  "threshold": 0.5
+}

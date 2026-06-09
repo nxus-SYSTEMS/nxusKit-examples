@@ -42,7 +42,7 @@ Other observed models:
 
 ## Current Walkthrough Default
 
-Prefer `qwen3.5:4b` for the interactive walkthrough when it is available. It is the primary v1.0.0 local proof candidate, remains small enough for a developer laptop, and has current local smoke evidence for the car-wash fail/recover shape.
+Prefer `qwen3.5:4b` for the interactive walkthrough when it is available. It is the primary v1.0.x local proof candidate, remains small enough for a developer laptop, and has current local smoke evidence for the car-wash fail/recover shape.
 
 ```bash
 export NXUSKIT_PROVIDER=ollama
@@ -70,4 +70,4 @@ export OLLAMA_HOST=http://127.0.0.1:11434
 
 ## Structured Facts Posture
 
-Provider-native structured-output controls remain the preferred hardening path, especially Ollama JSON/schema formatting and thinking-mode controls when exposed through the installed SDK/CLI surface. In v1.0.0, the Bash/CLI runner disables thinking for short guardrail calls and requests JSON schema output for fact extraction. The example itself should be described more narrowly: live structured facts can pass with pure JSON, warn when valid JSON is recovered from prose, or fail after retry and fall back to fixtures. Failure is a fallback state, not the expected walkthrough result.
+Provider-native structured-output controls remain the preferred hardening path, especially Ollama JSON/schema formatting and thinking-mode controls when exposed through the installed SDK/CLI surface. In the v1.0.x examples line, the Bash/CLI runner disables thinking for short guardrail calls and requests JSON schema output for fact extraction. The example itself should be described more narrowly: live structured facts can pass with pure JSON, warn when valid JSON is recovered from prose, or fail after retry and fall back to fixtures. Failure is a fallback state, not the expected walkthrough result.

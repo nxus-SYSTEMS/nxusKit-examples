@@ -16,5 +16,109 @@
     "combined_margin_percent": -7,
     "discount_count": 3,
     "non_stackable_count": 2
+  },
+  "table": {
+    "contentType": "application/vnd.gorules.decision",
+    "edges": [
+      {
+        "id": "input-to-decision",
+        "sourceId": "input",
+        "targetId": "decision",
+        "type": "edge"
+      },
+      {
+        "id": "decision-to-output",
+        "sourceId": "decision",
+        "targetId": "output",
+        "type": "edge"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "input",
+        "name": "Input",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "type": "inputNode"
+      },
+      {
+        "content": {
+          "hitPolicy": "first",
+          "inputs": [
+            {
+              "field": "non_stackable_count",
+              "id": "non_stackable_count",
+              "name": "Non-stackable count"
+            },
+            {
+              "field": "combined_margin_percent",
+              "id": "combined_margin_percent",
+              "name": "Combined margin percent"
+            }
+          ],
+          "outputs": [
+            {
+              "field": "allowed",
+              "id": "allowed",
+              "name": "Allowed"
+            },
+            {
+              "field": "decision",
+              "id": "decision",
+              "name": "Decision"
+            },
+            {
+              "field": "repair_hint",
+              "id": "repair_hint",
+              "name": "Repair hint"
+            }
+          ],
+          "rules": [
+            {
+              "_id": "deny-non-stackable-conflict",
+              "allowed": "false",
+              "combined_margin_percent": "",
+              "decision": "\"deny_stack\"",
+              "non_stackable_count": "> 1",
+              "repair_hint": "\"select_single_best_eligible_discount\""
+            },
+            {
+              "_id": "deny-margin-floor-breach",
+              "allowed": "false",
+              "combined_margin_percent": "< 0",
+              "decision": "\"deny_margin_floor\"",
+              "non_stackable_count": "",
+              "repair_hint": "\"select_single_best_eligible_discount\""
+            },
+            {
+              "_id": "allow-single-discount",
+              "allowed": "true",
+              "combined_margin_percent": "",
+              "decision": "\"allow_single_discount\"",
+              "non_stackable_count": "",
+              "repair_hint": "\"Guardrail passed.\""
+            }
+          ]
+        },
+        "id": "decision",
+        "name": "Promotion Policy",
+        "position": {
+          "x": 200,
+          "y": 0
+        },
+        "type": "decisionTableNode"
+      },
+      {
+        "id": "output",
+        "name": "Output",
+        "position": {
+          "x": 400,
+          "y": 0
+        },
+        "type": "outputNode"
+      }
+    ]
   }
 }

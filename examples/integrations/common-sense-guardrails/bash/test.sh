@@ -16,7 +16,7 @@ BASH_MAIN="$SCRIPT_DIR/main.sh"
 SCENARIOS=(car-wash coupon-stack pallet-door cold-chain)
 
 unset NXUSKIT_PROVIDER NXUSKIT_MODEL ANTHROPIC_API_KEY OPENAI_API_KEY OLLAMA_HOST LMSTUDIO_BASE_URL NXUSKIT_LICENSE_TOKEN ENT_TOKEN_FILE
-unset NXUSKIT_COMMON_SENSE_SIMULATE_LIVE
+unset NXUSKIT_COMMON_SENSE_SIMULATE_LIVE NXUSKIT_COMMON_SENSE_FIXTURE_LLM
 
 need_jq() {
   command -v jq >/dev/null 2>&1 || {
@@ -42,6 +42,17 @@ need_jq
 bash "$BASH_MAIN" --validate-scenarios >/dev/null
 
 for scenario in "${SCENARIOS[@]}"; do
+  problem="$ROOT_DIR/scenarios/$scenario/problem.json"
+  engine="$(jq -r '.pro_stage.engine // "solver"' "$problem")"
+  pro_stage_id="$(jq -r '.pro_stage.id // (if (.pro_stage.engine // "solver") == "zen" then "zen-policy" else "solver-proof" end)' "$problem")"
+  bn_enabled="$(jq -r 'if .bn_stage then "true" else "false" end' "$problem")"
+  expected_all_selection="clips,$engine"
+  expected_all_stage_count="6"
+  if [[ "$bn_enabled" == "true" ]]; then
+    expected_all_selection="clips,$engine,bn"
+    expected_all_stage_count="7"
+  fi
+
   out="$(run_bash_json --scenario "$scenario" --mode mock --stage ce)"
   assert_eq "$(jq -r '.scenario' <<<"$out")" "$scenario" "scenario"
   assert_eq "$(jq -r '.resolved_mode' <<<"$out")" "mock" "resolved_mode"
@@ -49,19 +60,34 @@ for scenario in "${SCENARIOS[@]}"; do
   assert_eq "$(jq -r '.stages | length' <<<"$out")" "5" "ce stage count"
   assert_eq "$(jq -r '.stages[0].id' <<<"$out")" "raw-baseline" "first stage"
   assert_eq "$(jq -r '.stages[2].id' <<<"$out")" "clips-validation" "clips stage"
-  [[ "$(jq -r '.stages[2].output.findings[0].rule_id' <<<"$out")" != "null" ]]
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$out")" "clips" "ce guardrail selection"
+  [[ "$(jq -r '.stages[2].output.attempts[0].findings[0].rule_id' <<<"$out")" != "null" ]]
+  assert_eq "$(jq -r '.stages[2].output.attempts[1].status' <<<"$out")" "pass" "ce repaired attempt"
 
   pro="$(run_bash_json --scenario "$scenario" --mode mock --stage pro)"
-  assert_eq "$(jq -r '.stages | length' <<<"$pro")" "1" "pro stage count"
-  assert_eq "$(jq -r '.stages[0].tier' <<<"$pro")" "pro" "pro tier"
-  assert_eq "$(jq -r '.stages[0].output.entitlement_mode' <<<"$pro")" "mock-fixture" "mock pro entitlement"
+  assert_eq "$(jq -r '.stages | length' <<<"$pro")" "5" "pro loop stage count"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$pro")" "$engine" "pro guardrail selection"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .tier' <<<"$pro")" "pro" "pro tier"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .source' <<<"$pro")" "mock" "mock pro source"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[0].status' <<<"$pro")" "fail" "pro baseline failure"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[1].status' <<<"$pro")" "pass" "pro repaired pass"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$pro")" "false" "mock pro runtime label"
 
   all="$(run_bash_json --scenario "$scenario" --mode mock --stage all)"
-  assert_eq "$(jq -r '.stages | length' <<<"$all")" "6" "all stage count"
+  assert_eq "$(jq -r '.stages | length' <<<"$all")" "$expected_all_stage_count" "all stage count"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$all")" "$expected_all_selection" "all guardrail selection"
+  if [[ "$bn_enabled" == "true" ]]; then
+    assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .tier' <<<"$all")" "community" "auto BN tier"
+    assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.mechanism' <<<"$all")" "bn" "auto BN mechanism"
+    assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[0].status' <<<"$all")" "fail" "auto BN baseline failure"
+    assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[1].status' <<<"$all")" "pass" "auto BN repaired pass"
+  else
+    assert_eq "$(jq -r '[.stages[] | select(.id == "bn-risk")] | length' <<<"$all")" "0" "no BN auto stage"
+  fi
 
   py="$(python3 "$PY_MAIN" --scenario "$scenario" --mode mock --stage all --json)"
   assert_eq "$(jq -r '.final_status' <<<"$out")" "$(jq -r '.final_status' <<<"$py")" "python bash status parity"
-  assert_eq "$(jq -r '.stages[2].output.findings[0].rule_id' <<<"$all")" "$(jq -r '.stages[2].output.findings[0].rule_id' <<<"$py")" "python bash finding parity"
+  assert_eq "$(jq -r '.stages[2].output.attempts[0].findings[0].rule_id' <<<"$all")" "$(jq -r '.stages[2].output.attempts[0].findings[0].rule_id' <<<"$py")" "python bash finding parity"
 
   export NXUSKIT_COMMON_SENSE_SIMULATE_LIVE=1
   export ENT_TOKEN_FILE="$SCRIPT_DIR/.no-license-token"
@@ -70,9 +96,102 @@ for scenario in "${SCENARIOS[@]}"; do
   unset ENT_TOKEN_FILE
   assert_eq "$(jq -r '.resolved_mode' <<<"$simulated_live")" "live" "simulated live mode"
   assert_eq "$(jq -r '.final_status' <<<"$simulated_live")" "pass" "simulated live all status"
-  assert_eq "$(jq -r '.stages[-1].status' <<<"$simulated_live")" "skipped" "simulated live pro skip"
-  assert_eq "$(jq -r '.stages[-1].output.entitlement_mode' <<<"$simulated_live")" "unavailable" "simulated live no entitlement"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$simulated_live")" "$expected_all_selection" "simulated live guardrail selection"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .status' <<<"$simulated_live")" "pass" "simulated live pro pass"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$simulated_live")" "false" "simulated live fixture label"
 done
+
+for scenario in coupon-stack cold-chain; do
+  problem="$ROOT_DIR/scenarios/$scenario/problem.json"
+  engine="$(jq -r '.pro_stage.engine // "solver"' "$problem")"
+  pro_stage_id="$(jq -r '.pro_stage.id // (if (.pro_stage.engine // "solver") == "zen" then "zen-policy" else "solver-proof" end)' "$problem")"
+
+  bn="$(run_bash_json --scenario "$scenario" --mode mock --guardrails bn)"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$bn")" "bn" "explicit BN selection"
+  assert_eq "$(jq -r '.stages | length' <<<"$bn")" "5" "BN-only stage count"
+  assert_eq "$(jq -r '.stages[2].id' <<<"$bn")" "bn-risk" "BN stage id"
+  assert_eq "$(jq -r '.stages[2].label' <<<"$bn")" "Bayesian risk / confidence" "BN stage label"
+  assert_eq "$(jq -r '.stages[2].tier' <<<"$bn")" "community" "BN stage tier"
+  assert_eq "$(jq -r '.stages[2].output.mechanism' <<<"$bn")" "bn" "BN mechanism"
+  assert_eq "$(jq -r '.stages[2].output.attempts[0].status' <<<"$bn")" "fail" "BN baseline failure"
+  assert_eq "$(jq -r '.stages[2].output.attempts[1].status' <<<"$bn")" "pass" "BN repaired pass"
+  assert_eq "$(jq -r '.stages[2].output.attempts[0].findings[0].evidence.runtime_executed' <<<"$bn")" "false" "mock BN runtime label"
+  assert_eq "$(jq -r '.stages[] | select(.id == "repair-packet") | .output.findings | map(.mechanism) | join(",")' <<<"$bn")" "bn" "BN repair packet participation"
+
+  clips_bn="$(run_bash_json --scenario "$scenario" --mode mock --guardrails clips,bn)"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$clips_bn")" "clips,bn" "clips BN selection"
+  assert_eq "$(jq -r '[.stages[] | select(.id == "clips-validation" or .id == "bn-risk")] | length' <<<"$clips_bn")" "2" "clips BN stages"
+
+  combined="$(run_bash_json --scenario "$scenario" --mode mock --guardrails "clips,$engine,bn")"
+  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$combined")" "clips,$engine,bn" "combined BN selection"
+  assert_eq "$(jq -r --arg id "$pro_stage_id" '[.stages[] | select(.id == "clips-validation" or .id == $id or .id == "bn-risk")] | length' <<<"$combined")" "3" "combined guardrail stages"
+done
+
+for scenario in car-wash pallet-door; do
+  auto_no_bn="$(run_bash_json --scenario "$scenario" --mode mock --guardrails auto)"
+  assert_eq "$(jq -r '[.stages[] | select(.id == "bn-risk")] | length' <<<"$auto_no_bn")" "0" "no BN auto for crisp scenario"
+  set +e
+  bn_err="$(bash "$BASH_MAIN" --scenario "$scenario" --mode mock --guardrails bn --json 2>&1 >/dev/null)"
+  bn_rc=$?
+  set -e
+  [[ "$bn_rc" -ne 0 && "$bn_err" == *"does not support BN"* ]] || {
+    echo "FAIL explicit BN should be rejected for $scenario" >&2
+    echo "$bn_err" >&2
+    exit 1
+  }
+done
+
+tmp_cli_dir="$(mktemp -d)"
+fake_cli="$tmp_cli_dir/nxuskit-cli"
+bn_log="$tmp_cli_dir/bn.log"
+cat > "$fake_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+sub="${2:-}"
+shift 2 || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -i|--input) input="${2:-}"; shift 2 ;;
+    -o|--output) output="${2:-}"; shift 2 ;;
+    -f|--format) shift 2 ;;
+    --quiet) shift ;;
+    *) shift ;;
+  esac
+done
+
+if [[ "$cmd" == "bn" && "$sub" == "infer" ]]; then
+  printf 'bn infer\n' >> "$NXUSKIT_FAKE_BN_LOG"
+  if jq -e '.evidence.discount_count_bucket == "low" and .evidence.margin_floor_breach == "no" and .evidence.non_stackable_conflict == "no"' "$input" >/dev/null; then
+    jq -n '{result:{posteriors:{needs_review:{yes:0.22,no:0.78}}}}' > "$output"
+  else
+    jq -n '{result:{posteriors:{needs_review:{yes:0.96,no:0.04}}}}' > "$output"
+  fi
+  exit 0
+fi
+
+echo "unexpected command: $cmd $sub" >&2
+exit 9
+EOF
+chmod +x "$fake_cli"
+live_bn="$(
+  NXUSKIT_CLI="$fake_cli" \
+  NXUSKIT_FAKE_BN_LOG="$bn_log" \
+  NXUSKIT_COMMON_SENSE_FIXTURE_LLM=1 \
+  bash "$BASH_MAIN" --scenario coupon-stack --mode live --guardrails bn --json
+)"
+bn_calls="$(cat "$bn_log")"
+rm -rf "$tmp_cli_dir"
+assert_eq "$(jq -r '.resolved_mode' <<<"$live_bn")" "live" "fixture live BN mode"
+assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$live_bn")" "bn" "fixture live BN selection"
+assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .source' <<<"$live_bn")" "live" "fixture live BN source"
+assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[0].status' <<<"$live_bn")" "fail" "fixture live BN first attempt"
+assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[1].status' <<<"$live_bn")" "pass" "fixture live BN repaired attempt"
+assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$live_bn")" "true" "fixture live BN runtime label"
+assert_eq "$(grep -c '^bn infer$' <<<"$bn_calls")" "2" "fixture live BN CLI call count"
 
 auto="$(run_bash_json --scenario car-wash --mode auto --stage ce)"
 assert_eq "$(jq -r '.resolved_mode' <<<"$auto")" "mock" "auto fallback"
@@ -89,6 +208,20 @@ set -e
 [[ "$live_err" == *"live mode requires"* ]] || {
   echo "FAIL live error did not explain provider preflight" >&2
   echo "$live_err" >&2
+  exit 1
+}
+
+set +e
+default_live_err="$(bash "$BASH_MAIN" --scenario car-wash --stage ce 2>&1 >/dev/null)"
+default_live_rc=$?
+set -e
+[[ "$default_live_rc" -ne 0 ]] || {
+  echo "FAIL default mode should be live and fail without provider" >&2
+  exit 1
+}
+[[ "$default_live_err" == *"live mode requires"* ]] || {
+  echo "FAIL default live error did not explain provider preflight" >&2
+  echo "$default_live_err" >&2
   exit 1
 }
 
@@ -297,6 +430,82 @@ assert_eq "$(jq -r '.stages[] | select(.id == "structured-facts") | .status' <<<
   exit 1
 }
 
+tmp_cli_dir="$(mktemp -d)"
+fake_cli="$tmp_cli_dir/nxuskit-cli"
+solver_log="$tmp_cli_dir/solver.log"
+cat > "$fake_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+sub="${2:-}"
+if [[ "$cmd" == "call" ]]; then
+  sub=""
+else
+  shift || true
+fi
+shift || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -i|--input) input="${2:-}"; shift 2 ;;
+    -o|--output) output="${2:-}"; shift 2 ;;
+    -f|--format|--model|--provider) shift 2 ;;
+    --quiet) shift ;;
+    *) shift ;;
+  esac
+done
+
+if [[ "$cmd" == "solver" && "$sub" == "solve" ]]; then
+  printf 'solver solve\n' >> "$NXUSKIT_FAKE_SOLVER_LOG"
+  jq -e '.variables[] | select(.name == "required_object_present_after_action")' "$input" >/dev/null
+  actual="$(jq -r '.variables[] | select(.name == "required_object_present_after_action") | .domain.min' "$input")"
+  if [[ "$actual" == "1" ]]; then
+    jq -n '{result:{satisfiable:true}}' > "$output"
+  else
+    jq -n '{result:{satisfiable:false}}' > "$output"
+  fi
+  exit 0
+fi
+
+if [[ "$cmd" != "call" ]]; then
+  echo "unexpected command: $cmd $sub" >&2
+  exit 9
+fi
+
+prompt="$(jq -r '.messages[-1].content // empty' "$input")"
+if [[ "$prompt" == *"Return only JSON"* || "$prompt" == *"previous extraction was invalid"* ]]; then
+  if [[ "$prompt" == *"Drive the car"* ]]; then
+    content='{"goal":{"object":"car","outcome":"wash","target_location":"car_wash"},"candidate_actions":[{"id":"drive-car-to-wash","moves":["person","car"],"recommendation":"drive","target_location":"car_wash"}],"objects_required":[{"current_location":"car_wash","object":"car","present_at_required_location":true,"required_location":"car_wash"}],"objects_moved":[{"action_id":"drive-car-to-wash","from":"home","object":"person","to":"car_wash"},{"action_id":"drive-car-to-wash","from":"home","object":"car","to":"car_wash"}],"resources":[{"id":"car","state":"at_car_wash","type":"vehicle"}],"constraints":[{"id":"car-must-be-at-wash","requirement":"car.location == car_wash before washing","type":"physical"}],"policy_context":{"distance_meters":50,"domain":"physical_planning"},"confidence":1}'
+  else
+    content='{"goal":{"object":"car","outcome":"wash","target_location":"car_wash"},"candidate_actions":[{"id":"walk-to-car-wash","moves":["person"],"recommendation":"walk","target_location":"car_wash"}],"objects_required":[{"current_location":"home","object":"car","present_at_required_location":false,"required_location":"car_wash"}],"objects_moved":[{"action_id":"walk-to-car-wash","from":"home","object":"person","to":"car_wash"}],"resources":[{"id":"car","state":"at_home","type":"vehicle"}],"constraints":[{"id":"car-must-be-at-wash","requirement":"car.location == car_wash before washing","type":"physical"}],"policy_context":{"distance_meters":50,"domain":"physical_planning"},"confidence":1}'
+  fi
+elif [[ "$prompt" == *"failed these feasibility checks"* ]]; then
+  content="Drive the car to the car wash, or walk only if the car is already there."
+else
+  content="Walk to the car wash because it is nearby."
+fi
+jq -n --arg content "$content" '{result:{content:$content}}' > "$output"
+EOF
+chmod +x "$fake_cli"
+live_solver="$(
+  NXUSKIT_CLI="$fake_cli" \
+  NXUSKIT_FAKE_SOLVER_LOG="$solver_log" \
+  NXUSKIT_PROVIDER=ollama \
+  NXUSKIT_MODEL=llama3:8b \
+  bash "$BASH_MAIN" --scenario car-wash --mode live --guardrails solver --json
+)"
+solver_calls="$(cat "$solver_log")"
+rm -rf "$tmp_cli_dir"
+assert_eq "$(jq -r '.resolved_mode' <<<"$live_solver")" "live" "live solver mode"
+assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$live_solver")" "solver" "live solver selection"
+assert_eq "$(jq -r '.final_status' <<<"$live_solver")" "pass" "live solver final status"
+assert_eq "$(jq -r '.stages[] | select(.id == "solver-proof") | .output.attempts[0].status' <<<"$live_solver")" "fail" "live solver first attempt"
+assert_eq "$(jq -r '.stages[] | select(.id == "solver-proof") | .output.attempts[1].status' <<<"$live_solver")" "pass" "live solver repaired attempt"
+assert_eq "$(jq -r '.stages[] | select(.id == "solver-proof") | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$live_solver")" "true" "live solver runtime label"
+assert_eq "$(grep -c '^solver solve$' <<<"$solver_calls")" "2" "live solver CLI call count"
+
 [[ -x "$SCRIPT_DIR/strict_live_smoke.sh" ]] || {
   echo "FAIL strict live smoke script must be executable" >&2
   exit 1
@@ -311,7 +520,7 @@ set -e
   exit 1
 }
 
-for required in problem.json expected-output.json rules.clp mock-baseline.json mock-facts.json mock-repair.json mock-corrected.json; do
+for required in problem.json expected-output.json rules.clp mock-baseline.json mock-facts.json mock-corrected-facts.json mock-repair.json mock-corrected.json; do
   [[ -f "$ROOT_DIR/scenarios/car-wash/$required" ]] || {
     echo "FAIL missing required fixture $required" >&2
     exit 1

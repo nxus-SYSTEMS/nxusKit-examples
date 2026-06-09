@@ -17,5 +17,115 @@
     "handoff_record": false,
     "refrigerated": false,
     "temperature_logging": false
+  },
+  "table": {
+    "contentType": "application/vnd.gorules.decision",
+    "edges": [
+      {
+        "id": "input-to-decision",
+        "sourceId": "input",
+        "targetId": "decision",
+        "type": "edge"
+      },
+      {
+        "id": "decision-to-output",
+        "sourceId": "decision",
+        "targetId": "output",
+        "type": "edge"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "input",
+        "name": "Input",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "type": "inputNode"
+      },
+      {
+        "content": {
+          "hitPolicy": "first",
+          "inputs": [
+            {
+              "field": "carrier_certified",
+              "id": "carrier_certified",
+              "name": "Carrier certified"
+            },
+            {
+              "field": "handoff_record",
+              "id": "handoff_record",
+              "name": "Handoff record"
+            },
+            {
+              "field": "refrigerated",
+              "id": "refrigerated",
+              "name": "Refrigerated"
+            },
+            {
+              "field": "temperature_logging",
+              "id": "temperature_logging",
+              "name": "Temperature logging"
+            }
+          ],
+          "outputs": [
+            {
+              "field": "allowed",
+              "id": "allowed",
+              "name": "Allowed"
+            },
+            {
+              "field": "decision",
+              "id": "decision",
+              "name": "Decision"
+            },
+            {
+              "field": "repair_hint",
+              "id": "repair_hint",
+              "name": "Repair hint"
+            }
+          ],
+          "rules": [
+            {
+              "_id": "allow-certified-cold-chain",
+              "allowed": "true",
+              "carrier_certified": "true",
+              "decision": "\"allow_certified_cold_chain\"",
+              "handoff_record": "true",
+              "refrigerated": "true",
+              "repair_hint": "\"Guardrail passed.\"",
+              "temperature_logging": "true"
+            },
+            {
+              "_id": "reject-uncertified-courier",
+              "allowed": "false",
+              "carrier_certified": "",
+              "decision": "\"reject_uncertified_courier\"",
+              "handoff_record": "",
+              "refrigerated": "",
+              "repair_hint": "\"use_certified_cold_chain_carrier\"",
+              "temperature_logging": ""
+            }
+          ]
+        },
+        "id": "decision",
+        "name": "Cold Chain Policy",
+        "position": {
+          "x": 200,
+          "y": 0
+        },
+        "type": "decisionTableNode"
+      },
+      {
+        "id": "output",
+        "name": "Output",
+        "position": {
+          "x": 400,
+          "y": 0
+        },
+        "type": "outputNode"
+      }
+    ]
   }
 }

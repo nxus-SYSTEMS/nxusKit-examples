@@ -1,0 +1,144 @@
+{
+  "cpds": {
+    "clearance_item": {
+      "probabilities": [
+        0.5,
+        0.5
+      ]
+    },
+    "discount_count_bucket": {
+      "probabilities": [
+        0.4,
+        0.6
+      ]
+    },
+    "margin_floor_breach": {
+      "probabilities": [
+        0.35,
+        0.65
+      ]
+    },
+    "needs_review": {
+      "probabilities": [
+        0.97,
+        0.03,
+        0.84,
+        0.16,
+        0.55,
+        0.45,
+        0.07,
+        0.93
+      ]
+    },
+    "non_stackable_conflict": {
+      "probabilities": [
+        0.35,
+        0.65
+      ]
+    },
+    "policy_conflict": {
+      "probabilities": [
+        0.98,
+        0.02,
+        0.9,
+        0.1,
+        0.88,
+        0.12,
+        0.08,
+        0.92
+      ]
+    },
+    "promotion_pressure": {
+      "probabilities": [
+        0.92,
+        0.08,
+        0.75,
+        0.25,
+        0.2,
+        0.8,
+        0.1,
+        0.9
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "non_stackable_conflict",
+      "to": "policy_conflict"
+    },
+    {
+      "from": "margin_floor_breach",
+      "to": "policy_conflict"
+    },
+    {
+      "from": "discount_count_bucket",
+      "to": "promotion_pressure"
+    },
+    {
+      "from": "clearance_item",
+      "to": "promotion_pressure"
+    },
+    {
+      "from": "policy_conflict",
+      "to": "needs_review"
+    },
+    {
+      "from": "promotion_pressure",
+      "to": "needs_review"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "non_stackable_conflict",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "margin_floor_breach",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "discount_count_bucket",
+      "states": [
+        "high",
+        "low"
+      ]
+    },
+    {
+      "name": "clearance_item",
+      "states": [
+        "yes",
+        "no"
+      ]
+    },
+    {
+      "name": "policy_conflict",
+      "states": [
+        "present",
+        "clear"
+      ]
+    },
+    {
+      "name": "promotion_pressure",
+      "states": [
+        "high",
+        "normal"
+      ]
+    },
+    {
+      "name": "needs_review",
+      "states": [
+        "yes",
+        "no"
+      ]
+    }
+  ],
+  "query_nodes": [
+    "needs_review"
+  ]
+}
