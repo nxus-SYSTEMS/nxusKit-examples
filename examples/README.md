@@ -79,6 +79,7 @@ A curated collection of **34 production-ready examples** demonstrating LLM integ
 | &nbsp;&nbsp;↳ `coupon-stack` | | | Reject promotion stacking that violates eligibility and margin policy, with optional ZEN validation and BN risk scoring | | | |
 | &nbsp;&nbsp;↳ `pallet-door` | | | Block unsafe warehouse advice that ignores dimensional clearance, with optional Solver/Z3 feasibility | | | |
 | &nbsp;&nbsp;↳ `cold-chain` | | | Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation and BN review-risk scoring | | | |
+| &nbsp;&nbsp;↳ `synthetic-claims-audit` | | | Inspect synthetic administrative data-quality and evidence-completeness findings as a review record | | | |
 | &nbsp;&nbsp;↳ real-world: **LLM answer validation** | | | | Catch plausible recommendations that fail physical, operational, or policy preconditions before they reach users | | |
 | &nbsp;&nbsp;↳ real-world: **Policy enforcement** | | | | Turn free-form answers into facts, apply deterministic rules, and produce auditable repair context | | |
 | &nbsp;&nbsp;↳ real-world: **Operational decision support** | | | | Preserve fast LLM drafting while requiring concrete feasibility evidence for workflow-critical recommendations | | |

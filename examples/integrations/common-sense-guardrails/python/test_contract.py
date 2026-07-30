@@ -21,6 +21,9 @@ BASH_DIR = ROOT / "bash"
 REPO = ROOT.parents[2]
 MANIFEST = REPO / "conformance" / "examples_manifest.json"
 SMOKE_MATRIX = REPO / "conformance" / "example_smoke_matrix.json"
+REASONING_RECORD_SCHEMA = (
+    REPO / "specs" / "012-marimo-reasoning-lab-v105" / "contracts" / "reasoning-record.schema.json"
+)
 SCENARIOS = ("car-wash", "coupon-stack", "pallet-door", "cold-chain")
 BN_SCENARIOS = ("coupon-stack", "cold-chain")
 NO_BN_SCENARIOS = ("car-wash", "pallet-door")
@@ -35,6 +38,16 @@ CE_IDS = (
 
 def load_example_module():
     spec = importlib.util.spec_from_file_location("csg_main", PY_DIR / "main.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_core_module():
+    spec = importlib.util.spec_from_file_location(
+        "csg_guardrail_core", PY_DIR / "guardrail_core.py"
+    )
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -155,6 +168,35 @@ def test_all_scenarios_mock_ce() -> None:
         assert report["resolved_mode"] == "mock"
         assert all(stage["tier"] == "community" for stage in report["stages"])
         assert_ce_report(report, scenario)
+
+
+def test_canonical_reasoning_record_is_deterministic_and_shared() -> None:
+    core = load_core_module()
+    report = CSG.build_report("cold-chain", "mock", "ce")
+    record = core.reasoning_record_from_report(report)
+
+    assert record == core.reasoning_record_from_report(report)
+    assert CSG.build_reasoning_record("cold-chain", "mock", "ce") == record
+    assert json.loads(REASONING_RECORD_SCHEMA.read_text())["$id"].endswith(
+        "reasoning-record-v1.json"
+    )
+    assert record["schema_version"] == "1.0.0"
+    assert record["record_id"].startswith("rr-")
+    assert len(record["input_sha256"]) == 64
+    assert record["scenario"] == {
+        "id": "cold-chain",
+        "label": "cold-chain",
+        "synthetic": True,
+    }
+    assert record["provenance"]["mode"] == "fixture"
+    assert record["provenance"]["community_complete"] is True
+    assert {mechanism["id"] for mechanism in record["mechanisms"]} == {"clips"}
+    assert record["mechanisms"][0]["runtime_executed"] is False
+    assert record["facts"]
+    assert record["findings"]
+    assert record["evidence"]
+    assert record["attempts"]
+    assert record["final"]["review_disposition"] == "complete"
 
 
 def test_car_wash_repair_packet_and_order() -> None:
@@ -808,7 +850,13 @@ def test_manifest_tier_profile_contract() -> None:
     assert ex["languages"] == ["python", "bash"]
     assert ex["tech_tags"] == ["LLM", "CLIPS", "Solver", "BN", "ZEN"]
     assert ex["edition_note"]
-    assert len(ex["scenarios"]) == 4
+    assert len(ex["scenarios"]) == 5
+    assert any(
+        scenario["name"] == "synthetic-claims-audit"
+        and scenario["cli"]
+        == "python marimo/frontend_core.py --analyze --scenario synthetic-claims-audit"
+        for scenario in ex["scenarios"]
+    )
     profile = ex["tier_profile"]
     assert profile["minimum_tier"] == "community"
     assert "community" in profile["tiers"]

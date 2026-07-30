@@ -110,7 +110,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install ruff
-        run: pip install ruff
+        run: pip install ruff==0.15.0
       - name: Check Python files
         run: |
           PY_FILES=$(find examples -name "*.py" 2>/dev/null)

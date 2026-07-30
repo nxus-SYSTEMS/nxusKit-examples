@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "claimLine": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_key": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "line_key": {
+          "type": "string"
+        },
+        "provider_ref": {
+          "type": "string"
+        },
+        "recorded_amount_cents": {
+          "type": "integer"
+        },
+        "service_end": {
+          "format": "date",
+          "type": "string"
+        },
+        "service_ref": {
+          "type": "string"
+        },
+        "service_start": {
+          "format": "date",
+          "type": "string"
+        },
+        "service_window_end": {
+          "format": "date",
+          "type": "string"
+        },
+        "service_window_start": {
+          "format": "date",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true
+        }
+      },
+      "required": [
+        "line_key",
+        "claim_key",
+        "service_ref",
+        "provider_ref",
+        "evidence_refs",
+        "service_start",
+        "service_end",
+        "service_window_start",
+        "service_window_end",
+        "recorded_amount_cents",
+        "synthetic"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://nxuskit.dev/schemas/synthetic-claims-audit-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A synthetic, structural data-quality and evidence-completeness expert-review fixture. It is not a determination or an operational record.",
+  "properties": {
+    "claim_lines": {
+      "items": {
+        "$ref": "#/$defs/claimLine"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "disclosure": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "synthetic",
+    "disclosure",
+    "claim_lines"
+  ],
+  "title": "Synthetic administrative claims-audit fixture",
+  "type": "object"
+}

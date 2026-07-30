@@ -147,6 +147,72 @@
           },
           "additionalProperties": false
         },
+        "frontends": {
+          "type": "array",
+          "description": "Optional, first-class interactive frontends for an existing language implementation. A frontend does not add a language or replace the canonical implementation.",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "language",
+              "entrypoint",
+              "documentation",
+              "default_mode",
+              "community_offline",
+              "requires_explicit_analyze"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable frontend identifier within the example.",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "kind": {
+                "type": "string",
+                "description": "Interactive frontend runtime.",
+                "enum": [
+                  "marimo"
+                ]
+              },
+              "language": {
+                "type": "string",
+                "description": "Existing implementation language that owns the frontend.",
+                "enum": [
+                  "python"
+                ]
+              },
+              "entrypoint": {
+                "type": "string",
+                "description": "Repository-relative ordinary-source entrypoint for the frontend.",
+                "pattern": "^examples/"
+              },
+              "documentation": {
+                "type": "string",
+                "description": "Repository-relative frontend setup and operation guide.",
+                "pattern": "^examples/"
+              },
+              "default_mode": {
+                "type": "string",
+                "description": "Safe, no-credential default frontend mode.",
+                "enum": [
+                  "fixture"
+                ]
+              },
+              "community_offline": {
+                "type": "boolean",
+                "description": "Whether the default Community journey completes without a provider, network, or entitlement.",
+                "const": true
+              },
+              "requires_explicit_analyze": {
+                "type": "boolean",
+                "description": "Whether provider or reasoning execution requires an explicit user submission.",
+                "const": true
+              }
+            },
+            "additionalProperties": false
+          }
+        },
         "tier": {
           "type": "string",
           "description": "Scalar SDK edition tier for compatibility with existing consumers.",

@@ -23,6 +23,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from guardrail_core import reasoning_record_from_report
+
 
 EXAMPLE_ID = "common-sense-guardrails"
 SCENARIOS = ("car-wash", "coupon-stack", "pallet-door", "cold-chain")
@@ -2074,6 +2076,26 @@ def build_report(
             else "Run completed with guardrail warnings or skipped stages."
         ),
     }
+
+
+def build_reasoning_record(
+    name: str,
+    requested_mode: str,
+    requested_stage: str | None,
+    requested_guardrails: str | None = None,
+    max_repair_attempts: int = DEFAULT_MAX_REPAIR_ATTEMPTS,
+) -> dict[str, Any]:
+    """Build the canonical record while preserving the existing report surface."""
+
+    return reasoning_record_from_report(
+        build_report(
+            name,
+            requested_mode,
+            requested_stage,
+            requested_guardrails,
+            max_repair_attempts,
+        )
+    )
 
 
 def render_report(report: dict[str, Any]) -> str:

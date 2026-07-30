@@ -1,0 +1,125 @@
+{
+  "claim_lines": [
+    {
+      "claim_key": "synthetic-claim-a",
+      "evidence_refs": [
+        "evidence-a"
+      ],
+      "line_key": "synthetic-line-001",
+      "provider_ref": "synthetic-provider-a",
+      "recorded_amount_cents": 1250,
+      "service_end": "2026-01-04",
+      "service_ref": "synthetic-service-a",
+      "service_start": "2026-01-04",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-b",
+      "evidence_refs": [
+        "evidence-b"
+      ],
+      "line_key": "synthetic-line-001",
+      "provider_ref": "synthetic-provider-b",
+      "recorded_amount_cents": 1300,
+      "service_end": "2026-01-05",
+      "service_ref": "synthetic-service-b",
+      "service_start": "2026-01-05",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-c",
+      "evidence_refs": [],
+      "line_key": "synthetic-line-003",
+      "provider_ref": "synthetic-provider-c",
+      "recorded_amount_cents": 1100,
+      "service_end": "2026-01-06",
+      "service_ref": "synthetic-service-c",
+      "service_start": "2026-01-06",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-d",
+      "evidence_refs": [
+        "evidence-d"
+      ],
+      "line_key": "synthetic-line-004",
+      "provider_ref": "synthetic-provider-d",
+      "recorded_amount_cents": 900,
+      "service_end": "2026-01-08",
+      "service_ref": "synthetic-service-d",
+      "service_start": "2026-01-09",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-e",
+      "evidence_refs": [
+        "evidence-e"
+      ],
+      "line_key": "synthetic-line-005",
+      "provider_ref": "synthetic-provider-e",
+      "recorded_amount_cents": 1000,
+      "service_end": "2026-02-03",
+      "service_ref": "synthetic-service-e",
+      "service_start": "2026-02-03",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-f",
+      "evidence_refs": [
+        "evidence-f"
+      ],
+      "line_key": "synthetic-line-006",
+      "provider_ref": "synthetic-provider-f",
+      "recorded_amount_cents": -50,
+      "service_end": "2026-01-12",
+      "service_ref": "synthetic-service-f",
+      "service_start": "2026-01-12",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-g",
+      "evidence_refs": [
+        "evidence-g"
+      ],
+      "line_key": "synthetic-line-007",
+      "provider_ref": "synthetic-provider-g",
+      "recorded_amount_cents": 1000,
+      "service_end": "2026-01-13",
+      "service_ref": "",
+      "service_start": "2026-01-13",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    },
+    {
+      "claim_key": "synthetic-claim-h",
+      "evidence_refs": [
+        "evidence-h"
+      ],
+      "line_key": "synthetic-line-008",
+      "provider_ref": "",
+      "recorded_amount_cents": 1000,
+      "service_end": "2026-01-14",
+      "service_ref": "synthetic-service-h",
+      "service_start": "2026-01-14",
+      "service_window_end": "2026-01-31",
+      "service_window_start": "2026-01-01",
+      "synthetic": true
+    }
+  ],
+  "disclosure": "Synthetic administrative data-quality and evidence-completeness fixture for an expert-review audit; it is not an operational record.",
+  "schema_version": "1.0.0",
+  "synthetic": true
+}

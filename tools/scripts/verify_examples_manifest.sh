@@ -61,6 +61,30 @@ for i in $(seq 0 $((EXAMPLE_COUNT - 1))); do
       missing=$((missing + 1))
     fi
   done
+
+  frontend_count=$(jq "(.examples[$i].frontends // []) | length" "${MANIFEST}")
+  if [[ "${frontend_count}" -gt 0 ]]; then
+    for frontend_index in $(seq 0 $((frontend_count - 1))); do
+      frontend_language=$(jq -r ".examples[$i].frontends[$frontend_index].language" "${MANIFEST}")
+      frontend_id=$(jq -r ".examples[$i].frontends[$frontend_index].id" "${MANIFEST}")
+      entrypoint=$(jq -r ".examples[$i].frontends[$frontend_index].entrypoint" "${MANIFEST}")
+      documentation=$(jq -r ".examples[$i].frontends[$frontend_index].documentation" "${MANIFEST}")
+
+      checked=$((checked + 1))
+      if ! jq -e --arg language "${frontend_language}" ".examples[$i].implementations | has(\$language)" "${MANIFEST}" >/dev/null; then
+        echo "  ERROR: ${name} frontend ${frontend_id} language ${frontend_language} has no canonical implementation" >&2
+        missing=$((missing + 1))
+      elif [[ ! -f "${ROOT_DIR}/${entrypoint}" ]]; then
+        echo "  ERROR: ${name} frontend ${frontend_id} missing entrypoint at ${entrypoint}" >&2
+        missing=$((missing + 1))
+      elif [[ ! -f "${ROOT_DIR}/${documentation}" ]]; then
+        echo "  ERROR: ${name} frontend ${frontend_id} missing documentation at ${documentation}" >&2
+        missing=$((missing + 1))
+      else
+        echo "  OK: ${name} frontend (${frontend_id})"
+      fi
+    done
+  fi
 done
 
 echo ""

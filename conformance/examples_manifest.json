@@ -761,6 +761,11 @@
           "name": "cold-chain",
           "cli": "--scenario cold-chain",
           "description": "Prevent cheaper logistics recommendations that violate handling requirements, with optional ZEN validation and BN review-risk scoring"
+        },
+        {
+          "name": "synthetic-claims-audit",
+          "cli": "python marimo/frontend_core.py --analyze --scenario synthetic-claims-audit",
+          "description": "Inspect synthetic administrative data-quality and evidence-completeness findings as a review record"
         }
       ],
       "real_world_application": "LLM answer validation, policy enforcement, operational decision support",
@@ -793,6 +798,18 @@
         "python": "examples/integrations/common-sense-guardrails/python",
         "bash": "examples/integrations/common-sense-guardrails/bash"
       },
+      "frontends": [
+        {
+          "id": "reasoning-lab",
+          "kind": "marimo",
+          "language": "python",
+          "entrypoint": "examples/integrations/common-sense-guardrails/marimo/reasoning_lab.py",
+          "documentation": "examples/integrations/common-sense-guardrails/marimo/README.md",
+          "default_mode": "fixture",
+          "community_offline": true,
+          "requires_explicit_analyze": true
+        }
+      ],
       "tier": "community",
       "edition_note": "Runs in Community Edition with CLIPS and selected BN risk scoring. Pro adds Solver/Z3 and ZEN guardrails for repair feedback when selected.",
       "tier_profile": {
@@ -871,7 +888,7 @@
       "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, selected CLIPS/BN findings, iterative repair packets, and optional Pro repair feedback.",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
       "blurb": "The common-sense-guardrails example turns LLM recommendations into typed facts, runs selected CLIPS, BN, Solver/Z3, or ZEN guardrails, builds a deterministic repair packet from failed findings, retries the answer, and reevaluates it. Four scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. BN is used only where uncertainty or risk scoring fits coupon-stack and cold-chain evidence; car-wash and pallet-door stay with crisp rule and feasibility mechanisms. Python and Bash share fixtures, and live local guardrails call nxuskit-cli for CLIPS, BN, Solver, and ZEN where selected.",
-      "content_hash": "5a0615f1a81f4c9b847340f449725594b1f4a89e136417139dcb674a748ec6ce"
+      "content_hash": "dd8e545e76a71225bbb5e671dd169266012284921c08ebf2facfda4414f5f06b"
     },
     {
       "name": "model-research-harness",

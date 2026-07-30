@@ -1,0 +1,18 @@
+[project]
+name = "nxuskit-marimo-reasoning-lab"
+version = "1.0.5"
+description = "Fixture-first ordinary-Python Marimo frontend for nxusKit reasoning records"
+requires-python = ">=3.11"
+dependencies = [
+  "jsonschema==4.26.0",
+  "marimo==0.23.15",
+  "nxuskit-py==1.0.5",
+  "polars==1.43.1",
+]
+
+[dependency-groups]
+dev = ["pytest==9.1.1"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "-p no:cacheprovider"

@@ -2,7 +2,7 @@
 
 > Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.
 
-**Scenarios**: `car-wash` · `coupon-stack` · `pallet-door` · `cold-chain`
+**Scenarios**: `car-wash` · `coupon-stack` · `pallet-door` · `cold-chain` · `synthetic-claims-audit`
 
 ## Edition
 
@@ -46,6 +46,7 @@ Mock Pro and BN findings are fixture-backed and do not require entitlement. Mock
 | `coupon-stack` | Promotion policy and margin violation | CLIPS and ZEN handle crisp eligibility; BN adds probabilistic promotion risk and review priority. |
 | `pallet-door` | Dimensional feasibility and unsafe geometry | CLIPS catches the rule and Solver/Z3 proves geometry. BN is intentionally not modeled. |
 | `cold-chain` | Handling and auditability violation | CLIPS and ZEN handle policy checks; BN combines carrier certification, refrigeration, temperature logging, and handoff evidence into review risk. |
+| `synthetic-claims-audit` | Synthetic administrative data-quality and evidence completeness | The fixture-first Marimo surface emits a canonical expert-review record from structural Community checks. |
 
 ## Run
 
@@ -58,6 +59,25 @@ python3 main.py --scenario car-wash --mode mock --stage ce
 cd ../bash
 bash main.sh --scenario car-wash --mode mock --stage ce
 ```
+
+## Fixture-First Marimo Reasoning Lab
+
+The [ordinary-Python Marimo frontend](./marimo/README.md) starts in offline
+fixture mode. It does not build a record until **Analyze** is selected. It can
+render the existing synthetic cold-chain record and the synthetic
+administrative data-quality/evidence-completeness audit without credentials,
+providers, or a Pro invocation.
+
+```bash
+cd examples/integrations/common-sense-guardrails/marimo
+uv sync --frozen
+uv run marimo run reasoning_lab.py
+```
+
+Solver and ZEN are not selected by default. An explicit selection in fixture
+mode is reported as unavailable; the frontend retains only available Community
+mechanisms and does not simulate a Pro run. See the frontend README for script
+mode and local container reproduction.
 
 Machine-readable parity checks:
 
