@@ -155,6 +155,10 @@ check_bash_syntax() {
 }
 run_check "Bash syntax (helper scripts)" check_bash_syntax
 
+# ── 8a. Public release workflow gate ─────────────────────────────
+
+run_check "Public release workflow gate" python3 scripts/check-public-release-workflow.py --self-test
+
 # ── 8b. README normalizer dry-run ───────────────────────────────
 
 run_check "README normalizer (dry-run)" python3 scripts/normalize_example_readme_build_run.py --dry-run

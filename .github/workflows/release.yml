@@ -1,25 +1,43 @@
-# CD — Create a tagged release matching the SDK version.
+# CD — Create a tagged release matching the SDK version after explicit approval.
 #
 # Reads the SDK version from the latest nxusKit SDK GitHub Release tag
 # (sdk-vX.Y.Z) and creates a GitHub Release with auto-generated source
 # archives (.tar.gz, .zip).
 #
 # Skips if the tag already exists (idempotent on re-runs / unchanged version).
+# Manual dispatchers must type CONFIRM_RELEASE and select the main ref.
 
 name: Release
 
 on:
-  push:
-    branches: [main]
-
-permissions:
-  contents: write
+  workflow_dispatch:
+    inputs:
+      confirm_release:
+        description: Type CONFIRM_RELEASE to create a public Examples Release from main.
+        required: true
+        type: string
 
 jobs:
   release:
     name: Tag and release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - name: Validate manual release gate
+        env:
+          RELEASE_CONFIRMATION: ${{ inputs.confirm_release }}
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          if [[ "$RELEASE_CONFIRMATION" != "CONFIRM_RELEASE" ]]; then
+            echo "Explicit confirmation is required." >&2
+            exit 1
+          fi
+          if [[ "$SELECTED_REF" != "refs/heads/main" ]]; then
+            echo "Release dispatches must select the main ref." >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
