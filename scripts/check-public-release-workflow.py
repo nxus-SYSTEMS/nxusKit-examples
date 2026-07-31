@@ -1,199 +1,292 @@
 #!/usr/bin/env python3
-"""Fail closed when the exported public Release workflow can auto-publish."""
+"""Validate the fixed Examples public Release workflow snapshot and layout."""
 
 from __future__ import annotations
 
 import argparse
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 
-CONFIRMATION_TOKEN = "CONFIRM_RELEASE"
-MAIN_REF = "refs/heads/main"
-DEFAULT_WORKFLOW = Path(".github/workflows-public/release.yml")
+PRIVATE_WORKFLOW = Path(".github/workflows-public/release.yml")
+PUBLIC_WORKFLOW = Path(".github/workflows/release.yml")
+SNAPSHOT = Path("conformance/public_release_workflow.snapshot.yml")
+CONTROLLER = "scripts/examples-public-release.py"
+FORBIDDEN_WORKFLOW_AUTHORITIES = (
+    "gh release create",
+    "gh release edit",
+    "gh release delete",
+    "git tag ",
+)
+PRIVATE_PUBLICATION_WORKFLOWS = {
+    "publish-to-public.yml",
+    "publish-to-public.yaml",
+    "publish-to-docs.yml",
+    "publish-to-docs.yaml",
+}
+TAG_REF_PUSH = re.compile(r"git\s+push\b[^\n]*refs/tags/", flags=re.IGNORECASE)
+GITHUB_API_WRITE = re.compile(
+    r"gh\s+api\b[^\n]*(?:--method\s+|-X\s+)(?:POST|PUT|PATCH|DELETE)\b",
+    flags=re.IGNORECASE,
+)
 
 
-def indented_block(text: str, key: str, indent: int) -> str | None:
-    """Return the YAML indentation block for an unquoted mapping key."""
+def workflow_paths(root: Path) -> list[Path]:
+    """Return every workflow source in either private or exported layout."""
 
-    lines = text.splitlines()
-    key_pattern = re.compile(rf"^ {{%d}}%s:\s*(?:#.*)?$" % (indent, re.escape(key)))
-    start = next((index for index, line in enumerate(lines) if key_pattern.match(line)), None)
-    if start is None:
-        return None
-
-    block: list[str] = []
-    for line in lines[start + 1 :]:
-        if line.strip() and len(line) - len(line.lstrip(" ")) <= indent:
-            break
-        block.append(line)
-    return "\n".join(block)
+    paths: set[Path] = set()
+    for directory in (root / ".github/workflows", root / ".github/workflows-public"):
+        if directory.is_dir():
+            paths.update(directory.rglob("*.yml"))
+            paths.update(directory.rglob("*.yaml"))
+    return sorted(paths)
 
 
-def mapping_keys(block: str, indent: int) -> list[str]:
-    pattern = re.compile(rf"^ {{%d}}([A-Za-z0-9_-]+):" % indent)
-    return [match.group(1) for line in block.splitlines() if (match := pattern.match(line))]
+def expected_workflow(layout: str) -> tuple[Path, Path]:
+    """Resolve one explicit layout without silently selecting an alternative."""
+
+    if layout == "private":
+        return PRIVATE_WORKFLOW, PUBLIC_WORKFLOW
+    if layout == "public":
+        return PUBLIC_WORKFLOW, PRIVATE_WORKFLOW
+    raise ValueError("layout must be private or public")
 
 
-def validate(workflow: str) -> list[str]:
-    """Return public-release gate violations for the workflow source."""
+def validate_repository(root: Path, layout: str) -> list[str]:
+    """Return stable snapshot/layout violations without parsing shell syntax."""
 
     errors: list[str] = []
-    triggers = indented_block(workflow, "on", 0)
-    if triggers is None:
-        errors.append("workflow must declare an unquoted top-level on: mapping")
-    elif mapping_keys(triggers, 2) != ["workflow_dispatch"]:
-        errors.append("workflow triggers must be workflow_dispatch only; push-triggered releases are forbidden")
+    try:
+        expected, opposite = expected_workflow(layout)
+    except ValueError as exc:
+        return [str(exc)]
 
-    dispatch = indented_block(workflow, "workflow_dispatch", 2)
-    inputs = indented_block(workflow, "inputs", 4) if dispatch is not None else None
-    confirmation = indented_block(workflow, "confirm_release", 6) if inputs is not None else None
-    if confirmation is None:
-        errors.append("workflow_dispatch must require the confirm_release input")
-    else:
-        if not re.search(r"^ {8}required: true\s*$", confirmation, flags=re.MULTILINE):
-            errors.append("confirm_release must be required")
-        if not re.search(r"^ {8}type: string\s*$", confirmation, flags=re.MULTILINE):
-            errors.append("confirm_release must be a string input")
-        if CONFIRMATION_TOKEN not in confirmation:
-            errors.append("confirm_release must document the fixed confirmation token")
+    workflow = root / expected
+    snapshot = root / SNAPSHOT
+    opposite_workflow = root / opposite
+    if not workflow.is_file():
+        errors.append(f"required release workflow is missing: {expected}")
+    if not snapshot.is_file():
+        errors.append(f"release workflow snapshot is missing: {SNAPSHOT}")
+    if workflow.is_file() and snapshot.is_file():
+        try:
+            if workflow.read_bytes() != snapshot.read_bytes():
+                errors.append("release workflow must match snapshot exactly")
+        except OSError:
+            errors.append("release workflow or snapshot could not be read")
+    if opposite_workflow.is_file():
+        errors.append(f"opposite release workflow must be absent: {opposite}")
 
-    gate_marker = "- name: Validate manual release gate"
-    checkout_marker = "- uses: actions/checkout@v6"
-    metadata_marker = "- name: Read SDK version and stats"
-    release_marker = "- name: Create or update release"
-    gate_index = workflow.find(gate_marker)
-    checkout_index = workflow.find(checkout_marker)
-    metadata_index = workflow.find(metadata_marker)
-    release_index = workflow.find(release_marker)
-    if gate_index < 0 or checkout_index < 0 or metadata_index < 0 or release_index < 0:
-        errors.append("release job must retain gate, checkout, metadata, and release steps")
-    elif not gate_index < checkout_index < metadata_index < release_index:
-        errors.append("manual gate must run before checkout, metadata, and release API steps")
-    else:
-        gate = workflow[gate_index:checkout_index]
-        required_gate_fragments = (
-            "RELEASE_CONFIRMATION: ${{ inputs.confirm_release }}",
-            "SELECTED_REF: ${{ github.ref }}",
-            f'"$RELEASE_CONFIRMATION" != "{CONFIRMATION_TOKEN}"',
-            f'"$SELECTED_REF" != "{MAIN_REF}"',
-            "exit 1",
+    controller_occurrences: list[Path] = []
+    for path in workflow_paths(root):
+        try:
+            content = path.read_text()
+        except OSError:
+            errors.append(f"workflow could not be read: {path.relative_to(root)}")
+            continue
+        relative = path.relative_to(root)
+        controller_occurrences.extend([relative] * content.count(CONTROLLER))
+        for authority in FORBIDDEN_WORKFLOW_AUTHORITIES:
+            if authority in content:
+                errors.append(
+                    f"forbidden workflow authority in {relative}: {authority}"
+                )
+        if (
+            "gh api" in content
+            and "/releases/" in content
+            and GITHUB_API_WRITE.search(content) is not None
+        ):
+            errors.append(f"forbidden Release API write in {relative}")
+        if TAG_REF_PUSH.search(content) is not None:
+            errors.append(f"forbidden tag-ref push in {relative}")
+        if layout == "public" and path.name in PRIVATE_PUBLICATION_WORKFLOWS:
+            errors.append(
+                f"private publication workflow is forbidden in public layout: {relative}"
+            )
+
+    expected_relative = expected
+    if len(controller_occurrences) != 1:
+        errors.append("workflows must contain the release controller exactly once")
+    elif controller_occurrences[0] != expected_relative:
+        errors.append(
+            "release controller must appear only in the expected release workflow"
         )
-        for fragment in required_gate_fragments:
-            if fragment not in gate:
-                errors.append(f"manual gate must fail closed with {fragment!r}")
-
-    if "gh release view \"$TAG\"" not in workflow:
-        errors.append("release idempotency check must remain present")
-    if "gh release create \"$TAG\"" not in workflow:
-        errors.append("release creation command must remain present behind the manual gate")
-
-    top_permissions = indented_block(workflow, "permissions", 0)
-    release_job = indented_block(workflow, "release", 2)
-    if top_permissions is not None and "contents: write" in top_permissions:
-        errors.append("contents: write must be scoped to the explicitly confirmed release job")
-    if release_job is None or "permissions:\n      contents: write" not in release_job:
-        errors.append("explicitly confirmed release job must retain contents: write")
-
     return errors
 
 
-SAFE_WORKFLOW = f"""\
+CANONICAL_WORKFLOW = """\
+# CD — Create a manually confirmed, source-only public Examples Release.
+# New tags are v<SDK-semver>-<UTC YYYYMMDDHHMM>.
+
 name: Release
+
 on:
   workflow_dispatch:
     inputs:
       confirm_release:
-        description: Type {CONFIRMATION_TOKEN} to create the release.
+        description: Type CONFIRM_RELEASE to create a public Examples Release from main.
         required: true
         type: string
-permissions: {{}}
+
 jobs:
   release:
+    name: Tag and release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - name: Validate manual release gate
-        env:
-          RELEASE_CONFIRMATION: ${{{{ inputs.confirm_release }}}}
-          SELECTED_REF: ${{{{ github.ref }}}}
-        run: |
-          if [[ "$RELEASE_CONFIRMATION" != "{CONFIRMATION_TOKEN}" ]]; then
-            exit 1
-          fi
-          if [[ "$SELECTED_REF" != "{MAIN_REF}" ]]; then
-            exit 1
-          fi
       - uses: actions/checkout@v6
-      - name: Read SDK version and stats
-        run: true
-      - name: Create or update release
-        run: |
-          gh release view "$TAG"
-          gh release create "$TAG"
+        with:
+          fetch-depth: 0
+
+      - name: Execute confirmed Examples release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_CONFIRMATION: ${{ inputs.confirm_release }}
+        run: >-
+          python3 scripts/examples-public-release.py
+          --expected-sha "$GITHUB_SHA"
+          --confirmation "$RELEASE_CONFIRMATION"
+          --execute
 """
 
 
-def assert_rejected(label: str, workflow: str, expected_error: str) -> None:
-    errors = validate(workflow)
-    if expected_error not in errors:
-        raise AssertionError(f"{label} must report {expected_error!r}, got {errors!r}")
+def write_layout(root: Path, layout: str, workflow: str = CANONICAL_WORKFLOW) -> Path:
+    """Create one disposable private or exported-public workflow layout."""
+
+    expected, _ = expected_workflow(layout)
+    workflow_path = root / expected
+    workflow_path.parent.mkdir(parents=True)
+    workflow_path.write_text(workflow)
+    snapshot = root / SNAPSHOT
+    snapshot.parent.mkdir(parents=True)
+    snapshot.write_text(CANONICAL_WORKFLOW)
+    return workflow_path
+
+
+def assert_layout_rejected(root: Path, layout: str, label: str) -> None:
+    """Require a one-property mutation to fail closed."""
+
+    if not validate_repository(root, layout):
+        raise AssertionError(f"{label} must be rejected")
 
 
 def run_self_test() -> None:
-    if errors := validate(SAFE_WORKFLOW):
-        raise AssertionError(f"safe workflow rejected: {errors}")
-    assert_rejected(
-        "push trigger",
-        SAFE_WORKFLOW.replace("workflow_dispatch:", "push:\n    branches: [main]\n  workflow_dispatch:", 1),
-        "workflow triggers must be workflow_dispatch only; push-triggered releases are forbidden",
-    )
-    assert_rejected(
-        "missing confirmation",
-        SAFE_WORKFLOW.replace("confirm_release:", "release_now:", 1),
-        "workflow_dispatch must require the confirm_release input",
-    )
-    assert_rejected(
-        "wrong gate confirmation",
-        SAFE_WORKFLOW.replace(
-            'if [[ "$RELEASE_CONFIRMATION" != "CONFIRM_RELEASE" ]]',
-            'if [[ "$RELEASE_CONFIRMATION" != "WRONG_TOKEN" ]]',
-            1,
+    """Exercise snapshot/layout rejection without dispatching a workflow."""
+
+    source_mutations = {
+        "inline create": lambda text: (
+            text + "\n      - run: gh release create unsafe\n"
         ),
-        f'manual gate must fail closed with \'"$RELEASE_CONFIRMATION" != "{CONFIRMATION_TOKEN}"\'',
-    )
-    assert_rejected(
-        "undocumented confirmation",
-        SAFE_WORKFLOW.replace(f"Type {CONFIRMATION_TOKEN}", "Type WRONG_TOKEN", 1),
-        "confirm_release must document the fixed confirmation token",
-    )
-    assert_rejected(
-        "non-main ref",
-        SAFE_WORKFLOW.replace(MAIN_REF, "refs/heads/release", 1),
-        f'manual gate must fail closed with \'"$SELECTED_REF" != "{MAIN_REF}"\'',
-    )
+        "inline edit": lambda text: text + "\n      - run: gh release edit unsafe\n",
+        "GitHub API write": lambda text: (
+            text + "\n      - run: gh api --method POST repos/example/releases\n"
+        ),
+        "git tag": lambda text: text + "\n      - run: git tag unsafe\n",
+        "tag-ref push": lambda text: (
+            text + "\n      - run: git push origin refs/tags/unsafe\n"
+        ),
+        "duplicate controller": lambda text: (
+            text + "\n      - run: python3 scripts/examples-public-release.py\n"
+        ),
+        "extra run step": lambda text: text + "\n      - run: echo extra\n",
+        "changed trigger": lambda text: text.replace("workflow_dispatch:", "push:", 1),
+        "changed confirmation": lambda text: text.replace(
+            "CONFIRM_RELEASE", "WRONG_CONFIRMATION", 1
+        ),
+        "changed expected SHA": lambda text: text.replace(
+            '--expected-sha "$GITHUB_SHA"', '--expected-sha "$OTHER_SHA"', 1
+        ),
+        "changed confirmation argument": lambda text: text.replace(
+            '--confirmation "$RELEASE_CONFIRMATION"', "--confirmation wrong", 1
+        ),
+        "missing execute argument": lambda text: text.replace("--execute", "", 1),
+        "broadened permissions": lambda text: text.replace(
+            "contents: write", "contents: write\n      actions: write", 1
+        ),
+        "other tag target bypass": lambda text: text.replace(
+            '"$GITHUB_SHA"', '"$OTHER_TAG"', 1
+        ),
+        "swapped write bypass": lambda text: (
+            text
+            + "\n      - run: gh release create unsafe --verify-tag --target $OTHER_TAG\n"
+        ),
+        "later release write bypass": lambda text: (
+            text
+            + "\n      - name: Later write\n        run: gh release create unsafe\n"
+        ),
+        "compound release write bypass": lambda text: (
+            text + "\n      - run: true && gh release create unsafe\n"
+        ),
+    }
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        source = write_layout(root, "private")
+        if errors := validate_repository(root, "private"):
+            raise AssertionError(f"private canonical workflow rejected: {errors}")
+        for label, mutate in source_mutations.items():
+            source.write_text(mutate(CANONICAL_WORKFLOW))
+            assert_layout_rejected(root, "private", label)
+            source.write_text(CANONICAL_WORKFLOW)
+        public_release = root / PUBLIC_WORKFLOW
+        public_release.parent.mkdir(parents=True, exist_ok=True)
+        public_release.write_text(CANONICAL_WORKFLOW)
+        assert_layout_rejected(root, "private", "private workflow restoration")
+        public_release.unlink()
+        snapshot = root / SNAPSHOT
+        snapshot.write_text("snapshot drift\n")
+        assert_layout_rejected(root, "private", "private snapshot drift")
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        write_layout(root, "public")
+        if errors := validate_repository(root, "public"):
+            raise AssertionError(f"public canonical workflow rejected: {errors}")
+        read_only_tag = root / ".github/workflows/tag-inspection.yml"
+        read_only_tag.parent.mkdir(parents=True, exist_ok=True)
+        read_only_tag.write_text("run: git ls-remote origin refs/tags/read-only\n")
+        if errors := validate_repository(root, "public"):
+            raise AssertionError(f"read-only tag inspection rejected: {errors}")
+        snapshot = root / SNAPSHOT
+        snapshot.write_text("snapshot drift\n")
+        assert_layout_rejected(root, "public", "public snapshot drift")
+        snapshot.write_text(CANONICAL_WORKFLOW)
+        private_release = root / PRIVATE_WORKFLOW
+        private_release.parent.mkdir(parents=True, exist_ok=True)
+        private_release.write_text(CANONICAL_WORKFLOW)
+        assert_layout_rejected(root, "public", "public private release leakage")
+        private_release.unlink()
+        mirror = root / ".github/workflows/publish-to-public.yml"
+        mirror.write_text("name: private mirror\n")
+        assert_layout_rejected(root, "public", "public mirror workflow leakage")
+        mirror.unlink()
+        docs = root / ".github/workflows/publish-to-docs.yml"
+        docs.write_text("name: private docs\n")
+        assert_layout_rejected(root, "public", "public Docs workflow leakage")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workflow", type=Path, default=DEFAULT_WORKFLOW)
-    parser.add_argument(
-        "--self-test",
-        action="store_true",
-        help="run built-in mutation cases before validating the selected workflow",
-    )
-    args = parser.parse_args()
+    """Run self-tests, then validate one private or exported-public layout."""
 
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository-root", type=Path, default=Path("."))
+    parser.add_argument("--layout", choices=("private", "public"), default="private")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
     if args.self_test:
         run_self_test()
-
-    errors = validate(args.workflow.read_text())
+    errors = validate_repository(args.repository_root, args.layout)
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
-    print(f"Public release workflow gate passed: {args.workflow}")
+    print(
+        "Public release workflow snapshot/layout gate passed: "
+        f"{args.repository_root / expected_workflow(args.layout)[0]}"
+    )
     return 0
 
 

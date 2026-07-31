@@ -737,18 +737,18 @@
       "publication_status": "approved"
     },
     {
-      "approved_content_hash": "dd8e545e76a71225bbb5e671dd169266012284921c08ebf2facfda4414f5f06b",
-      "approved_release": "v1.0.5-marimo-reasoning-lab",
+      "approved_content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73",
+      "approved_release": "v1.0.5-interactive-reasoning-workbenches",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Current source accepted for the approved v1.0.5 Marimo Reasoning Lab public Examples selection.",
+        "notes": "Current source accepted for the approved v1.0.5 Interactive Reasoning Workbenches public Examples selection.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
       "current_changes_public_ready": true,
-      "current_content_hash": "dd8e545e76a71225bbb5e671dd169266012284921c08ebf2facfda4414f5f06b",
+      "current_content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73",
       "example_id": "common-sense-guardrails",
-      "notes": "Approved v1.0.5 Marimo Reasoning Lab current-source release.",
+      "notes": "Approved v1.0.5 Interactive Reasoning Workbenches current-source release.",
       "public_channels": [
         "repo",
         "docs",
@@ -770,17 +770,17 @@
     },
     {
       "approved_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
-      "approved_release": "v1.0.2-validated-examples-portfolio",
+      "approved_release": "v1.0.5-interactive-reasoning-workbenches",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Current source, including the Model Research Marimo frontend, accepted for the approved v1.0.5 Interactive Reasoning Workbenches public Examples selection.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
       "current_changes_public_ready": true,
       "current_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
       "example_id": "model-research-harness",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved v1.0.5 Interactive Reasoning Workbenches current-source release, including the Model Research Marimo frontend.",
       "public_channels": [
         "repo",
         "docs",

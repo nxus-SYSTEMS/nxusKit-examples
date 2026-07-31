@@ -63,10 +63,13 @@ bash main.sh --scenario car-wash --mode mock --stage ce
 ## Fixture-First Marimo Reasoning Lab
 
 The [ordinary-Python Marimo frontend](./marimo/README.md) starts in offline
-fixture mode. It does not build a record until **Analyze** is selected. It can
-render the existing synthetic cold-chain record and the synthetic
-administrative data-quality/evidence-completeness audit without credentials,
-providers, or a Pro invocation.
+fixture mode. It exposes all five scenarios, fixture/auto/live modes,
+scenario-compatible mechanisms, a bounded repair-attempt control, and an
+explicit **Analyze** form submission. It does not build a record while inputs
+change. Its responsive result view pairs human-readable truth indicators with
+Altair charts and searchable Polars evidence tables for the existing synthetic
+cold-chain record and synthetic administrative data-quality/evidence-completeness
+audit.
 
 ```bash
 cd examples/integrations/common-sense-guardrails/marimo
@@ -74,10 +77,18 @@ uv sync --frozen
 uv run marimo run reasoning_lab.py
 ```
 
-Solver and ZEN are not selected by default. An explicit selection in fixture
-mode is reported as unavailable; the frontend retains only available Community
-mechanisms and does not simulate a Pro run. See the frontend README for script
-mode and local container reproduction.
+For local browser use, bind to loopback only:
+
+```bash
+uv run marimo run reasoning_lab.py --host 127.0.0.1 --port 2718
+```
+
+Cloud providers, local runtimes, Solver/Z3, and ZEN remain visibly unavailable
+until their safe prerequisite applies. Credential names—not values—control
+cloud visibility; the app neither reads nor displays credentials. Local
+runtimes are not started or downloaded, and Pro requires a validated released
+v1.0.5 feature grant rather than token presence. See the frontend README for
+the exact availability, script-mode, and local-container reproduction rules.
 
 Machine-readable parity checks:
 

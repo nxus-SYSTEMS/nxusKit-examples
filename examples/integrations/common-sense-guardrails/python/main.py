@@ -235,7 +235,10 @@ def provider_env_present() -> bool:
         )
     ):
         return True
-    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
+    if any(
+        os.environ.get(name)
+        for name in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "XAI_API_KEY")
+    ):
         return True
     if os.environ.get("OLLAMA_HOST") and endpoint_reachable(
         os.environ["OLLAMA_HOST"], "/api/tags"
@@ -282,7 +285,8 @@ def resolve_mode(requested: str) -> dict[str, Any]:
         if not available:
             raise RuntimeError(
                 "live mode requires NXUSKIT_PROVIDER/NXUSKIT_MODEL, ANTHROPIC_API_KEY, "
-                "OPENAI_API_KEY, reachable OLLAMA_HOST, or reachable LMSTUDIO_BASE_URL"
+                "OPENAI_API_KEY, GROQ_API_KEY, XAI_API_KEY, reachable OLLAMA_HOST, "
+                "or reachable LMSTUDIO_BASE_URL"
             )
         if fixture_llm:
             return {
@@ -1639,6 +1643,27 @@ def make_provider(phase: str | None = None):
     ):
         return Provider.openai(
             model=model or "gpt-4o-mini", api_key=os.environ.get("OPENAI_API_KEY")
+        )
+    if provider_name == "groq" or (
+        not provider_name and os.environ.get("GROQ_API_KEY")
+    ):
+        return Provider.groq(
+            model=model or "llama-3.3-70b-versatile",
+            api_key=os.environ.get("GROQ_API_KEY"),
+        )
+    if provider_name == "xai" or (not provider_name and os.environ.get("XAI_API_KEY")):
+        return Provider.xai(model=model or "grok-4", api_key=os.environ.get("XAI_API_KEY"))
+    if provider_name in {"lmstudio", "lm-studio"} or (
+        not provider_name
+        and not os.environ.get("OLLAMA_HOST")
+        and os.environ.get("LMSTUDIO_BASE_URL")
+    ):
+        return Provider.lmstudio(
+            model=model or "local-model",
+            api_url=os.environ.get("LMSTUDIO_BASE_URL") or None,
+            timeout=OLLAMA_READ_TIMEOUT_SECONDS,
+            connect_timeout=OLLAMA_CONNECT_TIMEOUT_SECONDS,
+            read_timeout=OLLAMA_READ_TIMEOUT_SECONDS,
         )
     return Provider.ollama(
         model=model or "llama3",

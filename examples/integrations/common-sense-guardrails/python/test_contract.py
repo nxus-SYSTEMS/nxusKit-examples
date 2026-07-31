@@ -64,6 +64,8 @@ def clean_env() -> dict[str, str]:
         "NXUSKIT_MODEL",
         "ANTHROPIC_API_KEY",
         "OPENAI_API_KEY",
+        "GROQ_API_KEY",
+        "XAI_API_KEY",
         "OLLAMA_HOST",
         "LMSTUDIO_BASE_URL",
         "NXUSKIT_LICENSE_TOKEN",
@@ -578,6 +580,61 @@ def test_ollama_provider_uses_live_host_and_local_timeouts() -> None:
     assert calls["timeout"] == 120.0
     assert calls["connect_timeout"] == 5.0
     assert calls["read_timeout"] == 120.0
+
+
+def test_groq_and_xai_use_the_released_v105_provider_constructors() -> None:
+    """Catches advertised live-provider choices falling through to Ollama."""
+
+    calls: list[tuple[str, dict]] = []
+
+    class FakeProvider:
+        @staticmethod
+        def groq(**kwargs):
+            calls.append(("groq", kwargs))
+            return object()
+
+        @staticmethod
+        def xai(**kwargs):
+            calls.append(("xai", kwargs))
+            return object()
+
+        @staticmethod
+        def lmstudio(**kwargs):
+            calls.append(("lmstudio", kwargs))
+            return object()
+
+    original_module = sys.modules.get("nxuskit")
+    fake_module = type(sys)("nxuskit")
+    fake_module.Provider = FakeProvider
+    sys.modules["nxuskit"] = fake_module
+    original_env = os.environ.copy()
+    try:
+        os.environ["NXUSKIT_PROVIDER"] = "groq"
+        os.environ["NXUSKIT_MODEL"] = "groq-test-model"
+        os.environ["GROQ_API_KEY"] = "canary-groq-key"
+        assert CSG.provider_env_present() is True
+        CSG.make_provider()
+        os.environ["NXUSKIT_PROVIDER"] = "xai"
+        os.environ["NXUSKIT_MODEL"] = "xai-test-model"
+        os.environ["XAI_API_KEY"] = "canary-xai-key"
+        assert CSG.provider_env_present() is True
+        CSG.make_provider()
+        os.environ["NXUSKIT_PROVIDER"] = "lmstudio"
+        os.environ["NXUSKIT_MODEL"] = "local-test-model"
+        os.environ["LMSTUDIO_BASE_URL"] = "http://127.0.0.1:1234"
+        CSG.make_provider()
+    finally:
+        os.environ.clear()
+        os.environ.update(original_env)
+        if original_module is None:
+            sys.modules.pop("nxuskit", None)
+        else:
+            sys.modules["nxuskit"] = original_module
+
+    assert [name for name, _kwargs in calls] == ["groq", "xai", "lmstudio"]
+    assert calls[0][1]["model"] == "groq-test-model"
+    assert calls[1][1]["model"] == "xai-test-model"
+    assert calls[2][1]["model"] == "local-test-model"
 
 
 def test_phase_specific_ollama_model_overrides_global_model() -> None:

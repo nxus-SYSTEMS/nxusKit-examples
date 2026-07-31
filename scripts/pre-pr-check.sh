@@ -155,11 +155,19 @@ check_bash_syntax() {
 }
 run_check "Bash syntax (helper scripts)" check_bash_syntax
 
-# ── 8a. Public release workflow gate ─────────────────────────────
+# ── 8a. Examples release-tag contract ────────────────────────────
 
-run_check "Public release workflow gate" python3 scripts/check-public-release-workflow.py --self-test
+run_check "Examples release tag contract" python3 scripts/test-examples-release-tag.py
 
-# ── 8b. README normalizer dry-run ───────────────────────────────
+# ── 8b. Examples public-release controller ───────────────────────
+
+run_check "Examples public-release controller" python3 scripts/test-examples-public-release.py
+
+# ── 8c. Public release workflow gate ─────────────────────────────
+
+run_check "Public release workflow gate" python3 scripts/check-public-release-workflow.py --self-test --layout private
+
+# ── 8d. README normalizer dry-run ───────────────────────────────
 
 run_check "README normalizer (dry-run)" python3 scripts/normalize_example_readme_build_run.py --dry-run
 

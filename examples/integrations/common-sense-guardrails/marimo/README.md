@@ -1,8 +1,11 @@
-# Fixture-First Reasoning Lab
+# Interactive Reasoning Lab
 
 This ordinary-Python Marimo frontend renders canonical records from the
 existing common-sense-guardrails core. It starts in offline fixture mode and
-does not build a record until the user selects **Analyze**.
+does not build a record until the user submits **Analyze**. Configure a
+scenario, mode, provider/model, compatible mechanisms, and one through ten
+repair attempts; changing those controls alone runs no provider, engine,
+adapter, or filesystem operation.
 
 ## Setup
 
@@ -17,6 +20,32 @@ cd examples/integrations/common-sense-guardrails/marimo
 uv sync --frozen
 uv run marimo run reasoning_lab.py
 ```
+
+For a local browser session, bind only to loopback:
+
+```bash
+uv run marimo run reasoning_lab.py --host 127.0.0.1 --port 2718
+```
+
+The result pairs a concise summary with Altair evidence charts and searchable
+Polars tables. Facts, findings, evidence, attempts, mechanisms, bounded claims
+scale profiles, and raw canonical JSON remain inspectable without creating a
+second reasoning authority.
+
+## Availability and execution boundary
+
+All supported providers are visible. Claude, OpenAI, Groq, and xAI remain
+disabled until their corresponding credential **name** is detected; no value is
+read, shown, validated, or stored. Ollama and LM Studio remain disabled unless
+an explicit bounded local preflight is added later; the app does not start a
+service or download a model. Solver/Z3 and ZEN remain visible and disabled
+unless the released v1.0.5 license path validates the exact feature grant.
+Token presence alone never enables Pro.
+
+Fixture is the default. Auto and live selections are explicit, and live runs
+fail before execution if a selected provider or mechanism is disabled. The UI
+does not invoke cloud providers, local models, CLIPS, BN, Solver/Z3, or ZEN
+until an explicit submitted request reaches the existing canonical runner.
 
 ## Offline Community paths
 
@@ -37,19 +66,20 @@ uv run python frontend_core.py --json --analyze --scenario synthetic-claims-audi
 
 ## Optional Pro selection
 
-Solver and ZEN are never selected by default. If explicitly selected in this
-frontend, fixture mode reports them as unavailable and continues with the
-available Community mechanisms; it does not simulate a Pro invocation. Use the
+Solver and ZEN are never selected by default. They remain visible but disabled
+until a validated v1.0.5 feature grant is available; fixture mode remains a
+complete Community result and does not simulate a Pro invocation. Use the
 canonical CLI example only when an installed released v1.0.5 bundle and the
 appropriate tier are available.
 
 ## Bounded synthetic scale proof
 
 The adjacent Python helpers accept only seeded `1k`, `100k`, or `1m` temporary
-expansion profiles. They create local generated rows, then demonstrate a
-Polars lazy scan, synthetic reference join, aggregation, and streaming
-collection. Generated output is not committed. See Spec 012 evidence for the
-machine-specific local observations.
+expansion profiles. They create local generated rows after an explicit command,
+then demonstrate a Polars lazy scan, synthetic reference join, aggregation,
+and streaming collection. The lab shows the bounded profile choices and
+claims exception categories without reactively generating data. Generated
+output is not committed.
 
 ## Container reproduction
 

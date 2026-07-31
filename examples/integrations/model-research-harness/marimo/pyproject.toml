@@ -1,11 +1,10 @@
 [project]
-name = "nxuskit-marimo-reasoning-lab"
+name = "nxuskit-marimo-model-research-workbench"
 version = "1.0.5"
-description = "Fixture-first ordinary-Python Marimo frontend for nxusKit reasoning records"
+description = "Fixture-first Marimo workbench for the nxusKit Model Research harness"
 requires-python = ">=3.11"
 dependencies = [
   "altair==6.2.2",
-  "jsonschema==4.26.0",
   "marimo==0.23.15",
   "nxuskit-py==1.0.5",
   "polars==1.43.1",

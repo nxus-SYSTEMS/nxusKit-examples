@@ -888,7 +888,7 @@
       "difficulty_override_reason": "Advanced multi-stage hybrid workflow with shared fixtures, selected CLIPS/BN findings, iterative repair packets, and optional Pro repair feedback.",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
       "blurb": "The common-sense-guardrails example turns LLM recommendations into typed facts, runs selected CLIPS, BN, Solver/Z3, or ZEN guardrails, builds a deterministic repair packet from failed findings, retries the answer, and reevaluates it. Four scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. BN is used only where uncertainty or risk scoring fits coupon-stack and cold-chain evidence; car-wash and pallet-door stay with crisp rule and feasibility mechanisms. Python and Bash share fixtures, and live local guardrails call nxuskit-cli for CLIPS, BN, Solver, and ZEN where selected.",
-      "content_hash": "dd8e545e76a71225bbb5e671dd169266012284921c08ebf2facfda4414f5f06b"
+      "content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73"
     },
     {
       "name": "model-research-harness",
@@ -945,6 +945,18 @@
         "python": "examples/integrations/model-research-harness/python",
         "bash": "examples/integrations/model-research-harness/bash"
       },
+      "frontends": [
+        {
+          "id": "model-research-workbench",
+          "kind": "marimo",
+          "language": "python",
+          "entrypoint": "examples/integrations/model-research-harness/marimo/research_workbench.py",
+          "documentation": "examples/integrations/model-research-harness/marimo/README.md",
+          "default_mode": "fixture",
+          "community_offline": true,
+          "requires_explicit_analyze": true
+        }
+      ],
       "tier": "community",
       "edition_note": "Runs in Community Edition. Future Pro profiles may add Solver portfolio optimization and ZEN decision tables.",
       "tier_profile": {

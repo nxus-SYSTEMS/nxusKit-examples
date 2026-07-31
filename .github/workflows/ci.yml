@@ -26,6 +26,17 @@ env:
 
 jobs:
 
+  release-workflow-gate:
+    name: Examples release tag contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate release tag contract and public release gate
+        run: |
+          python3 scripts/test-examples-release-tag.py
+          python3 scripts/test-examples-public-release.py
+          python3 scripts/check-public-release-workflow.py --self-test --layout public
+
   changes:
     name: Detect changes
     runs-on: ubuntu-latest

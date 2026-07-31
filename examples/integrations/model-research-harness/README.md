@@ -65,6 +65,21 @@ cd bash
 bash main.sh --config ../configs/nxuskit-harness-basic.yaml --mode mock --json
 ```
 
+## Interactive Marimo workbench
+
+The adjacent [Marimo workbench](marimo/README.md) provides a fixture-first
+browser interface with Polars tables and direct Altair projections. It exposes
+all checked-in configs and clear availability/tier truth, but only **Run
+evaluation** can invoke the existing harness. Cloud credentials, local models,
+external adapters, lifecycle mutation, and Pro features remain behind their
+separate explicit gates; the default mock path is offline and synthetic.
+
+```bash
+cd marimo
+uv sync --frozen
+uv run marimo run research_workbench.py --host 127.0.0.1 --port 2719
+```
+
 Promptfoo import:
 
 ```bash
