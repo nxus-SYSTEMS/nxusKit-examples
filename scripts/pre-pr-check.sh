@@ -167,11 +167,15 @@ run_check "Examples public-release controller" python3 scripts/test-examples-pub
 
 run_check "Public release workflow gate" python3 scripts/check-public-release-workflow.py --self-test --layout private
 
-# ── 8d. README normalizer dry-run ───────────────────────────────
+# ── 8d. Public example dependency boundary ───────────────────────
+
+run_check "Public example dependency boundary" python3 scripts/test-public-example-references.py
+
+# ── 8e. README normalizer dry-run ───────────────────────────────
 
 run_check "README normalizer (dry-run)" python3 scripts/normalize_example_readme_build_run.py --dry-run
 
-# ── 8c. Showcase validate ───────────────────────────────────────
+# ── 8f. Showcase validate ───────────────────────────────────────
 
 if [ -f scripts/generate-examples-showcase.sh ]; then
   run_check "Showcase validate" bash scripts/generate-examples-showcase.sh --validate
@@ -179,7 +183,7 @@ else
   skip_check "Showcase validate" "script missing"
 fi
 
-# ── 8d. NOTICE assembly check ───────────────────────────────────
+# ── 8g. NOTICE assembly check ───────────────────────────────────
 
 if [ -f scripts/assemble-notice.sh ]; then
   run_check "NOTICE assembly (check)" scripts/assemble-notice.sh --check
@@ -187,7 +191,7 @@ else
   skip_check "NOTICE assembly" "script missing"
 fi
 
-# ── 8e. Manifest schema validation ──────────────────────────────
+# ── 8h. Manifest schema validation ──────────────────────────────
 
 check_schema() {
   python3 -c "
@@ -205,7 +209,7 @@ else
   skip_check "Manifest schema validation" "jsonschema not installed (pip install jsonschema)"
 fi
 
-# ── 8f. Dependency audit check ──────────────────────────────────
+# ── 8i. Dependency audit check ──────────────────────────────────
 
 if [ -f conformance/dependency-audit.json ]; then
   run_check "Dependency audit (check)" python3 scripts/audit-example-deps.py --check

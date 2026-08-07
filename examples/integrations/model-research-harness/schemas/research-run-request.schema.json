@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allow_external": {
+      "default": false,
+      "type": "boolean"
+    },
+    "config_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "exclude_tests": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "include_tests": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mode": {
+      "enum": [
+        "mock",
+        "auto",
+        "live",
+        "dry-run-policy",
+        "import-promptfoo"
+      ],
+      "type": "string"
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "write_reports": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "config_id",
+    "mode",
+    "provider",
+    "model",
+    "include_tests",
+    "exclude_tests",
+    "allow_external",
+    "write_reports"
+  ],
+  "title": "Model Research submitted evaluation request",
+  "type": "object"
+}

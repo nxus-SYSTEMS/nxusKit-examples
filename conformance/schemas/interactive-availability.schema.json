@@ -1,0 +1,63 @@
+{
+  "$id": "https://nxuskit.dev/schemas/interactive-availability-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Safe, serializable availability state. It intentionally excludes credentials, license tokens, and identity claims.",
+  "properties": {
+    "enabled": {
+      "type": "boolean"
+    },
+    "id": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "provider",
+        "mechanism",
+        "engine",
+        "config"
+      ]
+    },
+    "reason": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runtime_executed": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "available",
+        "credential_not_detected",
+        "endpoint_unreachable",
+        "license_not_detected",
+        "license_invalid",
+        "feature_not_granted",
+        "runtime_unavailable",
+        "unsupported_for_scenario"
+      ]
+    },
+    "tier": {
+      "enum": [
+        "community",
+        "pro"
+      ]
+    },
+    "visible": {
+      "const": true
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "tier",
+    "visible",
+    "enabled",
+    "status",
+    "reason",
+    "runtime_executed"
+  ],
+  "title": "nxusKit Interactive Workbench Availability v1",
+  "type": "object"
+}

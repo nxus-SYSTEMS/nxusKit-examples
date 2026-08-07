@@ -36,6 +36,7 @@ jobs:
           python3 scripts/test-examples-release-tag.py
           python3 scripts/test-examples-public-release.py
           python3 scripts/check-public-release-workflow.py --self-test --layout public
+          python3 scripts/test-public-example-references.py
 
   changes:
     name: Detect changes

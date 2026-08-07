@@ -11,12 +11,8 @@ from jsonschema import Draft202012Validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = ROOT.parents[2]
 CATALOG = ROOT / "marimo" / "config_catalog.py"
-SCHEMA = (
-    REPO_ROOT
-    / "specs/013-interactive-reasoning-workbenches-v105/contracts/research-run-request.schema.json"
-)
+SCHEMA = ROOT / "schemas" / "research-run-request.schema.json"
 
 
 def load_catalog():

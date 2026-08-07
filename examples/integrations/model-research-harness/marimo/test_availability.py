@@ -13,6 +13,9 @@ from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE = ROOT / "marimo" / "availability.py"
+AVAILABILITY_SCHEMA = (
+    ROOT.parents[2] / "conformance" / "schemas" / "interactive-availability.schema.json"
+)
 
 
 def load_availability():
@@ -90,14 +93,7 @@ def test_every_availability_entry_conforms_to_the_shared_contract() -> None:
     """Catches a workbench-only availability status outside the canonical schema."""
 
     module = load_availability()
-    schema_path = (
-        ROOT.parents[2]
-        / "specs"
-        / "013-interactive-reasoning-workbenches-v105"
-        / "contracts"
-        / "availability.schema.json"
-    )
-    validator = Draft202012Validator(json.loads(schema_path.read_text()))
+    validator = Draft202012Validator(json.loads(AVAILABILITY_SCHEMA.read_text()))
     entries = (
         module.inspect_provider_availability({}) + module.inspect_engine_availability()
     )
