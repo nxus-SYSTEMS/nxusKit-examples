@@ -110,11 +110,20 @@ done
 
 ## Mode Behavior
 
-- `--mode live`: default. Requires a configured live provider and fails before scenario content is sent if preflight is unavailable.
-- `--mode mock`: uses checked-in fixtures for LLM answers, structured facts, guardrail findings, repair packets, and corrected answers. It performs no provider, network, or entitlement preflight.
-- `--mode auto`: uses live execution when provider preflight succeeds; otherwise it labels the run as fixture-backed mock mode.
+| Mode | `coupon-stack` with nxusKit v1.0.5 | Other scenarios |
+| --- | --- | --- |
+| Fixture (`--mode mock`) | Deterministic synthetic evidence. No provider is contacted. | Uses checked-in fixtures without provider, network, or entitlement preflight. |
+| Auto | Uses checked-in fixtures because the Python provider path cannot preserve the required strict schema; no provider is contacted. | Uses live execution when provider preflight succeeds and a supported, explicitly labeled fixture fallback otherwise. |
+| Live | Unavailable: the Python provider path cannot preserve the required strict schema. | Runs the configured provider/model after preflight or fails before scenario content is sent. |
 
-For local guardrail runtime smoke without model variability, export `NXUSKIT_COMMON_SENSE_FIXTURE_LLM=1` and run `--mode live`. The runners use checked-in LLM answers and fact fixtures, then execute CLIPS and the selected BN, Solver/Z3, or ZEN guardrail through the installed CLI. This is useful for validating local runtime and Pro entitlement wiring; it is not a live LLM quality test.
+This v1.0.5 containment applies only to `coupon-stack`. Provider availability
+remains truthful and visible even though providers are not applicable to that
+scenario. Coupon Auto resolves to fixture-backed `mock` before provider
+inspection or contact. Re-enabling strict coupon Live requires an independently
+accepted released-v2 Python provider-parity result plus exact Examples
+compatibility proof; a `2.0.0` version string alone never enables it.
+
+For local guardrail runtime smoke without model variability, export `NXUSKIT_COMMON_SENSE_FIXTURE_LLM=1` and run `--mode live` for a scenario that supports Live. The runners use checked-in LLM answers and fact fixtures, then execute CLIPS and the selected BN, Solver/Z3, or ZEN guardrail through the installed CLI. For `coupon-stack` on v1.0.5, use contained `--mode auto`; Live remains unavailable. This is useful for validating local runtime and Pro entitlement wiring; it is not a live LLM quality test.
 
 ## Guardrail Selection
 
@@ -130,11 +139,31 @@ BN is deliberately absent from `car-wash` and `pallet-door`. Those failures are 
 
 Each run retries up to `--max-repair-attempts 3` by default. Every attempt re-extracts facts and reruns the selected guardrails, because a repaired answer can fix one problem and introduce another.
 
-Live structured fact extraction prefers pure JSON. If the model wraps a valid JSON object in prose, the runners extract it and mark the structured-facts stage as `warn`; if no valid JSON object is recoverable after retry, the structured-facts stage is marked `fail` and the run falls back to checked-in fact fixtures so later guardrail stages can still show their behavior.
+Live structured fact extraction prefers pure JSON. If the model wraps a valid JSON object in prose, the runners extract it and mark the structured-facts stage as `warn`. An explicit `live` run stops if no valid scenario-specific JSON object is recoverable after retry; it never silently substitutes fixture facts. Only `auto` may fall back to checked-in fixtures, and the resolved mode and execution source label that fallback explicitly.
 
 Provider preflight order is explicit nxusKit provider/model environment, phase-specific model environment, nxusKit-recognized cloud credentials, reachable Ollama, then reachable LM Studio. Do not commit provider credentials or license tokens.
 
-For local Ollama live runs, the Python runner honors `OLLAMA_HOST` and uses a short 5 second connect timeout with a 120 second read timeout because local model responses can be slower than cloud providers. The Python runner requests JSON response format for fact extraction when the installed SDK exposes it, but v1.0.x does not expose provider-level `thinking_mode` in Python. Use the Bash/CLI runner for the strict local proof path because it can pass both `thinking_mode` and `response_format` through `nxuskit-cli call`.
+For local Ollama Live runs, the Python/Marimo runner uses the released
+`nxuskit-cli` v1.0.5 compatibility path for every LLM turn. The CLI routes
+through nxusKit's Rust Ollama provider, so baseline and repair calls use bounded
+text output, structured-fact calls use a 900-token JSON-schema request, and
+`thinking_mode` is disabled for this deterministic guardrail demonstration.
+Cloud providers continue to use the released `nxuskit-py` provider surface.
+The UI, Run Activity, and session export identify the local backend as
+`nxuskit-cli / Rust Ollama provider`; the example never calls Ollama directly.
+
+The local call deadline defaults to five minutes and can be changed without
+editing source:
+
+```bash
+export NXUSKIT_COMMON_SENSE_OLLAMA_READ_TIMEOUT_SECONDS=300
+```
+
+The value must be a finite number greater than zero and no more than 3600
+seconds. This timeout is a final safety ceiling; the CLI request's bounded
+generation controls are the primary latency guard. The compatibility adapter
+can be retired after a v2 Python provider proves equivalent Ollama options,
+thinking-mode, JSON-schema, output-limit, and finish-reason behavior.
 
 Live runs can use one provider/model for every phase or override phases independently:
 

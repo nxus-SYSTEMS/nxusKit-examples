@@ -86,9 +86,15 @@ def run_evaluation(
         raise ValueError(str(entry["reason"]))
     if entry["category"] == "external-adapter" and not allow_external:
         raise ValueError("external adapter requires allow_external=true")
-    _require_available_provider(
-        _request_value(request, "provider"), provider_availability
-    )
+    provider_value = _request_value(request, "provider")
+    model_value = _request_value(request, "model")
+    requested_provider = str(provider_value).strip() if provider_value else None
+    requested_model = str(model_value).strip() if model_value else None
+    if mode == "live" and not requested_provider:
+        raise ValueError("Live mode requires an enabled provider.")
+    if mode in {"auto", "live"} and requested_provider and not requested_model:
+        raise ValueError("A selected provider requires an explicit model.")
+    _require_available_provider(requested_provider, provider_availability)
 
     config_path = ROOT / "configs" / config_id
     if not config_path.is_file() or config_path.parent != ROOT / "configs":
@@ -117,8 +123,8 @@ def run_evaluation(
     results, bayesian, recommendations, truth = run_config(
         config,
         mode=runner_mode,
-        provider_override=_request_value(request, "provider") or None,
-        model_override=_request_value(request, "model") or None,
+        provider_override=requested_provider or None,
+        model_override=requested_model or None,
         output_dir=OUTPUT_ROOT,
         allow_external_commands=allow_external,
         allow_lifecycle_mutations=False,

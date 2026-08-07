@@ -14,222 +14,265 @@ def _():
     import marimo as mo
 
     from availability import (
-        inspect_mechanism_availability,
         inspect_provider_availability,
+        inspect_reasoning_engine_availability,
+        released_license_status,
     )
-    from frontend_core import SCENARIOS, analyze_request
+    from frontend_core import (
+        AnalysisSubmissionGate,
+        analyze_request,
+        format_elapsed_duration,
+    )
+    from model_discovery import ProviderDiscoveryCoordinator
     from presenters import chart_specs, record_tables
+    from reasoning_controls import ReasoningControls
+    from run_activity import RunActivity
 
     return (
-        SCENARIOS,
+        AnalysisSubmissionGate,
+        ProviderDiscoveryCoordinator,
+        ReasoningControls,
+        RunActivity,
         analyze_request,
         chart_specs,
-        inspect_mechanism_availability,
+        format_elapsed_duration,
         inspect_provider_availability,
+        inspect_reasoning_engine_availability,
         json,
         mo,
         os,
         record_tables,
+        released_license_status,
     )
 
 
 @app.cell
-def _(SCENARIOS, mo):
-    scenario = mo.ui.dropdown(
-        options=list(SCENARIOS), value="cold-chain", label="Scenario"
-    )
-    run_mode = mo.ui.dropdown(
-        options=["fixture", "auto", "live"], value="fixture", label="Run mode"
-    )
-    return run_mode, scenario
+def _(os, released_license_status):
+    license_status = released_license_status(environ=os.environ)
+    return (license_status,)
 
 
 @app.cell
 def _(
-    inspect_mechanism_availability,
-    inspect_provider_availability,
+    ProviderDiscoveryCoordinator,
+    ReasoningControls,
+    RunActivity,
+    inspect_reasoning_engine_availability,
+    license_status,
     mo,
     os,
-    run_mode,
-    scenario,
 ):
-    provider_availability = inspect_provider_availability(os.environ)
-    mechanism_availability = inspect_mechanism_availability(scenario.value)
-
-    enabled_providers = [
-        entry["id"] for entry in provider_availability if entry["enabled"]
-    ]
-    unavailable_providers = [
-        f"{entry['id']}: {entry['reason']}"
-        for entry in provider_availability
-        if not entry["enabled"]
-    ]
-    provider = mo.ui.dropdown(
-        options=enabled_providers,
-        value=None,
-        allow_select_none=True,
-        label="Provider",
-        disabled=not enabled_providers,
+    engine_availability = inspect_reasoning_engine_availability(license_status)
+    discovery_coordinator = ProviderDiscoveryCoordinator()
+    reasoning_widget = ReasoningControls(
+        coordinator=discovery_coordinator,
+        environ=os.environ,
+        engine_availability=engine_availability,
     )
-    model = mo.ui.text(value="", label="Model", disabled=not enabled_providers)
-    unavailable_provider_list = mo.ui.multiselect(
-        options=unavailable_providers,
-        label="Unavailable providers (visible, disabled)",
-        disabled=True,
-    )
-
-    enabled_mechanisms = [
-        entry["id"] for entry in mechanism_availability if entry["enabled"]
-    ]
-    unavailable_mechanisms = [
-        f"{entry['id']}: {entry['reason']}"
-        for entry in mechanism_availability
-        if not entry["enabled"]
-    ]
-    defaults = [item for item in ("clips", "bn") if item in enabled_mechanisms]
-    mechanisms = mo.ui.multiselect(
-        options=enabled_mechanisms,
-        value=defaults or enabled_mechanisms[:1],
-        label="Mechanisms",
-        disabled=not enabled_mechanisms,
-    )
-    unavailable_mechanism_list = mo.ui.multiselect(
-        options=unavailable_mechanisms,
-        label="Unavailable mechanisms (visible, disabled)",
-        disabled=True,
-    )
-    repair_attempts = mo.ui.number(
-        start=1, stop=10, step=1, value=3, label="Repair attempts"
-    )
-    configuration = mo.ui.dictionary(
-        {
-            "scenario": scenario,
-            "mode": run_mode,
-            "provider": provider,
-            "model": model,
-            "mechanisms": mechanisms,
-            "max_repair_attempts": repair_attempts,
-        },
-        label="Configure",
-    )
-    request_form = mo.ui.form(
-        configuration,
-        submit_button_label="Analyze",
-        label="Configure the synthetic reasoning record",
-    )
-    mo.vstack(
-        [
-            mo.md(
-                "# nxusKit Reasoning Lab\n"
-                "Fixture-first Community analysis. Configuration changes do not run a "
-                "provider, engine, adapter, or filesystem operation."
-            ),
-            request_form,
-            unavailable_provider_list,
-            unavailable_mechanism_list,
-        ]
-    )
+    run_activity_widget = RunActivity()
+    controls = mo.ui.anywidget(reasoning_widget)
+    activity_view = mo.ui.anywidget(run_activity_widget)
+    controls
     return (
-        mechanism_availability,
-        provider_availability,
-        request_form,
+        activity_view,
+        controls,
+        engine_availability,
+        reasoning_widget,
+        run_activity_widget,
     )
 
 
 @app.cell
-def _(analyze_request, mechanism_availability, provider_availability, request_form):
-    submitted_request = request_form.value
-    if submitted_request is None:
+def _(AnalysisSubmissionGate, analyze_request):
+    analysis_gate = AnalysisSubmissionGate(analyze=analyze_request)
+    return (analysis_gate,)
+
+
+@app.cell
+def _(
+    analysis_gate,
+    analyze_request,
+    controls,
+    engine_availability,
+    reasoning_widget,
+    run_activity_widget,
+):
+    control_state = controls.value
+    provider_availability = list(control_state.get("providers", []))
+    submit_generation = int(control_state.get("submit_generation", 0))
+    submitted_request = dict(control_state.get("submitted_request", {}))
+    draft_configuration = {
+        "scenario": str(control_state.get("scenario", "cold-chain")),
+        "mode": str(control_state.get("mode", "fixture")),
+        "provider": control_state.get("selected_provider"),
+        "model": control_state.get("selected_model"),
+        "mechanisms": list(control_state.get("selected_engines", ["clips", "bn"])),
+        "max_repair_attempts": int(control_state.get("max_repair_attempts", 3)),
+    }
+    run_activity_widget.set_draft_configuration(draft_configuration)
+    if submit_generation < 1 or not submitted_request:
         response = analyze_request(
-            {
-                "scenario": "cold-chain",
-                "mode": "fixture",
-                "provider": None,
-                "model": None,
-                "mechanisms": ["clips", "bn"],
-                "max_repair_attempts": 3,
-            },
+            draft_configuration,
             submitted=False,
             provider_availability=provider_availability,
-            mechanism_availability=mechanism_availability,
+            mechanism_availability=engine_availability,
         )
     else:
-        response = analyze_request(
+        run_activity_widget.begin_run(
             submitted_request,
-            submitted=True,
-            provider_availability=provider_availability,
-            mechanism_availability=mechanism_availability,
+            generation=submit_generation,
         )
+        try:
+            response = analysis_gate.evaluate(
+                submit_generation,
+                submitted_request,
+                provider_availability=provider_availability,
+                mechanism_availability=engine_availability,
+                event_sink=run_activity_widget.append_event,
+                interaction_sink=run_activity_widget.append_interaction_update,
+            )
+        except Exception:
+            run_activity_widget.fail_run(
+                "Analysis stopped before a safe result was available."
+            )
+            reasoning_widget.completed_elapsed_ms = run_activity_widget.final_elapsed_ms
+            reasoning_widget.completion_state = "failed"
+            reasoning_widget.completed_generation = submit_generation
+            raise
+        run_activity_widget.complete_run(response)
+        reasoning_widget.completed_elapsed_ms = int(
+            response["run_receipt"]["elapsed_ms"]
+        )
+        reasoning_widget.completion_state = (
+            "completed" if response.get("record") is not None else "failed"
+        )
+        reasoning_widget.completed_generation = submit_generation
     return (response,)
 
 
 @app.cell
-def _(chart_specs, json, mo, record_tables, response):
+def _(
+    activity_view,
+    chart_specs,
+    format_elapsed_duration,
+    json,
+    mo,
+    record_tables,
+    response,
+):
     record = response["record"]
     if record is None:
-        result_view = mo.callout(
-            "Select inputs, then press Analyze. No reasoning record has been built.",
-            kind="info",
+        result_view = mo.vstack(
+            [
+                mo.callout(
+                    response.get(
+                        "message",
+                        "Choose the configuration above, then press Analyze. No reasoning record has been built.",
+                    ),
+                    kind="danger" if response.get("run_receipt") else "info",
+                ),
+                activity_view,
+            ]
         )
     else:
         provenance = record["provenance"]
         final = record["final"]
         submitted = response["mode"]
+        skipped = response.get("skipped_mechanisms", [])
+        execution = response["execution"]
+        run_receipt = response["run_receipt"]
+        skipped_summary = (
+            ", ".join(f"{item['id']} ({item['reason']})" for item in skipped)
+            if skipped
+            else "none"
+        )
         summary = mo.md(
-            "## Summary\n"
-            f"**Scenario:** {record['scenario']['label']}  \\n"
-            f"**Requested / resolved mode:** {submitted} / {provenance['mode']}  \\n"
-            f"**Provider / model:** {response['requested_provider'] or 'not selected'} / "
-            f"{response['requested_model'] or 'not selected'}  \\n"
-            f"**nxusKit Python / native:** {provenance['sdk_python_version']} / "
-            f"{provenance['sdk_native_version']}  \\n"
-            f"**Synthetic data:** {record['scenario']['synthetic']}  \\n"
-            f"**Review disposition:** {final['review_disposition']}  \\n"
-            "**Mechanism execution:** "
-            + ", ".join(
-                f"{item['id']} ({item['tier']}, {item['availability']}, "
-                f"runtime_executed={item['runtime_executed']})"
-                for item in record["mechanisms"]
-            )
-            + "  \\n"
-            f"{final['summary']}"
+            f"""## Summary
+
+- **Scenario:** {record["scenario"]["label"]}
+- **Requested / resolved mode:** {submitted} / {provenance["mode"]}
+- **Provider / model:** {response["requested_provider"] or "not selected"} / {response["requested_model"] or "not selected"}
+- **LLM execution source:** {execution["llm_source"]} (provider contacted: {execution["provider_contacted"]})
+- **Execution detail:** {execution["message"]}
+- **Run started / completed (UTC):** {run_receipt["started_at_utc"]} / {run_receipt["completed_at_utc"]}
+- **Elapsed:** {format_elapsed_duration(run_receipt["elapsed_ms"])}
+- **nxusKit Python / native:** {provenance["sdk_python_version"]} / {provenance["sdk_native_version"]}
+- **Synthetic data:** {record["scenario"]["synthetic"]}
+- **Review disposition:** {final["review_disposition"]}
+- **Reasoning Engine execution:** {", ".join(f"{item['id']} ({item['tier']}, {item['availability']}, runtime_executed={item['runtime_executed']})" for item in record["mechanisms"])}
+- **Skipped Reasoning Engines:** {skipped_summary}
+
+{final["summary"]}
+"""
         )
         charts = chart_specs(record)
+        chart_views = [
+            mo.style(
+                mo.ui.altair_chart(
+                    chart.properties(width="container").properties(height=260),
+                    chart_selection=False,
+                    legend_selection=False,
+                    label=name.replace("_", " ").title(),
+                ),
+                width="100%",
+                min_width="18rem",
+            )
+            for name, chart in charts.items()
+        ]
         visual_evidence = mo.vstack(
             [
                 mo.md("## Visual Evidence"),
-                *[
-                    mo.ui.altair_chart(chart, label=name.replace("_", " ").title())
-                    for name, chart in charts.items()
-                ],
+                mo.hstack(
+                    chart_views,
+                    align="stretch",
+                    wrap=True,
+                    widths="equal",
+                ),
             ]
         )
         tables = record_tables(record)
-        evidence_tabs = mo.tabs(
+        evidence_tabs = mo.ui.tabs(
             {
                 "Findings": mo.ui.table(tables["findings"], label="Findings"),
                 "Evidence": mo.ui.table(tables["evidence"], label="Evidence"),
                 "Attempts": mo.ui.table(tables["attempts"], label="Attempts"),
                 "Facts": mo.ui.table(tables["facts"], label="Facts"),
-                "Mechanisms": mo.ui.table(tables["mechanisms"], label="Mechanisms"),
+                "Reasoning Engines": mo.ui.table(
+                    tables["mechanisms"], label="Reasoning Engines"
+                ),
                 "Claims scale": mo.ui.table(
                     tables["claims_scale_profiles"], label="Claims scale profiles"
                 ),
             }
         )
-        result_view = mo.vstack(
-            [
-                mo.hstack([summary, visual_evidence], wrap=True, widths="equal"),
-                mo.md("## Inspect evidence"),
-                evidence_tabs,
-                mo.accordion(
-                    {
-                        "Raw JSON": mo.md(
-                            f"```json\\n{json.dumps(record, indent=2, sort_keys=True)}\\n```"
-                        )
-                    }
-                ),
-            ]
+        styled_tabs = mo.style(
+            evidence_tabs,
+            width="100%",
+            min_width="0",
+            overflow_x="auto",
+        )
+        result_view = mo.style(
+            mo.vstack(
+                [
+                    summary,
+                    activity_view,
+                    mo.md("## Inspect Evidence"),
+                    styled_tabs,
+                    visual_evidence,
+                    mo.accordion(
+                        {
+                            "Raw JSON": mo.md(
+                                f"""```json
+{json.dumps(record, indent=2, sort_keys=True)}
+```"""
+                            )
+                        }
+                    ),
+                ]
+            ),
+            width="100%",
+            min_width="0",
+            overflow_x="hidden",
         )
     result_view
 

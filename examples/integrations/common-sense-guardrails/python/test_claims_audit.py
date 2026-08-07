@@ -24,13 +24,7 @@ from claims_polars import claims_lazy_summary, claims_observational_sql
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "schemas" / "synthetic-claims-audit.schema.json"
-RECORD_SCHEMA = (
-    ROOT.parents[2]
-    / "specs"
-    / "012-marimo-reasoning-lab-v105"
-    / "contracts"
-    / "reasoning-record.schema.json"
-)
+RECORD_SCHEMA = ROOT / "schemas" / "reasoning-record.schema.json"
 
 
 def test_tiny_fixture_is_synthetic_and_audit_is_structural() -> None:

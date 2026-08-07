@@ -743,9 +743,9 @@
       "tier": "community"
     },
     {
-      "blurb": "The common-sense-guardrails example turns LLM recommendations into typed facts, runs selected CLIPS, BN, Solver/Z3, or ZEN guardrails, builds a deterministic repair packet from failed findings, retries the answer, and reevaluates it. Four scenarios cover physical preconditions, promotion policy, warehouse geometry, and cold-chain handling. BN is used only where uncertainty or risk scoring fits coupon-stack and cold-chain evidence; car-wash and pallet-door stay with crisp rule and feasibility mechanisms. Python and Bash share fixtures, and live local guardrails call nxuskit-cli for CLIPS, BN, Solver, and ZEN where selected.",
+      "blurb": "The common-sense-guardrails example turns LLM recommendations into typed facts, runs selected CLIPS, BN, Solver/Z3, or ZEN guardrails, builds a deterministic repair packet from failed findings, retries the answer, and reevaluates it. Five scenarios cover physical preconditions, promotion policy, warehouse geometry, cold-chain handling, and a synthetic administrative claims evidence audit. BN is used only where uncertainty or risk scoring fits coupon-stack and cold-chain evidence; car-wash and pallet-door stay with crisp rule and feasibility mechanisms. Python and Bash share fixtures, and live local guardrails call nxuskit-cli for LLM inference, CLIPS, BN, Solver, and ZEN where selected.",
       "category": "integrations",
-      "content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73",
+      "content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
       "description": "Progressive LLM guardrails with CE CLIPS/BN and optional Pro Solver/ZEN repair feedback",
       "difficulty": "advanced",
       "difficulty_override": true,
@@ -2128,8 +2128,8 @@
         }
       },
       {
-        "approved_content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73",
-        "approved_release": "v1.0.5-interactive-reasoning-workbenches",
+        "approved_content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
+        "approved_release": "v1.0.5-coupon-live-containment",
         "example_id": "common-sense-guardrails",
         "public_channels": [
           "repo",
@@ -2150,7 +2150,7 @@
         },
         "publication_status": "approved",
         "selected_source": {
-          "content_hash": "613fb2a352012f9aafe1589efb8c23692e89f38964f1a9a3cb7d489068ac9e73",
+          "content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
           "kind": "current_source"
         }
       },

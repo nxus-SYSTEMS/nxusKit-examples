@@ -87,7 +87,7 @@
             {
               "_id": "deny-margin-floor-breach",
               "allowed": "false",
-              "combined_margin_percent": "< 0",
+              "combined_margin_percent": "< 20",
               "decision": "\"deny_margin_floor\"",
               "non_stackable_count": "",
               "repair_hint": "\"select_single_best_eligible_discount\""

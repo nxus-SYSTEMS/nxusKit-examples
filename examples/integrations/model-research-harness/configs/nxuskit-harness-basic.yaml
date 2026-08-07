@@ -19,7 +19,7 @@
   "tests": [
     {
       "id": "ticket-billing-refund",
-      "prompt": "Classify this support ticket as JSON with label, confidence, and rationale: {{ ticket }}",
+      "prompt": "Classify this synthetic support ticket as JSON with label, confidence, and rationale. The label must be exactly one of \"billing\", \"technical\", \"account\", or \"other\". Return the lowercase label value exactly. Ticket: {{ ticket }}",
       "vars": {
         "ticket": "I was charged twice after cancelling my renewal. Please refund the duplicate payment."
       },

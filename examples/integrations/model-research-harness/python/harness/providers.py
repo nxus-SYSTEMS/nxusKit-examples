@@ -43,7 +43,9 @@ def call_provider(
     model_override: str | None = None,
 ) -> dict[str, Any]:
     prompt = render_template(test["prompt"], test.get("vars") or {})
-    if mode == "mock" or provider.get("provider") in {"mock", "loopback"}:
+    if mode == "mock" or (
+        not provider_override and provider.get("provider") in {"mock", "loopback"}
+    ):
         mock = test.get("mock_response", {})
         if isinstance(mock, dict):
             content = json.dumps(mock, sort_keys=True)
@@ -143,6 +145,7 @@ def call_live_provider(
     return {
         "content": response.content,
         "source": "live",
+        "provider_id": provider_name,
         "model": getattr(response, "model", model),
         "latency_ms": 0,
         "metadata": {

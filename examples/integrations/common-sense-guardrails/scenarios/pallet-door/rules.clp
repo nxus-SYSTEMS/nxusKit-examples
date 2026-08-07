@@ -7,7 +7,8 @@
 
 (deftemplate action
   (slot id)
-  (slot movement))
+  (slot movement)
+  (slot unsafe-manipulation))
 
 (deftemplate guardrail-finding
   (slot status)
@@ -31,7 +32,7 @@
   (clearance
     (load-state loaded))
   (action
-    (id angle-and-push))
+    (unsafe-manipulation true))
   =>
   (assert
     (guardrail-finding

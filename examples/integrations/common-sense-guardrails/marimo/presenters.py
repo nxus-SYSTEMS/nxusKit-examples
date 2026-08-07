@@ -10,6 +10,10 @@ import polars as pl
 from claims_audit import PROFILE_ROWS
 
 
+STATUS_DOMAIN = ["pass", "fail", "warn", "skipped", "review_required", "unknown"]
+STATUS_RANGE = ["#009E73", "#D55E00", "#E69F00", "#6B7280", "#0072B2", "#6B7280"]
+
+
 TABLE_SCHEMAS: dict[str, dict[str, pl.DataType]] = {
     "stages": {
         "stage": pl.String,
@@ -33,6 +37,7 @@ TABLE_SCHEMAS: dict[str, dict[str, pl.DataType]] = {
         "input_sha256": pl.String,
         "selected_mechanisms": pl.List(pl.String),
         "status": pl.String,
+        "repair_from_attempt": pl.Int64,
     },
     "mechanisms": {
         "id": pl.String,
@@ -85,6 +90,9 @@ def record_tables(record: dict[str, Any]) -> dict[str, pl.DataFrame]:
         if name
         not in {"stages", "claims_exception_categories", "claims_scale_profiles"}
     }
+    tables["attempts"] = tables["attempts"].rename(
+        {"input_sha256": "attempt_input_sha256"}
+    )
     tables["stages"] = _table(_stage_rows(record), TABLE_SCHEMAS["stages"])
     tables["claims_exception_categories"] = _table(
         _claims_exception_categories(record),
@@ -98,6 +106,28 @@ def record_tables(record: dict[str, Any]) -> dict[str, pl.DataFrame]:
 
 def _inline_chart(values: list[dict[str, Any]]) -> alt.Chart:
     return alt.Chart(alt.InlineData(values=values))
+
+
+def _status_color(*, legend: alt.Legend | None = None) -> alt.Color:
+    return alt.Color(
+        "status:N",
+        title="Status",
+        legend=legend,
+        scale=alt.Scale(domain=STATUS_DOMAIN, range=STATUS_RANGE),
+    )
+
+
+def _readable_chart(chart: alt.Chart) -> alt.Chart:
+    return (
+        chart.configure_axis(
+            labelFontSize=13,
+            titleFontSize=14,
+            labelLimit=180,
+            titlePadding=10,
+        )
+        .configure_legend(labelFontSize=13, titleFontSize=14, labelLimit=180)
+        .configure_title(fontSize=16)
+    )
 
 
 def _count_rows(rows: Iterable[dict[str, Any]], *fields: str) -> list[dict[str, Any]]:
@@ -197,7 +227,7 @@ def chart_specs(record: dict[str, Any]) -> dict[str, alt.Chart]:
         .encode(
             x=alt.X("stage:N", title="Record stage"),
             y=alt.Y("attempt:Q", title="Attempt"),
-            color=alt.Color("status:N", title="Status"),
+            color=_status_color(),
             tooltip=["stage:N", "attempt:Q", "status:N"],
         ),
         "findings_by_status": _inline_chart(_count_rows(findings, "status"))
@@ -205,7 +235,7 @@ def chart_specs(record: dict[str, Any]) -> dict[str, alt.Chart]:
         .encode(
             x=alt.X("status:N", title="Finding status"),
             y=alt.Y("count:Q", title="Findings"),
-            color=alt.Color("status:N", legend=None),
+            color=_status_color(legend=None),
         ),
         "findings_by_category": _inline_chart(
             _count_rows(findings, "mechanism_id", "status", "severity")
@@ -213,16 +243,22 @@ def chart_specs(record: dict[str, Any]) -> dict[str, alt.Chart]:
         .mark_bar()
         .encode(
             x=alt.X("mechanism_id:N", title="Mechanism"),
+            xOffset=alt.XOffset("severity:N", title="Severity"),
             y=alt.Y("count:Q", title="Findings"),
-            color=alt.Color("status:N", title="Status"),
-            column=alt.Column("severity:N", title="Severity"),
+            color=_status_color(),
+            tooltip=[
+                "mechanism_id:N",
+                "severity:N",
+                "status:N",
+                "count:Q",
+            ],
         ),
         "attempt_findings": _inline_chart(_count_rows(findings, "attempt", "status"))
         .mark_bar()
         .encode(
             x=alt.X("attempt:N", title="Attempt"),
             y=alt.Y("count:Q", title="Findings"),
-            color=alt.Color("status:N", title="Status"),
+            color=_status_color(),
         ),
         "mechanism_availability": _inline_chart(
             [
@@ -238,7 +274,14 @@ def chart_specs(record: dict[str, Any]) -> dict[str, alt.Chart]:
         .encode(
             x=alt.X("mechanism:N", title="Mechanism"),
             y=alt.Y("availability:N", title="Availability"),
-            color=alt.Color("runtime_executed:N", title="Executed"),
+            color=alt.Color(
+                "runtime_executed:N",
+                title="Executed",
+                scale=alt.Scale(
+                    domain=[False, True],
+                    range=["#6B7280", "#0072B2"],
+                ),
+            ),
         ),
     }
     bn_values = _latest_bn_values(record)
@@ -249,7 +292,14 @@ def chart_specs(record: dict[str, Any]) -> dict[str, alt.Chart]:
             .encode(
                 x=alt.X("metric:N", title="Bayesian metric"),
                 y=alt.Y("value:Q", title="Probability"),
-                color=alt.Color("metric:N", legend=None),
+                color=alt.Color(
+                    "metric:N",
+                    legend=None,
+                    scale=alt.Scale(
+                        domain=["observed_probability", "review_threshold"],
+                        range=["#0072B2", "#E69F00"],
+                    ),
+                ),
             )
         )
-    return charts
+    return {name: _readable_chart(chart) for name, chart in charts.items()}

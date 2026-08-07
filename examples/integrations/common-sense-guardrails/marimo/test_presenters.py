@@ -20,6 +20,8 @@ def load_presenters() -> ModuleType:
     """Load the presentation boundary so absence is a deliberate red failure."""
 
     assert PRESENTER_PATH.is_file(), "missing pure Polars/Altair presenter module"
+    if str(PYTHON_ROOT) not in sys.path:
+        sys.path.insert(0, str(PYTHON_ROOT))
     spec = importlib.util.spec_from_file_location(
         "reasoning_presenters", PRESENTER_PATH
     )
@@ -42,6 +44,36 @@ def synthetic_claims_record() -> dict[str, object]:
     from claims_audit import build_claims_reasoning_record
 
     return build_claims_reasoning_record()
+
+
+def unresolved_three_attempt_record() -> dict[str, object]:
+    record = cold_chain_record()
+    attempts = record["attempts"]
+    record["attempts"] = [
+        {
+            **attempts[0],
+            "input_sha256": "1" * 64,
+            "status": "fail",
+        },
+        {
+            **attempts[1],
+            "input_sha256": "2" * 64,
+            "status": "fail",
+            "repair_from_attempt": 1,
+        },
+        {
+            **attempts[1],
+            "number": 3,
+            "input_sha256": "3" * 64,
+            "status": "fail",
+            "repair_from_attempt": 2,
+        },
+    ]
+    record["final"] = {
+        **record["final"],
+        "review_disposition": "review_required",
+    }
+    return record
 
 
 def test_tables_project_canonical_findings_attempts_mechanisms_facts_and_evidence() -> (
@@ -71,16 +103,60 @@ def test_tables_project_canonical_findings_attempts_mechanisms_facts_and_evidenc
     assert tables["stages"].to_dicts()[-1]["stage"] == "final review"
 
 
+def test_attempt_projection_uses_truthful_status_hash_label_and_repair_ancestry() -> (
+    None
+):
+    """Catches the evidence table diverging from the canonical repair loop."""
+
+    record = unresolved_three_attempt_record()
+    attempts = load_presenters().record_tables(record)["attempts"].to_dicts()
+
+    assert [row["status"] for row in attempts] == ["fail", "fail", "fail"]
+    assert "attempt_input_sha256" in attempts[0]
+    assert "input_sha256" not in attempts[0]
+    assert attempts[0]["repair_from_attempt"] is None
+    assert attempts[1]["repair_from_attempt"] == 1
+    assert attempts[2]["repair_from_attempt"] == 2
+
+
 def test_charts_include_truthful_stage_and_finding_category_projections() -> None:
     """Catches missing stage, severity, or mechanism evidence in the visual layer."""
 
-    charts = load_presenters().chart_specs(cold_chain_record())
+    charts = load_presenters().chart_specs(unresolved_three_attempt_record())
     with alt.data_transformers.enable("default", consolidate_datasets=False):
         stages = charts["stage_progression"].to_dict()["data"]["values"]
         findings = charts["findings_by_category"].to_dict()["data"]["values"]
-    assert stages[0] == {"attempt": 1, "stage": "baseline", "status": "pass"}
-    assert stages[-1]["stage"] == "final review"
+    assert [row["status"] for row in stages[:-1]] == ["fail", "fail", "fail"]
+    assert stages[0] == {"attempt": 1, "stage": "baseline", "status": "fail"}
+    assert stages[-1] == {
+        "attempt": 3,
+        "stage": "final review",
+        "status": "review_required",
+    }
     assert {"mechanism_id", "severity", "status", "count"} <= set(findings[0])
+
+
+def test_finding_category_chart_is_a_single_responsive_grouped_view() -> None:
+    """Catches a faceted chart that clips its legend in the workbench column."""
+
+    record = cold_chain_record()
+    spec = load_presenters().chart_specs(record)["findings_by_category"].to_dict()
+    assert "column" not in spec["encoding"]
+    assert spec["encoding"]["xOffset"]["field"] == "severity"
+
+
+def test_charts_use_accessible_semantic_status_colors_and_readable_type() -> None:
+    """Catches pass/fail colors or chart typography regressing to defaults."""
+
+    charts = load_presenters().chart_specs(cold_chain_record())
+    status_spec = charts["findings_by_status"].to_dict()
+    scale = status_spec["encoding"]["color"]["scale"]
+
+    assert scale["domain"][:3] == ["pass", "fail", "warn"]
+    assert scale["range"][:3] == ["#009E73", "#D55E00", "#E69F00"]
+    assert status_spec["config"]["axis"]["labelFontSize"] >= 13
+    assert status_spec["config"]["axis"]["titleFontSize"] >= 14
+    assert status_spec["config"]["legend"]["labelFontSize"] >= 13
 
 
 def test_bn_chart_uses_the_final_observed_probability_and_threshold() -> None:
@@ -91,7 +167,7 @@ def test_bn_chart_uses_the_final_observed_probability_and_threshold() -> None:
         values = charts["bn_threshold"].to_dict()["data"]["values"]
     assert values == [
         {"metric": "observed_probability", "value": 0.08},
-        {"metric": "review_threshold", "value": 0.5},
+        {"metric": "review_threshold", "value": 0.3},
     ]
 
 

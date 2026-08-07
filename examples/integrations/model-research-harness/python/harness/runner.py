@@ -63,6 +63,7 @@ def run_config(
             response = call_provider(
                 provider, test, mode, provider_override, model_override
             )
+            effective_provider_id = str(response.get("provider_id") or provider_id)
             parsed, parse_error = parse_jsonish(response["content"])
             assertions = evaluate_assertions(
                 response["content"], test.get("assertions") or []
@@ -70,7 +71,7 @@ def run_config(
             score = score_assertions(assertions)
             item = {
                 "test_id": test["id"],
-                "provider_id": provider_id,
+                "provider_id": effective_provider_id,
                 "model": response.get("model"),
                 "source": response.get("source"),
                 "status": "pass" if score["failed"] == 0 else "fail",
@@ -90,9 +91,20 @@ def run_config(
             if item["policy"]["status"] == "fail":
                 item["status"] = "fail"
             results.append(item)
+            observed_provider = {
+                **provider,
+                "id": effective_provider_id,
+                "provider": effective_provider_id,
+                "model": response.get("model") or provider.get("model", ""),
+                "capabilities": (
+                    provider.get("capabilities", {})
+                    if effective_provider_id == provider_id
+                    else {}
+                ),
+            }
             truth.append(
                 capability_truth(
-                    provider,
+                    observed_provider,
                     {
                         "harness_validated": True,
                         "harness_repaired": bool(test.get("repair")),

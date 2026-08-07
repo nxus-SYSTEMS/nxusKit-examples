@@ -97,3 +97,108 @@ def test_contract_has_one_submit_boundary_and_all_inspection_surfaces() -> None:
     } <= set(controls["form_fields"])
     source = APP.read_text(encoding="utf-8")
     assert source.count('submit_button_label="Run evaluation"') == 1
+
+
+def test_validated_license_status_is_passed_to_model_research_controls() -> None:
+    """Catches the workbench dropping its safe status before engine availability."""
+
+    controls = load_contract().workbench_controls(
+        environ={},
+        license_status={
+            "token_detected": True,
+            "validated": True,
+            "features": ["solver"],
+            "opaque_license_value": "must-not-reach-controls",
+        },
+    )
+
+    assert controls["engines"]["solver"]["enabled"] is True
+    assert controls["engines"]["zen"]["enabled"] is False
+    assert "must-not-reach-controls" not in str(controls)
+    source = APP.read_text(encoding="utf-8")
+    assert "released_license_status" in source
+    assert "workbench_controls(license_status=license_status)" in source
+
+
+def test_controls_project_only_safe_license_status_to_engine_inspection(
+    monkeypatch,
+) -> None:
+    """Catches opaque license fields crossing the controls-to-engine boundary."""
+
+    contract = load_contract()
+    received: list[object] = []
+    monkeypatch.setattr(
+        contract,
+        "inspect_engine_availability",
+        lambda *, license_status: received.append(license_status) or [],
+    )
+
+    contract.workbench_controls(
+        environ={},
+        license_status={
+            "token_detected": True,
+            "validated": True,
+            "features": ["solver", "zen", "unreleased-feature"],
+            "opaque_license_value": "must-not-cross-this-boundary",
+        },
+    )
+
+    assert received == [
+        {"token_detected": True, "validated": True, "features": ["solver", "zen"]}
+    ]
+
+
+def test_controls_fail_closed_when_validation_is_not_strictly_true(monkeypatch) -> None:
+    """Catches truthy but unvalidated status enabling a feature downstream."""
+
+    contract = load_contract()
+    received: list[object] = []
+    monkeypatch.setattr(
+        contract,
+        "inspect_engine_availability",
+        lambda *, license_status: received.append(license_status) or [],
+    )
+
+    contract.workbench_controls(
+        environ={},
+        license_status={
+            "token_detected": True,
+            "validated": 1,
+            "features": ["solver", "zen"],
+        },
+    )
+
+    assert received == [{"token_detected": True, "validated": False, "features": []}]
+
+
+def test_research_workbench_uses_responsive_ui_tabs_and_explains_safe_modes() -> None:
+    """Catches deprecated tabs or terse controls hiding usable evidence guidance."""
+
+    source = APP.read_text(encoding="utf-8")
+    assert "mo.ui.tabs(" in source
+    assert "mo.tabs(" not in source
+    assert "Unavailable configs (visible, disabled)" not in source
+    assert "Unavailable providers (visible, disabled)" not in source
+    assert 'properties(width="container")' in source
+    assert (
+        'mo.md("## Inspect evidence"),\n                inspections,\n'
+        "                visual_evidence,"
+    ) in source
+    assert "\\\\n" not in source
+
+
+def test_research_mode_guidance_uses_the_visible_mock_mode_vocabulary() -> None:
+    """Catches Fixture guidance that does not map to the visible mock control."""
+
+    source = APP.read_text(encoding="utf-8")
+    assert "Changing controls has no effect." in source
+    assert "After explicit Run evaluation:" in source
+    assert (
+        "Mock (Fixture) — deterministic synthetic evidence; it does not call a provider."
+        in source
+    )
+    assert (
+        "Auto — may attempt a compatible enabled live provider, then falls back only where supported."
+        in source
+    )
+    assert "Live — runs the selected enabled provider." in source

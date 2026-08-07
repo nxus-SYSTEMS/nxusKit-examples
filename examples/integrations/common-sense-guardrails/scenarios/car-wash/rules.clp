@@ -24,14 +24,14 @@
     (required-location car_wash)
     (current-location ?where)
     (present-at-required-location false))
-  (moved-object
-    (action-id ?action)
-    (object person)
-    (to car_wash))
+  (not
+    (moved-object
+      (object car)
+      (to car_wash)))
   =>
   (assert
     (guardrail-finding
       (status fail)
       (rule-id car-required-at-wash)
       (severity error)
-      (message "Walking moves the person to the wash, but the car remains at home."))))
+      (message "The selected action does not put the car at the wash location."))))

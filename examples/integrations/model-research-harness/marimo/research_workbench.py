@@ -6,10 +6,29 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
+    def mode_guidance() -> str:
+        """Describe the submitted modes in the same vocabulary as the control."""
+
+        return """**Mode guidance**
+
+Changing controls has no effect. After explicit Run evaluation:
+
+- Mock (Fixture) — deterministic synthetic evidence; it does not call a provider.
+- Auto — may attempt a compatible enabled live provider, then falls back only where supported.
+- Live — runs the selected enabled provider.
+"""
+
+    return (mode_guidance,)
+
+
+@app.cell
+def _():
     import json
+    import os
 
     import marimo as mo
 
+    from availability import released_license_status
     from frontend_core import run_evaluation
     from presenters import report_charts, report_tables
     from workbench_contract import (
@@ -24,23 +43,26 @@ def _():
         json,
         mo,
         normalise_filters,
+        os,
         report_charts,
         report_tables,
         run_evaluation,
         safe_report_json,
         workbench_controls,
+        released_license_status,
     )
 
 
 @app.cell
-def _(workbench_controls):
-    controls = workbench_controls()
+def _(os, released_license_status, workbench_controls):
+    license_status = released_license_status(environ=os.environ)
+    controls = workbench_controls(license_status=license_status)
     provider_availability = list(controls["providers"].values())
     return controls, provider_availability
 
 
 @app.cell
-def _(availability_markdown, controls, mo):
+def _(availability_markdown, controls, mo, mode_guidance):
     config_entries = controls["configs"]
     enabled_config_ids = [
         config_id for config_id, item in config_entries.items() if item["enabled"]
@@ -111,16 +133,17 @@ def _(availability_markdown, controls, mo):
                 "Community fixture/mock evaluation by default. Changing controls does "
                 "not call a provider, adapter, engine, or filesystem writer."
             ),
+            mo.md(mode_guidance()),
             request_form,
             mo.md(availability_markdown(controls)),
             mo.ui.multiselect(
                 options=disabled_configs,
-                label="Unavailable configs (visible, disabled)",
+                label="Unavailable config options — disabled (reason shown)",
                 disabled=True,
             ),
             mo.ui.multiselect(
                 options=unavailable_providers,
-                label="Unavailable providers (visible, disabled)",
+                label="Unavailable provider options — disabled (reason shown)",
                 disabled=True,
             ),
             mo.ui.multiselect(
@@ -177,22 +200,28 @@ def _(json, mo, report_charts, report_tables, response, safe_report_json):
         tables = report_tables(report)
         charts = report_charts(report)
         summary = mo.md(
-            "## Summary\n"
-            f"**Config:** {report['config_id']}  \\n"
-            f"**Final status:** {report['final_status']}  \\n"
-            f"**Report writing:** {response['report_path'] or 'not requested'}  \\n"
-            "Only submitted evaluation can execute the canonical harness."
+            f"""## Summary
+
+- **Config:** {report["config_id"]}
+- **Final status:** {report["final_status"]}
+- **Report writing:** {response["report_path"] or "not requested"}
+
+Only submitted evaluation can execute the canonical harness.
+"""
         )
         visual_evidence = mo.vstack(
             [
                 mo.md("## Visual Evidence"),
                 *[
-                    mo.ui.altair_chart(chart, label=name.replace("_", " ").title())
+                    mo.ui.altair_chart(
+                        chart.properties(width="container").properties(height=260),
+                        label=name.replace("_", " ").title(),
+                    )
                     for name, chart in charts.items()
                 ],
             ]
         )
-        inspections = mo.tabs(
+        inspections = mo.ui.tabs(
             {
                 "Results": mo.ui.table(tables["results"], label="Results"),
                 "Confidence": mo.ui.table(tables["confidence"], label="Confidence"),
@@ -205,17 +234,16 @@ def _(json, mo, report_charts, report_tables, response, safe_report_json):
         )
         result_view = mo.vstack(
             [
-                mo.hstack([summary, visual_evidence], wrap=True, widths="equal"),
+                summary,
                 mo.md("## Inspect evidence"),
                 inspections,
+                visual_evidence,
                 mo.accordion(
                     {
                         "Raw JSON": mo.md(
-                            "```json\\n"
-                            + json.dumps(
-                                safe_report_json(report), indent=2, sort_keys=True
-                            )
-                            + "\\n```"
+                            f"""```json
+{json.dumps(safe_report_json(report), indent=2, sort_keys=True)}
+```"""
                         )
                     }
                 ),

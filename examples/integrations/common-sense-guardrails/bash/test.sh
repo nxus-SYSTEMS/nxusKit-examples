@@ -89,16 +89,18 @@ for scenario in "${SCENARIOS[@]}"; do
   assert_eq "$(jq -r '.final_status' <<<"$out")" "$(jq -r '.final_status' <<<"$py")" "python bash status parity"
   assert_eq "$(jq -r '.stages[2].output.attempts[0].findings[0].rule_id' <<<"$all")" "$(jq -r '.stages[2].output.attempts[0].findings[0].rule_id' <<<"$py")" "python bash finding parity"
 
-  export NXUSKIT_COMMON_SENSE_SIMULATE_LIVE=1
-  export ENT_TOKEN_FILE="$SCRIPT_DIR/.no-license-token"
-  simulated_live="$(run_bash_json --scenario "$scenario" --mode live --stage all)"
-  unset NXUSKIT_COMMON_SENSE_SIMULATE_LIVE
-  unset ENT_TOKEN_FILE
-  assert_eq "$(jq -r '.resolved_mode' <<<"$simulated_live")" "live" "simulated live mode"
-  assert_eq "$(jq -r '.final_status' <<<"$simulated_live")" "pass" "simulated live all status"
-  assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$simulated_live")" "$expected_all_selection" "simulated live guardrail selection"
-  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .status' <<<"$simulated_live")" "pass" "simulated live pro pass"
-  assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$simulated_live")" "false" "simulated live fixture label"
+  if [[ "$scenario" != "coupon-stack" ]]; then
+    export NXUSKIT_COMMON_SENSE_SIMULATE_LIVE=1
+    export ENT_TOKEN_FILE="$SCRIPT_DIR/.no-license-token"
+    simulated_live="$(run_bash_json --scenario "$scenario" --mode live --stage all)"
+    unset NXUSKIT_COMMON_SENSE_SIMULATE_LIVE
+    unset ENT_TOKEN_FILE
+    assert_eq "$(jq -r '.resolved_mode' <<<"$simulated_live")" "live" "simulated live mode"
+    assert_eq "$(jq -r '.final_status' <<<"$simulated_live")" "pass" "simulated live all status"
+    assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$simulated_live")" "$expected_all_selection" "simulated live guardrail selection"
+    assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .status' <<<"$simulated_live")" "pass" "simulated live pro pass"
+    assert_eq "$(jq -r --arg id "$pro_stage_id" '.stages[] | select(.id == $id) | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$simulated_live")" "false" "simulated live fixture label"
+  fi
 done
 
 for scenario in coupon-stack cold-chain; do
@@ -177,21 +179,288 @@ echo "unexpected command: $cmd $sub" >&2
 exit 9
 EOF
 chmod +x "$fake_cli"
-live_bn="$(
-  NXUSKIT_CLI="$fake_cli" \
-  NXUSKIT_FAKE_BN_LOG="$bn_log" \
-  NXUSKIT_COMMON_SENSE_FIXTURE_LLM=1 \
-  bash "$BASH_MAIN" --scenario coupon-stack --mode live --guardrails bn --json
-)"
+live_bn_baseline="$tmp_cli_dir/baseline-findings.json"
+live_bn_corrected="$tmp_cli_dir/corrected-findings.json"
+NXUSKIT_CLI="$fake_cli" \
+NXUSKIT_FAKE_BN_LOG="$bn_log" \
+  "$BASH" -c '
+    set -euo pipefail
+    cd "$(dirname "$1")"
+    source "$1" --scenario car-wash --mode mock --json >/dev/null
+    SCENARIO=coupon-stack
+    live_bn_findings "$2" "$3" "$4" "$5" "$6"
+    live_bn_findings "$2" "$3" "$4" "$7" "$8"
+  ' _ \
+  "$BASH_MAIN" \
+  "$ROOT_DIR/scenarios/coupon-stack/problem.json" \
+  "$ROOT_DIR/scenarios/coupon-stack/bn-network.json" \
+  "$ROOT_DIR/scenarios/coupon-stack/bn-guardrail.json" \
+  "$ROOT_DIR/scenarios/coupon-stack/mock-facts.json" \
+  "$live_bn_baseline" \
+  "$ROOT_DIR/scenarios/coupon-stack/mock-corrected-facts.json" \
+  "$live_bn_corrected"
 bn_calls="$(cat "$bn_log")"
+assert_eq "$(jq -r '.[0].status' "$live_bn_baseline")" "fail" \
+  "direct coupon BN baseline status"
+assert_eq "$(jq -r '.[0].status' "$live_bn_corrected")" "pass" \
+  "direct coupon BN repaired status"
+assert_eq "$(jq -r '.[0].evidence.runtime_executed' "$live_bn_baseline")" \
+  "true" "direct coupon BN runtime label"
+assert_eq "$(grep -c '^bn infer$' <<<"$bn_calls")" "2" \
+  "direct coupon BN CLI call count"
 rm -rf "$tmp_cli_dir"
-assert_eq "$(jq -r '.resolved_mode' <<<"$live_bn")" "live" "fixture live BN mode"
-assert_eq "$(jq -r '.guardrail_selection.selected | join(",")' <<<"$live_bn")" "bn" "fixture live BN selection"
-assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .source' <<<"$live_bn")" "live" "fixture live BN source"
-assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[0].status' <<<"$live_bn")" "fail" "fixture live BN first attempt"
-assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[1].status' <<<"$live_bn")" "pass" "fixture live BN repaired attempt"
-assert_eq "$(jq -r '.stages[] | select(.id == "bn-risk") | .output.attempts[0].findings[0].evidence.runtime_executed' <<<"$live_bn")" "true" "fixture live BN runtime label"
-assert_eq "$(grep -c '^bn infer$' <<<"$bn_calls")" "2" "fixture live BN CLI call count"
+
+tmp_cli_dir="$(mktemp -d)"
+fake_cli="$tmp_cli_dir/nxuskit-cli"
+clips_log="$tmp_cli_dir/clips.log"
+cat > "$fake_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+sub="${2:-}"
+shift 2 || true
+input=""
+output=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -i|--input) input="${2:-}"; shift 2 ;;
+    -o|--output) output="${2:-}"; shift 2 ;;
+    -f|--format) shift 2 ;;
+    --quiet) shift ;;
+    *) shift ;;
+  esac
+done
+
+if [[ "$cmd" != "clips" || "$sub" != "eval" ]]; then
+  echo "unexpected command: $cmd $sub" >&2
+  exit 9
+fi
+
+fact="$(jq -r '.facts[0]' "$input")"
+printf '%s\n' "$fact" >> "$NXUSKIT_FAKE_CLIPS_LOG"
+if [[ "$fact" == *"(non-stackable-count 2)"* ]]; then
+  jq -n '{result:{derived_facts:[{template:"guardrail-finding",slots:{"rule-id":"non-stackable-discount-conflict",status:"fail",severity:"error",message:"The recommendation combines non-stackable promotion families."}}]}}' > "$output"
+elif [[ "$fact" == *"(non-stackable-count 1)"* ]]; then
+  jq -n '{result:{derived_facts:[]}}' > "$output"
+else
+  echo "coupon-stack CLIPS fact did not contain the derived non-stackable count: $fact" >&2
+  exit 9
+fi
+EOF
+chmod +x "$fake_cli"
+live_clips_baseline="$tmp_cli_dir/baseline-findings.json"
+live_clips_corrected="$tmp_cli_dir/corrected-findings.json"
+NXUSKIT_CLI="$fake_cli" \
+NXUSKIT_FAKE_CLIPS_LOG="$clips_log" \
+  "$BASH" -c '
+    set -euo pipefail
+    cd "$(dirname "$1")"
+    source "$1" --scenario car-wash --mode mock --json >/dev/null
+    SCENARIO=coupon-stack
+    live_clips_eval "$2" "$3" "$4"
+    live_clips_eval "$2" "$5" "$6"
+  ' _ \
+  "$BASH_MAIN" \
+  "$ROOT_DIR/scenarios/coupon-stack" \
+  "$ROOT_DIR/scenarios/coupon-stack/mock-facts.json" \
+  "$live_clips_baseline" \
+  "$ROOT_DIR/scenarios/coupon-stack/mock-corrected-facts.json" \
+  "$live_clips_corrected"
+clips_calls="$(cat "$clips_log")"
+assert_eq "$(jq -r '.[0].rule_id' "$live_clips_baseline")" \
+  "non-stackable-discount-conflict" \
+  "direct coupon CLIPS derived policy finding"
+assert_eq "$(jq -r '.[0].status' "$live_clips_corrected")" "pass" \
+  "direct coupon CLIPS repaired status"
+assert_eq "$(grep -c '(non-stackable-count 2)' <<<"$clips_calls")" "1" \
+  "direct coupon CLIPS baseline count"
+assert_eq "$(grep -c '(non-stackable-count 1)' <<<"$clips_calls")" "1" \
+  "direct coupon CLIPS repaired count"
+rm -rf "$tmp_cli_dir"
+
+coupon_parity_tmp="$(mktemp -d)"
+cleanup_coupon_parity_tmp() {
+  rm -rf "$coupon_parity_tmp"
+}
+trap cleanup_coupon_parity_tmp EXIT
+coupon_parity_repo="$coupon_parity_tmp/repo"
+coupon_parity_root="$coupon_parity_repo/examples/integrations/common-sense-guardrails"
+mkdir -p "$coupon_parity_repo/examples/integrations" "$coupon_parity_repo/examples/shared"
+cp -R "$ROOT_DIR" "$coupon_parity_root"
+cp -R "$ROOT_DIR/../../shared/bash" "$coupon_parity_repo/examples/shared/bash"
+coupon_parity_log="$coupon_parity_tmp/clips.log"
+
+assert_coupon_count_parity() {
+  local label="$1"
+  local baseline_discounts="$2"
+  local baseline_resources="$3"
+  local corrected_discounts="$4"
+  local corrected_resources="$5"
+  local expected_baseline="$6"
+  local expected_corrected="$7"
+  local counts output
+
+  jq --argjson discounts "$baseline_discounts" --argjson resources "$baseline_resources" \
+    '.candidate_actions[0].discounts = $discounts | .resources = $resources' \
+    "$ROOT_DIR/scenarios/coupon-stack/mock-facts.json" \
+    > "$coupon_parity_root/scenarios/coupon-stack/mock-facts.json"
+  jq --argjson discounts "$corrected_discounts" --argjson resources "$corrected_resources" \
+    '.candidate_actions[0].discounts = $discounts | .resources = $resources' \
+    "$ROOT_DIR/scenarios/coupon-stack/mock-corrected-facts.json" \
+    > "$coupon_parity_root/scenarios/coupon-stack/mock-corrected-facts.json"
+  "$BASH" -c '
+    set -euo pipefail
+    cd "$(dirname "$1")"
+    source "$1" --scenario car-wash --mode mock --json >/dev/null
+    SCENARIO=coupon-stack
+    clips_facts_json "$2"
+    clips_facts_json "$3"
+  ' _ \
+    "$coupon_parity_root/bash/main.sh" \
+    "$coupon_parity_root/scenarios/coupon-stack/mock-facts.json" \
+    "$coupon_parity_root/scenarios/coupon-stack/mock-corrected-facts.json" \
+    > "$coupon_parity_log"
+  output="$(
+    bash "$coupon_parity_root/bash/main.sh" \
+      --scenario coupon-stack --mode mock --guardrails clips --json
+  )"
+  assert_eq "$(jq -r '.final_status' <<<"$output")" "pass" "$label final status"
+  counts="$(sed -n 's/.*(non-stackable-count \([0-9][0-9]*\)).*/\1/p' "$coupon_parity_log")"
+  assert_eq "$(sed -n '1p' <<<"$counts")" "$expected_baseline" "$label baseline count"
+  assert_eq "$(sed -n '2p' <<<"$counts")" "$expected_corrected" "$label corrected count"
+}
+
+assert_coupon_count_parity \
+  "missing resource is conservatively non-stackable" \
+  '["missing-a", "missing-b"]' '[{"id":"other","type":"coupon","stackable":true}]' \
+  '["missing-a"]' '[{"id":"other","type":"coupon","stackable":true}]' \
+  "2" "1"
+assert_coupon_count_parity \
+  "duplicate resource uses the last row" \
+  '["repeat"]' '[{"id":"repeat","stackable":false},{"id":"repeat","stackable":true}]' \
+  '["repeat"]' '[{"id":"repeat","stackable":true},{"id":"repeat","stackable":false}]' \
+  "0" "1"
+assert_coupon_count_parity \
+  "duplicate selected discounts count per occurrence" \
+  '["repeat", "repeat"]' '[{"id":"repeat","stackable":true},{"id":"repeat","stackable":false}]' \
+  '["repeat"]' '[{"id":"repeat","stackable":true},{"id":"repeat","stackable":false}]' \
+  "2" "1"
+assert_coupon_count_parity \
+  "empty selected discounts use policy context fallback" \
+  '[]' '[{"id":"welcome-25","type":"coupon","stackable":false}]' \
+  '[]' '[{"id":"welcome-25","type":"coupon","stackable":false}]' \
+  "0" "1"
+
+cleanup_coupon_parity_tmp
+trap - EXIT
+
+coupon_validation_tmp="$(mktemp -d)"
+cleanup_coupon_validation_tmp() {
+  rm -rf "$coupon_validation_tmp"
+}
+trap cleanup_coupon_validation_tmp EXIT
+coupon_validation_facts="$coupon_validation_tmp/facts.json"
+
+coupon_invalid_cases=(
+  'boolean resource id|.resources[0].id = true'
+  'number resource id|.resources[0].id = 1'
+  'array resource id|.resources[0].id = []'
+  'object resource id|.resources[0].id = {}'
+  'null resource id|.resources[0].id = null'
+  'missing resource stackable|del(.resources[0].stackable)'
+  'nonboolean resource stackable|.resources[0].stackable = "false"'
+  'missing resource type|del(.resources[0].type)'
+  'nonstring resource type|.resources[0].type = 1'
+  'empty resources|.resources = []'
+  'empty selected discount id|.candidate_actions[0].discounts = [""]'
+)
+coupon_validation_failures=0
+for invalid_case in "${coupon_invalid_cases[@]}"; do
+  label="${invalid_case%%|*}"
+  mutation="${invalid_case#*|}"
+  jq "$mutation" "$ROOT_DIR/scenarios/coupon-stack/mock-facts.json" \
+    > "$coupon_validation_facts"
+  if "$BASH" -c '
+    set -euo pipefail
+    cd "$(dirname "$1")"
+    source "$1" --scenario car-wash --mode mock --json >/dev/null
+    SCENARIO=coupon-stack
+    facts_json_valid < "$2"
+  ' _ "$BASH_MAIN" "$coupon_validation_facts"; then
+    echo "FAIL coupon fact validator accepted $label" >&2
+    coupon_validation_failures=$((coupon_validation_failures + 1))
+  fi
+done
+if [[ "$coupon_validation_failures" -ne 0 ]]; then
+  echo "FAIL coupon fact validator accepted $coupon_validation_failures malformed typed-resource case(s)" >&2
+  exit 1
+fi
+cleanup_coupon_validation_tmp
+trap - EXIT
+
+coupon_containment_tmp="$(mktemp -d)"
+coupon_containment_cli="$coupon_containment_tmp/nxuskit-cli"
+coupon_contact_sentinel="$coupon_containment_tmp/provider-contacted"
+cat > "$coupon_containment_cli" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'provider command reached\n' >> "$NXUSKIT_COUPON_CONTACT_SENTINEL"
+exit 97
+EOF
+chmod +x "$coupon_containment_cli"
+
+set +e
+coupon_auto="$({
+  NXUSKIT_CLI="$coupon_containment_cli" \
+  NXUSKIT_COUPON_CONTACT_SENTINEL="$coupon_contact_sentinel" \
+  NXUSKIT_PROVIDER=literal-coupon-provider-canary \
+  NXUSKIT_MODEL=literal-coupon-model-canary \
+  bash "$BASH_MAIN" --scenario coupon-stack --mode auto \
+    --guardrails clips,bn --json
+} 2>"$coupon_containment_tmp/auto.err")"
+coupon_auto_rc=$?
+set -e
+coupon_auto_contacted=false
+[[ -e "$coupon_contact_sentinel" ]] && coupon_auto_contacted=true
+rm -f "$coupon_contact_sentinel"
+
+set +e
+coupon_live_err="$({
+  NXUSKIT_CLI="$coupon_containment_cli" \
+  NXUSKIT_COUPON_CONTACT_SENTINEL="$coupon_contact_sentinel" \
+  NXUSKIT_PROVIDER=literal-coupon-provider-canary \
+  NXUSKIT_MODEL=literal-coupon-model-canary \
+  bash "$BASH_MAIN" --scenario coupon-stack --mode live \
+    --guardrails clips,bn --json
+} 2>&1 >/dev/null)"
+coupon_live_rc=$?
+set -e
+coupon_live_contacted=false
+[[ -e "$coupon_contact_sentinel" ]] && coupon_live_contacted=true
+
+[[ "$coupon_auto_contacted" == false ]] || {
+  echo "FAIL coupon auto contacted the provider/CLI before containment (exit $coupon_auto_rc)" >&2
+  rm -rf "$coupon_containment_tmp"
+  exit 1
+}
+assert_eq "$(jq -r '.resolved_mode' <<<"$coupon_auto")" "mock" \
+  "coupon auto containment source"
+assert_eq "$(jq -r '.mode_resolution.provider_contacted' <<<"$coupon_auto")" \
+  "false" "coupon auto no provider contact"
+[[ "$coupon_live_contacted" == false ]] || {
+  echo "FAIL coupon live contacted the provider/CLI before containment" >&2
+  rm -rf "$coupon_containment_tmp"
+  exit 1
+}
+assert_eq "$coupon_live_rc" "2" "coupon live containment exit"
+[[ "$coupon_live_err" == \
+  "ERROR: coupon_live_strict_schema_transport_unavailable_v1_0_5:"* ]] || {
+  echo "FAIL coupon live containment error: $coupon_live_err" >&2
+  rm -rf "$coupon_containment_tmp"
+  exit 1
+}
+rm -rf "$coupon_containment_tmp"
 
 auto="$(run_bash_json --scenario car-wash --mode auto --stage ce)"
 assert_eq "$(jq -r '.resolved_mode' <<<"$auto")" "mock" "auto fallback"

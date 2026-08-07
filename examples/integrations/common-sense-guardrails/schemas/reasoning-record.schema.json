@@ -1,0 +1,378 @@
+{
+  "$defs": {
+    "attempt": {
+      "additionalProperties": false,
+      "properties": {
+        "elapsed_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "number": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "repair_from_attempt": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "selected_mechanisms": {
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "warn",
+            "fail",
+            "unavailable"
+          ]
+        }
+      },
+      "required": [
+        "number",
+        "input_sha256",
+        "selected_mechanisms",
+        "status"
+      ],
+      "type": "object"
+    },
+    "evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "observed": {},
+        "reference": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "fixture",
+            "rule",
+            "local_runtime",
+            "generated"
+          ]
+        },
+        "synthetic": {
+          "const": true
+        }
+      },
+      "required": [
+        "id",
+        "source_kind",
+        "reference",
+        "observed"
+      ],
+      "type": "object"
+    },
+    "fact": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "source": {
+          "enum": [
+            "fixture",
+            "local_runtime"
+          ]
+        },
+        "type": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "id",
+        "type",
+        "value",
+        "source",
+        "confidence"
+      ],
+      "type": "object"
+    },
+    "final": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "type": "array"
+        },
+        "finding_refs": {
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "type": "array"
+        },
+        "review_disposition": {
+          "enum": [
+            "complete",
+            "review_required",
+            "unresolved"
+          ]
+        },
+        "summary": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "review_disposition",
+        "summary",
+        "finding_refs",
+        "evidence_refs"
+      ],
+      "type": "object"
+    },
+    "finding": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "type": "array"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "mechanism_id": {
+          "$ref": "#/$defs/id"
+        },
+        "message": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "repair_hint": {
+          "type": "string"
+        },
+        "rule_id": {
+          "$ref": "#/$defs/id"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "warn",
+            "fail",
+            "unavailable"
+          ]
+        },
+        "tier": {
+          "enum": [
+            "community",
+            "pro"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "attempt",
+        "mechanism_id",
+        "tier",
+        "status",
+        "rule_id",
+        "severity",
+        "message",
+        "evidence_refs"
+      ],
+      "type": "object"
+    },
+    "id": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    },
+    "mechanism": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "enum": [
+            "available",
+            "unavailable",
+            "fixture"
+          ]
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "runtime_executed": {
+          "type": "boolean"
+        },
+        "source": {
+          "enum": [
+            "fixture",
+            "local_runtime",
+            "unavailable"
+          ]
+        },
+        "tier": {
+          "enum": [
+            "community",
+            "pro"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "tier",
+        "availability",
+        "source",
+        "runtime_executed"
+      ],
+      "type": "object"
+    },
+    "provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "community_complete": {
+          "const": true
+        },
+        "mode": {
+          "enum": [
+            "fixture",
+            "live"
+          ]
+        },
+        "native_bundle_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "sdk_native_version": {
+          "const": "1.0.5"
+        },
+        "sdk_python_version": {
+          "const": "1.0.5"
+        }
+      },
+      "required": [
+        "mode",
+        "sdk_python_version",
+        "sdk_native_version",
+        "community_complete"
+      ],
+      "type": "object"
+    },
+    "scenario": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "synthetic"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://nxuskit.dev/schemas/reasoning-record-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Canonical inspectable result for the common-sense-guardrails core and its Python frontends. This contract records review evidence; it does not authorize an external action.",
+  "properties": {
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/attempt"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/evidence"
+      },
+      "type": "array"
+    },
+    "facts": {
+      "items": {
+        "$ref": "#/$defs/fact"
+      },
+      "type": "array"
+    },
+    "final": {
+      "$ref": "#/$defs/final"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/finding"
+      },
+      "type": "array"
+    },
+    "input_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "mechanisms": {
+      "items": {
+        "$ref": "#/$defs/mechanism"
+      },
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "record_id": {
+      "pattern": "^rr-[a-f0-9]{12,64}$",
+      "type": "string"
+    },
+    "scenario": {
+      "$ref": "#/$defs/scenario"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "input_sha256",
+    "scenario",
+    "provenance",
+    "mechanisms",
+    "facts",
+    "findings",
+    "evidence",
+    "attempts",
+    "final"
+  ],
+  "title": "nxusKit Reasoning Record v1",
+  "type": "object"
+}

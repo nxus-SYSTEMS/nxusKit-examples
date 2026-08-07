@@ -58,5 +58,5 @@
   "query_node": "needs_review",
   "repair_hint": "Use a certified refrigerated carrier with temperature logging and documented handoff.",
   "stage_id": "bn-risk",
-  "threshold": 0.5
+  "threshold": 0.3
 }

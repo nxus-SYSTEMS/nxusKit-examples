@@ -4,6 +4,7 @@
   (slot id)
   (multislot discounts)
   (slot free-shipping)
+  (slot non-stackable-count)
   (slot margin-after-stack))
 
 (deftemplate guardrail-finding
@@ -14,8 +15,7 @@
 
 (defrule non-stackable-discount-conflict
   (promotion-action
-    (id stack-all-promotions)
-    (discounts welcome-25 employee-15 $?rest))
+    (non-stackable-count ?count&:(> ?count 1)))
   =>
   (assert
     (guardrail-finding
@@ -26,7 +26,6 @@
 
 (defrule margin-floor-breach
   (promotion-action
-    (id stack-all-promotions)
     (margin-after-stack ?m&:(< ?m 20)))
   =>
   (assert

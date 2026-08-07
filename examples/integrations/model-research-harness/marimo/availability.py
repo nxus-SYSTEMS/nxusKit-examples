@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+import os
+import subprocess
 from collections.abc import Callable, Mapping
 
 
@@ -12,6 +15,68 @@ CLOUD_PROVIDERS = (
     ("xai", "XAI_API_KEY"),
 )
 LOCAL_PROVIDERS = ("ollama", "lmstudio")
+RELEASED_PRO_FEATURES = ("solver", "zen")
+
+
+def _empty_license_status() -> dict[str, object]:
+    return {"token_detected": False, "validated": False, "features": []}
+
+
+def released_license_status(
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, object]:
+    """Project released CLI license status into the safe availability contract."""
+
+    environment = os.environ if environ is None else environ
+    command = [
+        environment.get("NXUSKIT_CLI", "nxuskit-cli"),
+        "license",
+        "status",
+        "--json",
+    ]
+    try:
+        result = runner(
+            command, text=True, capture_output=True, check=False, timeout=10
+        )
+    except (OSError, subprocess.SubprocessError):
+        return _empty_license_status()
+    if result.returncode != 0:
+        return _empty_license_status()
+    try:
+        payload = json.loads(result.stdout)
+    except (json.JSONDecodeError, TypeError):
+        return _empty_license_status()
+    license_info = payload.get("license") if isinstance(payload, Mapping) else None
+    if not isinstance(license_info, Mapping):
+        return _empty_license_status()
+
+    token_detected = bool(license_info)
+    validated = (
+        license_info.get("effective_edition") == "pro"
+        and license_info.get("status") == "valid"
+    )
+    if not validated:
+        return {
+            "token_detected": token_detected,
+            "validated": False,
+            "features": [],
+        }
+    granted = license_info.get("features")
+    cli_info = payload.get("cli") if isinstance(payload, Mapping) else None
+    pro_engines_compiled = (
+        isinstance(cli_info, Mapping) and cli_info.get("pro_engines_compiled") is True
+    )
+    return {
+        "token_detected": token_detected,
+        "validated": True,
+        "features": [
+            feature
+            for feature in RELEASED_PRO_FEATURES
+            if pro_engines_compiled and isinstance(granted, list) and feature in granted
+        ],
+    }
 
 
 def _entry(
@@ -120,7 +185,10 @@ def inspect_engine_availability(
             )
         elif not granted:
             availability_status = "feature_not_granted"
-            reason = "The validated license does not grant this exact feature."
+            reason = (
+                "The validated license and active CLI build do not make this "
+                "exact feature executable."
+            )
         else:
             availability_status = "available"
             reason = "Validated v1.0.5 feature grant detected."

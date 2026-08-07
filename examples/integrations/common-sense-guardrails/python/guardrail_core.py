@@ -17,7 +17,7 @@ REASONING_RECORD_VERSION = "1.0.0"
 SDK_VERSION = "1.0.5"
 
 
-def _canonical_sha256(value: Any) -> str:
+def canonical_sha256(value: Any) -> str:
     encoded = json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
@@ -64,7 +64,53 @@ def _facts_from_report(report: dict[str, Any]) -> tuple[dict[str, Any], str]:
     return {}, "mock"
 
 
+def _normalized_status(value: Any) -> str:
+    status = str(value or "fail")
+    return status if status in {"pass", "warn", "fail", "unavailable"} else "fail"
+
+
+def _attempt_statuses(report: dict[str, Any]) -> dict[int, dict[str, Any]]:
+    statuses: dict[int, dict[str, Any]] = {}
+    for stage in report.get("stages", []):
+        output = stage.get("output") or {}
+        mechanism = output.get("mechanism")
+        if stage.get("id") == "structured-facts":
+            kind = "facts"
+        elif isinstance(mechanism, str):
+            kind = "mechanism"
+        else:
+            continue
+        for attempt in output.get("attempts") or []:
+            number = int(attempt.get("attempt", 1))
+            entry = statuses.setdefault(number, {"facts": "fail", "mechanisms": {}})
+            status = _normalized_status(attempt.get("status"))
+            if kind == "facts":
+                entry["facts"] = status
+            else:
+                entry["mechanisms"][mechanism] = status
+    return statuses
+
+
+def _aggregate_attempt_status(statuses: dict[str, Any]) -> str:
+    facts_status = _normalized_status(statuses.get("facts"))
+    mechanism_statuses = [
+        _normalized_status(value)
+        for value in (statuses.get("mechanisms") or {}).values()
+    ]
+    combined = [facts_status, *mechanism_statuses]
+    if "fail" in combined:
+        return "fail"
+    if "warn" in combined:
+        return "warn"
+    if not mechanism_statuses or all(
+        status == "unavailable" for status in mechanism_statuses
+    ):
+        return "unavailable"
+    return "pass"
+
+
 def _record_attempts(report: dict[str, Any], input_sha256: str) -> list[dict[str, Any]]:
+    statuses = _attempt_statuses(report)
     for stage in report.get("stages", []):
         if stage.get("id") != "structured-facts":
             continue
@@ -72,17 +118,19 @@ def _record_attempts(report: dict[str, Any], input_sha256: str) -> list[dict[str
         selected = list((report.get("guardrail_selection") or {}).get("selected") or [])
         records = []
         for item in attempts:
-            status = item.get("status", "fail")
-            if status not in {"pass", "warn", "fail", "unavailable"}:
-                status = "fail"
-            records.append(
-                {
-                    "number": int(item.get("attempt", len(records) + 1)),
-                    "input_sha256": input_sha256,
-                    "selected_mechanisms": selected,
-                    "status": status,
-                }
-            )
+            number = int(item.get("attempt", len(records) + 1))
+            attempt_sha256 = item.get("input_sha256")
+            if not isinstance(attempt_sha256, str) or len(attempt_sha256) != 64:
+                attempt_sha256 = input_sha256
+            record = {
+                "number": number,
+                "input_sha256": attempt_sha256,
+                "selected_mechanisms": selected,
+                "status": _aggregate_attempt_status(statuses.get(number, {})),
+            }
+            if number > 1:
+                record["repair_from_attempt"] = number - 1
+            records.append(record)
         if records:
             return records
     return [
@@ -108,7 +156,7 @@ def reasoning_record_from_report(report: dict[str, Any]) -> dict[str, Any]:
         "requested_guardrails": report.get("requested_guardrails"),
         "max_repair_attempts": report.get("max_repair_attempts"),
     }
-    input_sha256 = _canonical_sha256(input_shape)
+    input_sha256 = canonical_sha256(input_shape)
     facts, facts_source = _facts_from_report(report)
     confidence = facts.get("confidence", 1.0)
     if not isinstance(confidence, (int, float)):

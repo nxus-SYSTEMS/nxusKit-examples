@@ -35,6 +35,7 @@ usage: bash main.sh [--scenario car-wash|coupon-stack|pallet-door|cold-chain] [-
 Live mode is the default. Guardrail auto selects CLIPS plus the scenario Pro mechanism when available.
 BN is modeled for coupon-stack and cold-chain only.
 Mock mode is fully fixture-backed and does not require credentials or Pro entitlement.
+Coupon stack on nxusKit v1.0.5 supports mock and fixture-backed auto; live is unavailable because the Python provider path cannot preserve its strict schema.
 --stage is a compatibility alias: ce=clips, pro=scenario Pro guardrail, all=auto.
 EOF
 }
@@ -382,8 +383,10 @@ facts_json_valid() {
       and (.candidate_actions[0].id | is_string)
       and (.candidate_actions[0].discounts | type == "array")
       and (.candidate_actions[0].discounts | length > 0)
-      and all(.candidate_actions[0].discounts[]; is_string)
+      and all(.candidate_actions[0].discounts[]; is_string and length > 0)
       and (.candidate_actions[0].free_shipping | is_bool)
+      and (.resources | length > 0)
+      and all(.resources[]; (.id | is_string) and (.type | is_string) and (.stackable | is_bool))
       and (.policy_context.margin_percent_after_stack | is_number);
     def pallet_door:
       (.candidate_actions | length > 0)
@@ -524,7 +527,26 @@ clips_facts_json() {
       ;;
     coupon-stack)
       jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
-      [.candidate_actions[0] as $a | "(promotion-action (id \($a.id | atom)) (discounts \($a.discounts | map(atom) | join(" "))) (free-shipping \($a.free_shipping | atom)) (margin-after-stack \(.policy_context.margin_percent_after_stack | atom)))"]' "$facts_file"
+      . as $root |
+      [.candidate_actions[0] as $a |
+        ($a.discounts // []) as $discounts |
+        (reduce $root.resources[]? as $resource
+          ({};
+            if ($resource.id == null or $resource.id == false or $resource.id == 0 or $resource.id == "")
+            then .
+            else .[($resource.id | tostring)] = $resource
+            end
+          )) as $resources_by_id |
+        ([
+          $discounts[] as $discount
+          | select($resources_by_id[($discount | tostring)].stackable != true)
+        ] | length) as $derived_non_stackable_count |
+        (if ($discounts | length) > 0
+         then $derived_non_stackable_count
+         else ($root.policy_context.non_stackable_count // 0)
+         end) as $non_stackable_count |
+        "(promotion-action (id \($a.id | atom)) (discounts \($discounts | map(atom) | join(" "))) (free-shipping \($a.free_shipping | atom)) (non-stackable-count \($non_stackable_count | atom)) (margin-after-stack \($root.policy_context.margin_percent_after_stack | atom)))"
+      ]' "$facts_file"
       ;;
     pallet-door)
       jq -c 'def atom: tostring | gsub("[^A-Za-z0-9_-]+"; "_") | gsub("^_+|_+$"; "");
@@ -937,7 +959,39 @@ merge_findings() {
   jq -s 'add' "$@" > "$outfile"
 }
 
+coupon_mode_compatibility_json() {
+  jq -c . "$SCENARIO_ROOT/coupon-stack/mode-compatibility-v1.0.5.json"
+}
+
+coupon_mode_resolution_json() {
+  local requested="$1" compatibility error
+  compatibility="$(coupon_mode_compatibility_json)"
+  case "$requested" in
+    mock)
+      jq -nc --arg requested "$requested" '{requested:$requested, source:"mock", provider_available:false, message:"mock mode uses checked-in fixtures and performs no provider preflight"}'
+      ;;
+    auto)
+      jq -nc \
+        --arg requested "$requested" \
+        --arg code "$(jq -r '.compatibility_code' <<<"$compatibility")" \
+        --arg message "$(jq -r '.modes.auto.message' <<<"$compatibility")" \
+        '{requested:$requested, source:"mock", provider_available:false, provider_contacted:false, compatibility_code:$code, message:$message}'
+      ;;
+    live)
+      error="$(jq -r '.live_cli_error' <<<"$compatibility")"
+      die "$error" 2
+      ;;
+    *)
+      die "unsupported coupon mode: $requested" 2
+      ;;
+  esac
+}
+
 resolution_json() {
+  if [[ "$SCENARIO" == "coupon-stack" ]]; then
+    coupon_mode_resolution_json "$MODE"
+    return
+  fi
   if [[ "$MODE" == "mock" ]]; then
     jq -nc --arg requested "$MODE" '{requested:$requested, source:"mock", provider_available:false, message:"mock mode uses checked-in fixtures and performs no provider preflight"}'
     return 0

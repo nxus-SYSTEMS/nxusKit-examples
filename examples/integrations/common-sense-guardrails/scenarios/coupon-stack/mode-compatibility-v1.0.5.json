@@ -1,0 +1,34 @@
+{
+  "compatibility_code": "coupon_live_strict_schema_transport_unavailable_v1_0_5",
+  "live_cli_error": "coupon_live_strict_schema_transport_unavailable_v1_0_5: coupon-stack live mode is unavailable with nxusKit v1.0.5 because the Python provider path cannot preserve the required strict schema; use --mode auto or --mode mock",
+  "migration_requirements": [
+    "an independently accepted released-v2 Python provider-parity result",
+    "released Python/native/CLI version lockstep",
+    "exact no-network schema transport parity for every offered provider path",
+    "exact Examples live admission and publication proof"
+  ],
+  "modes": {
+    "auto": {
+      "enabled": true,
+      "message": "Coupon stack Auto uses checked-in fixtures with nxusKit v1.0.5 because the Python provider path cannot preserve the required strict schema; no provider was contacted.",
+      "provider_contact": "prohibited",
+      "resolved_source": "fixture"
+    },
+    "fixture": {
+      "enabled": true,
+      "message": "Deterministic synthetic evidence. No provider is contacted.",
+      "provider_contact": "prohibited",
+      "resolved_source": "fixture"
+    },
+    "live": {
+      "enabled": false,
+      "message": "Unavailable for Coupon stack with nxusKit v1.0.5: the Python provider path cannot preserve the required strict schema.",
+      "provider_contact": "prohibited",
+      "resolved_source": null
+    }
+  },
+  "scenario": "coupon-stack",
+  "schema_version": "1.0.0",
+  "sdk_release": "1.0.5",
+  "summary": "Coupon stack uses fixture-backed analysis with nxusKit v1.0.5. Live provider analysis is unavailable for this scenario."
+}

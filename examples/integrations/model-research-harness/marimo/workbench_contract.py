@@ -22,10 +22,32 @@ INSPECTION_SECTIONS = [
     "Policy",
     "Raw JSON",
 ]
+RELEASED_PRO_FEATURES = ("solver", "zen")
+
+
+def _project_license_status(
+    license_status: Mapping[str, object] | None,
+) -> dict[str, object]:
+    """Pass only fixed-shape, validated released-feature state to engine checks."""
+
+    status = license_status or {}
+    validated = status.get("validated") is True
+    granted = status.get("features")
+    return {
+        "token_detected": bool(status.get("token_detected")),
+        "validated": validated,
+        "features": [
+            feature
+            for feature in RELEASED_PRO_FEATURES
+            if validated and isinstance(granted, list) and feature in granted
+        ],
+    }
 
 
 def workbench_controls(
-    *, environ: Mapping[str, str] | None = None
+    *,
+    environ: Mapping[str, str] | None = None,
+    license_status: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Return the UI contract without probing runtimes or providers."""
 
@@ -34,7 +56,12 @@ def workbench_controls(
     providers = {
         entry["id"]: entry for entry in inspect_provider_availability(environment)
     }
-    engines = {entry["id"]: entry for entry in inspect_engine_availability()}
+    engines = {
+        entry["id"]: entry
+        for entry in inspect_engine_availability(
+            license_status=_project_license_status(license_status)
+        )
+    }
     return {
         "configs": configs,
         "providers": providers,

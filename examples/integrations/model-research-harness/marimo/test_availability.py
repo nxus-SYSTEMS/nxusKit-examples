@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -102,3 +103,134 @@ def test_every_availability_entry_conforms_to_the_shared_contract() -> None:
     )
 
     assert [error for entry in entries for error in validator.iter_errors(entry)] == []
+
+
+def test_released_license_status_accepts_released_valid_pro_feature_names() -> None:
+    """Catches an adapter that exposes raw license payloads or unknown features."""
+
+    calls: list[tuple[list[str], dict[str, object]]] = []
+
+    def fake_cli_runner(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps(
+                {
+                    "cli": {"pro_engines_compiled": True},
+                    "license": {
+                        "effective_edition": "pro",
+                        "status": "valid",
+                        "features": ["solver", "zen", "unrelated-pro-feature"],
+                    },
+                }
+            ),
+            stderr="",
+        )
+
+    status = load_availability().released_license_status(
+        runner=fake_cli_runner, environ={"NXUSKIT_CLI": "nxuskit-cli"}
+    )
+
+    assert status == {
+        "token_detected": True,
+        "validated": True,
+        "features": ["solver", "zen"],
+    }
+    assert calls == [
+        (
+            ["nxuskit-cli", "license", "status", "--json"],
+            {"text": True, "capture_output": True, "check": False, "timeout": 10},
+        )
+    ]
+
+
+def test_valid_pro_license_does_not_enable_engines_missing_from_cli_build() -> None:
+    """Catches an OSS CLI enabling Pro controls from token grants alone."""
+
+    module = load_availability()
+    status = module.released_license_status(
+        runner=lambda command, **_kwargs: subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps(
+                {
+                    "cli": {"pro_engines_compiled": False},
+                    "license": {
+                        "edition": "oss",
+                        "effective_edition": "pro",
+                        "status": "valid",
+                        "features": ["solver", "zen"],
+                    },
+                }
+            ),
+            stderr="",
+        ),
+        environ={"NXUSKIT_CLI": "nxuskit-cli"},
+    )
+    engines = module.inspect_engine_availability(license_status=status)
+    pro = {item["id"]: item for item in engines if item["tier"] == "pro"}
+
+    assert status == {
+        "token_detected": True,
+        "validated": True,
+        "features": [],
+    }
+    assert pro["solver"]["enabled"] is False
+    assert pro["zen"]["enabled"] is False
+    assert pro["solver"]["status"] == "feature_not_granted"
+    assert pro["zen"]["status"] == "feature_not_granted"
+
+
+def test_released_license_status_fails_closed_for_malformed_invalid_or_non_pro_status() -> (
+    None
+):
+    """Catches malformed or invalid status responses enabling Pro engines."""
+
+    module = load_availability()
+    malformed = module.released_license_status(
+        runner=lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            ["nxuskit-cli"], 0, stdout="not-json", stderr=""
+        ),
+        environ={"NXUSKIT_CLI": "nxuskit-cli"},
+    )
+    invalid = module.released_license_status(
+        runner=lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            ["nxuskit-cli"],
+            0,
+            stdout=json.dumps(
+                {
+                    "license": {
+                        "effective_edition": "pro",
+                        "status": "invalid",
+                        "features": ["zen"],
+                    }
+                }
+            ),
+            stderr="",
+        ),
+        environ={"NXUSKIT_CLI": "nxuskit-cli"},
+    )
+    non_pro = module.released_license_status(
+        runner=lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            ["nxuskit-cli"],
+            0,
+            stdout=json.dumps(
+                {
+                    "license": {
+                        "effective_edition": "community",
+                        "status": "valid",
+                        "features": ["zen"],
+                    }
+                }
+            ),
+            stderr="",
+        ),
+        environ={"NXUSKIT_CLI": "nxuskit-cli"},
+    )
+
+    assert malformed == {"token_detected": False, "validated": False, "features": []}
+    assert invalid == {"token_detected": True, "validated": False, "features": []}
+    assert non_pro == {"token_detected": True, "validated": False, "features": []}
