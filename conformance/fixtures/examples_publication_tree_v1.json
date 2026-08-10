@@ -1,0 +1,24 @@
+{
+  "algorithm": "nxuskit-source-tree-sha256-v1",
+  "entries": [
+    {
+      "content_utf8": "# Demo\n",
+      "git_type": "blob",
+      "mode": "100644",
+      "path": "README.md"
+    },
+    {
+      "content_utf8": "#!/bin/sh\necho ok\n",
+      "git_type": "blob",
+      "mode": "100755",
+      "path": "bin/run.sh"
+    },
+    {
+      "content_utf8": "README.md",
+      "git_type": "blob",
+      "mode": "120000",
+      "path": "latest"
+    }
+  ],
+  "source_tree_sha256": "9030280214dba8b4e7c867e5a23445e43357bf0fc79d88b34885149a70cd55ec"
+}

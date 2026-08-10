@@ -167,15 +167,23 @@ run_check "Examples public-release controller" python3 scripts/test-examples-pub
 
 run_check "Public release workflow gate" python3 scripts/check-public-release-workflow.py --self-test --layout private
 
-# ── 8d. Public example dependency boundary ───────────────────────
+# ── 8d. Exact publication-tree and mirror workflow gates ─────────
+
+run_check "Publication tree identity self-test" python3 scripts/examples_publication_tree.py self-test
+run_check "Publication tree identity unit suite" python3 scripts/test_examples_publication_tree.py
+run_check "Publication selection self-test" python3 scripts/generate-examples-publication-selection.py --self-test
+run_check "Publication selection exact-tree check" python3 scripts/generate-examples-publication-selection.py --check
+run_check "Tracked publication workflow gate" python3 scripts/check_examples_publication_workflow.py --self-test --layout private
+
+# ── 8e. Public example dependency boundary ───────────────────────
 
 run_check "Public example dependency boundary" python3 scripts/test-public-example-references.py
 
-# ── 8e. README normalizer dry-run ───────────────────────────────
+# ── 8f. README normalizer dry-run ───────────────────────────────
 
 run_check "README normalizer (dry-run)" python3 scripts/normalize_example_readme_build_run.py --dry-run
 
-# ── 8f. Showcase validate ───────────────────────────────────────
+# ── 8g. Showcase validate ───────────────────────────────────────
 
 if [ -f scripts/generate-examples-showcase.sh ]; then
   run_check "Showcase validate" bash scripts/generate-examples-showcase.sh --validate

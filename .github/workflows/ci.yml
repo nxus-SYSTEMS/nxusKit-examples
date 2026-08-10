@@ -33,6 +33,11 @@ jobs:
       - uses: actions/checkout@v6
       - name: Validate release tag contract and public release gate
         run: |
+          python3 scripts/examples_publication_tree.py self-test
+          python3 scripts/test_examples_publication_tree.py
+          python3 scripts/generate-examples-publication-selection.py --self-test
+          python3 scripts/generate-examples-publication-selection.py --check
+          python3 scripts/check_examples_publication_workflow.py --self-test --layout public
           python3 scripts/test-examples-release-tag.py
           python3 scripts/test-examples-public-release.py
           python3 scripts/check-public-release-workflow.py --self-test --layout public

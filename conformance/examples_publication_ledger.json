@@ -5,14 +5,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "ce7404d7b8ae9d4fd3e34ded6055978a0515e999a432b95d0844ab8a4d4eb4a2",
       "current_changes_public_ready": true,
       "current_content_hash": "7d7796939ab185ab4e85b746e8961c2c084e8602da65563d349d9b0d2f9a0455",
+      "current_source_tree_sha256": "ce7404d7b8ae9d4fd3e34ded6055978a0515e999a432b95d0844ab8a4d4eb4a2",
       "example_id": "basic-chat",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -37,14 +39,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "6f212e0132b44bf188dcf1f50737422a509adbfb3122a03f4df2d93a99c9fb95",
       "current_changes_public_ready": true,
       "current_content_hash": "0cf9c2c9d29c07beffb12eb4ab69e9c41b2645a9cd1696bf41b5e630cbdc0c55",
+      "current_source_tree_sha256": "6f212e0132b44bf188dcf1f50737422a509adbfb3122a03f4df2d93a99c9fb95",
       "example_id": "streaming",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -69,14 +73,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "d17ea1c7854d562b8938d2b466da1f7a25363cfa582b9e74c8f9aea07e609222",
       "current_changes_public_ready": true,
       "current_content_hash": "f19b03f2630f69b232e60ba95c4eddef1a5e5aa048f2f1e682e63540e4d68183",
+      "current_source_tree_sha256": "d17ea1c7854d562b8938d2b466da1f7a25363cfa582b9e74c8f9aea07e609222",
       "example_id": "multi-provider",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -101,14 +107,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "8b01850e168bb68cd685c7a92613f980f2a17e7339e104f706f3fcf1ad50c59c",
       "current_changes_public_ready": true,
       "current_content_hash": "00eb6ea66328a643f0e72b8b55b7cc04a2272741be4533b26b1462e930019ede",
+      "current_source_tree_sha256": "8b01850e168bb68cd685c7a92613f980f2a17e7339e104f706f3fcf1ad50c59c",
       "example_id": "convenience-api",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -133,14 +141,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "d7296ef17140056e7ccc2491d3fbbbfeb751af2d2a8fa2b321ff53565f1e728a",
       "current_changes_public_ready": true,
       "current_content_hash": "205d680730bf94b756e2e409e580f57f7ba5005f3fd08761abd984c26a743d62",
+      "current_source_tree_sha256": "d7296ef17140056e7ccc2491d3fbbbfeb751af2d2a8fa2b321ff53565f1e728a",
       "example_id": "blocking-api",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -165,14 +175,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "a2567dbf2e24b7af130113484246c1ac56d7fcb0333ed93c413a74875062db67",
       "current_changes_public_ready": true,
       "current_content_hash": "6db10c68e2a63d5910d8de8b0f07e9b99781d84da8c3cec70bdea3eeff6d323b",
+      "current_source_tree_sha256": "a2567dbf2e24b7af130113484246c1ac56d7fcb0333ed93c413a74875062db67",
       "example_id": "capability-detection",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -197,14 +209,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "96f5923fc1e8a6dbce7bf2859936e6bcaeaa0d075228ee06986cd978f0ddb512",
       "current_changes_public_ready": true,
       "current_content_hash": "e05b96a5fee5b813c5aef882e2bf57005ae2d6543ca0676ad39faeec06345c20",
+      "current_source_tree_sha256": "96f5923fc1e8a6dbce7bf2859936e6bcaeaa0d075228ee06986cd978f0ddb512",
       "example_id": "cost-routing",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -229,14 +243,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "b2e8fcce5f115fcf2658170091d396a1134b8536ea406fa43887d01e1dc6e054",
       "current_changes_public_ready": true,
       "current_content_hash": "ec5756b9e542ffd2ac80e9d3df4e70916934d7f810486d7ae523db82f767b5d4",
+      "current_source_tree_sha256": "b2e8fcce5f115fcf2658170091d396a1134b8536ea406fa43887d01e1dc6e054",
       "example_id": "polymorphic",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -261,14 +277,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "39a4af87c31352414463aead06e8e2e22a6d72f336dc0a17327cb568fb64aa00",
       "current_changes_public_ready": true,
       "current_content_hash": "5fb2861d65d18809a56214169b4c8d88fd0faf67482973b5f14f156e6374994a",
+      "current_source_tree_sha256": "39a4af87c31352414463aead06e8e2e22a6d72f336dc0a17327cb568fb64aa00",
       "example_id": "retry-fallback",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -293,14 +311,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "b3cfedfb6b396d91b9862f3b20ae9a826024dba90d167d053665efc67a469642",
       "current_changes_public_ready": true,
       "current_content_hash": "8d6ee862d130639facc4acc0f9d56e2066e5bb7a5fe9a19b7ae5753c73de38de",
+      "current_source_tree_sha256": "b3cfedfb6b396d91b9862f3b20ae9a826024dba90d167d053665efc67a469642",
       "example_id": "structured-output",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -325,14 +345,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "566411cded621682286e32124318c172c2c7331a13070e41352da1f4134e5274",
       "current_changes_public_ready": true,
       "current_content_hash": "1e5b85c0765a5ca34ea3def5941c0a69d4a1c5dca75501311bf6fb2035e3467e",
+      "current_source_tree_sha256": "566411cded621682286e32124318c172c2c7331a13070e41352da1f4134e5274",
       "example_id": "timeout-config",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -357,14 +379,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "093660e9d0c47984375833db470a1a1ed2373fb4b9e01cc9c6f972f9d79974e3",
       "current_changes_public_ready": true,
       "current_content_hash": "42ccdc34740f1d589b8dd134f7c72783fc34565e90c72274f18e79a7c43a8a8c",
+      "current_source_tree_sha256": "093660e9d0c47984375833db470a1a1ed2373fb4b9e01cc9c6f972f9d79974e3",
       "example_id": "token-budget",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -389,14 +413,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "7362338c5c343f6220a639c728e2c9e9a0848ed299eeb682112079564d591a02",
       "current_changes_public_ready": true,
       "current_content_hash": "0124982ae70ca330d9320425f7e384041d224160b57a43fc02d67df8a9ec54e9",
+      "current_source_tree_sha256": "7362338c5c343f6220a639c728e2c9e9a0848ed299eeb682112079564d591a02",
       "example_id": "vision",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -421,14 +447,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "63f66b638ba6b14852406452af96a8a34cf25ca0f47d9fde5648d5b67ff226ca",
       "current_changes_public_ready": true,
       "current_content_hash": "851201679f36f6e2e7cb3067ec5e12d803d54bde1008fba1bc9998fd27fd5059",
+      "current_source_tree_sha256": "63f66b638ba6b14852406452af96a8a34cf25ca0f47d9fde5648d5b67ff226ca",
       "example_id": "auth-helper",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -453,14 +481,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "81b966271a97c024d438e2d17dfc865d3e0c39b272df31a27e3b8a8870a8744d",
       "current_changes_public_ready": true,
       "current_content_hash": "7ce5f2a327bd3d7fb9c85d4df7ff9244c12cc80e0da390dc1e9f4a332b2cd035",
+      "current_source_tree_sha256": "81b966271a97c024d438e2d17dfc865d3e0c39b272df31a27e3b8a8870a8744d",
       "example_id": "solver",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -485,14 +515,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "2be30fc7490c1e20d535bdb7a22252bfd8040e6541825c114d33b538e46fc90c",
       "current_changes_public_ready": true,
       "current_content_hash": "474d4cda2a5617a1c88b81a5591eb0afde02cc83399473c6fe348ae523341364",
+      "current_source_tree_sha256": "2be30fc7490c1e20d535bdb7a22252bfd8040e6541825c114d33b538e46fc90c",
       "example_id": "bayesian-inference",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -517,14 +549,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "8a39956a752fb7695080af1617edb2c1faaedde398cdc15ade90cd28ebc72fb4",
       "current_changes_public_ready": true,
       "current_content_hash": "22cd64bb5d3c714310fc375cf234cf06405444d71125f3329b9d5469cad75794",
+      "current_source_tree_sha256": "8a39956a752fb7695080af1617edb2c1faaedde398cdc15ade90cd28ebc72fb4",
       "example_id": "solver-what-if",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -549,14 +583,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "d60195d826b3c62b2236e4147995fc0499a2c8eafc59d89ac0a99d7b443857e2",
       "current_changes_public_ready": true,
       "current_content_hash": "76abaeb4411d94193c30a5f156155a75d8c80a83640e4219fd78e940652904a2",
+      "current_source_tree_sha256": "d60195d826b3c62b2236e4147995fc0499a2c8eafc59d89ac0a99d7b443857e2",
       "example_id": "ollama",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -581,14 +617,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "a8f8a3d6f6658128cb3f29150d3f80aa57b2ac3b9f0a0fc49c4fa7384d91b198",
       "current_changes_public_ready": true,
       "current_content_hash": "cdbfeab09532b467b85592a377a00f006aa17ac3f96a6a4ec0de37df82731b57",
+      "current_source_tree_sha256": "a8f8a3d6f6658128cb3f29150d3f80aa57b2ac3b9f0a0fc49c4fa7384d91b198",
       "example_id": "lmstudio",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -613,14 +651,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "79c10375c52ed9ad1865e62d2ca1ed6653e5902f50854345fd4a84298a19ae69",
       "current_changes_public_ready": true,
       "current_content_hash": "c099cfd7636d6df2b2046db02d50640d243834bb531d740a9e062bf3ebeef81f",
+      "current_source_tree_sha256": "79c10375c52ed9ad1865e62d2ca1ed6653e5902f50854345fd4a84298a19ae69",
       "example_id": "alert-triage",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -645,14 +685,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "7d7e820ab6d301c756644262e8d86b82f34ae95692dca2916dd020be83e263cc",
       "current_changes_public_ready": true,
       "current_content_hash": "037da96eda19848561858ff03708059daa7900eeefd716e4f29ef658a156c6ec",
+      "current_source_tree_sha256": "7d7e820ab6d301c756644262e8d86b82f34ae95692dca2916dd020be83e263cc",
       "example_id": "cli-assistant",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -677,14 +719,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "279203194515742d593a81665aaae8d2203c12be77f3d2cf00621cdb455bf006",
       "current_changes_public_ready": true,
       "current_content_hash": "b68007e2f4975ba6173d51f09e3116f4fe2a58db3c1b5b6207bd2dec9fb31e5b",
+      "current_source_tree_sha256": "279203194515742d593a81665aaae8d2203c12be77f3d2cf00621cdb455bf006",
       "example_id": "clips-basics",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -709,14 +753,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "f0f59d9f94274dc2a4545e435d2a7fa48b6e22e62bf9df6b60a6afe1a8885be0",
       "current_changes_public_ready": true,
       "current_content_hash": "1cfb20f70bd3ce4ca8a9e173b42b213c133da0ccec71b9221aa5a1b24d8f7453",
+      "current_source_tree_sha256": "f0f59d9f94274dc2a4545e435d2a7fa48b6e22e62bf9df6b60a6afe1a8885be0",
       "example_id": "clips-llm-hybrid",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -741,14 +787,16 @@
       "approved_release": "v1.0.5-coupon-live-containment",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Current Reasoning Lab source accepted for the bounded v1.0.5 coupon Live containment: coupon Fixture and fixture-backed Auto remain available and analyzable, including under the deterministic fixture-LLM override, while Live is scenario-inapplicable because v1.0.5 cannot preserve the strict coupon schema through the Python provider path.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
       "current_changes_public_ready": true,
       "current_content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
+      "current_source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
       "example_id": "common-sense-guardrails",
-      "notes": "Approved v1.0.5 Reasoning Lab containment keeps coupon Fixture and fixture-backed Auto available and analyzable, including under the deterministic fixture-LLM override, while visibly marking coupon Live scenario-inapplicable before provider inspection or contact; all other supported scenario modes remain unchanged.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -773,14 +821,16 @@
       "approved_release": "v1.0.5-interactive-reasoning-workbenches",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Current source, including the Model Research Marimo frontend, accepted for the approved v1.0.5 Interactive Reasoning Workbenches public Examples selection.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
       "current_changes_public_ready": true,
       "current_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
+      "current_source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
       "example_id": "model-research-harness",
-      "notes": "Approved v1.0.5 Interactive Reasoning Workbenches current-source release, including the Model Research Marimo frontend.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -805,14 +855,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "91df468ff4938aeeb9a326c4a7046c75e50e68129757a0e80c8f8aad9fa9eb08",
       "current_changes_public_ready": true,
       "current_content_hash": "ad6bc6d1f1df14446c296a093c91d0aed1a7d5335672bae1b4d4feb9c1c79e71",
+      "current_source_tree_sha256": "91df468ff4938aeeb9a326c4a7046c75e50e68129757a0e80c8f8aad9fa9eb08",
       "example_id": "bn-solver-clips-pipeline",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -837,14 +889,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "d739c6120f2c1f2403098b797b2f981055286b2f2b63820238b9e5b3daf1c7b7",
       "current_changes_public_ready": true,
       "current_content_hash": "cbcd656ff1b2502c1dd45dc550243149b701b58ef7adf6c0b6cc66b0acdd438a",
+      "current_source_tree_sha256": "d739c6120f2c1f2403098b797b2f981055286b2f2b63820238b9e5b3daf1c7b7",
       "example_id": "llm-solver-hybrid",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -869,14 +923,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "56e1251d24bbd07e6561f3da4d6e763a7dc25dff5bda29e348266fb72acbef31",
       "current_changes_public_ready": true,
       "current_content_hash": "2c175270894c3a1176c55bc08077d21e9be2624d129ec6795a8c933e0b3ebc32",
+      "current_source_tree_sha256": "56e1251d24bbd07e6561f3da4d6e763a7dc25dff5bda29e348266fb72acbef31",
       "example_id": "bn-structure-learning",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -901,14 +957,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "a8caec4dd1c4ac34ec964c0830b6422c001486e367e16fd0e08f1f8c4a2c2da0",
       "current_changes_public_ready": true,
       "current_content_hash": "40c7122b9c2d5c703a6891438dd4d52cda1b5b1ca3e6b5ff7b882e16c6ed240c",
+      "current_source_tree_sha256": "a8caec4dd1c4ac34ec964c0830b6422c001486e367e16fd0e08f1f8c4a2c2da0",
       "example_id": "zen-decisions",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -933,14 +991,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "b714012e346264c70ed843165216498dffebc201b48adfcf54b2f109a61082d5",
       "current_changes_public_ready": true,
       "current_content_hash": "f66da8fd9f81fa4e1ba6877032e3fcfd5db7fefb89181342f21036edcc3c82a5",
+      "current_source_tree_sha256": "b714012e346264c70ed843165216498dffebc201b48adfcf54b2f109a61082d5",
       "example_id": "puzzler",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -965,14 +1025,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "a19e44553a7afa104d6175fc5a3240db151acf0cc492a30be05905f57021d075",
       "current_changes_public_ready": true,
       "current_content_hash": "e82c6e39840d0b85800dfff2b3b0b02ff71610c556f51189a03c2f7d263de079",
+      "current_source_tree_sha256": "a19e44553a7afa104d6175fc5a3240db151acf0cc492a30be05905f57021d075",
       "example_id": "racer",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -997,14 +1059,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "fb88466806c1b4aad96cc990a44026b1ad66d9cb1998b5d2b69c17f2f5d77f8f",
       "current_changes_public_ready": true,
       "current_content_hash": "757c2d11b7a7dd6da6f727e997a49089e26f2683f0a11a362b2a9cdf531b2a0d",
+      "current_source_tree_sha256": "fb88466806c1b4aad96cc990a44026b1ad66d9cb1998b5d2b69c17f2f5d77f8f",
       "example_id": "riffer",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -1029,14 +1093,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "223315587c5f5000b0958d4ae87ad0b63e276b37df73f59532253c76a20e352f",
       "current_changes_public_ready": true,
       "current_content_hash": "a0189aaaf06b0a6fcee28ca31e37ff44f699e5e0f8628113031502910f32a5c5",
+      "current_source_tree_sha256": "223315587c5f5000b0958d4ae87ad0b63e276b37df73f59532253c76a20e352f",
       "example_id": "ruler",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -1061,14 +1127,16 @@
       "approved_release": "v1.0.2-validated-examples-portfolio",
       "approved_source_ref": {
         "kind": "current_source",
-        "notes": "Initialized from the v1.0.2 validated Examples portfolio source state.",
+        "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
+      "approved_source_tree_sha256": "42e0db51c6e604697b1c6f3778bf34f1250f84d7117d33906717b2ef00271651",
       "current_changes_public_ready": true,
       "current_content_hash": "cfe19fb633960065bb64d9fc7ca2d87766521d8fcfc7e5382c13d9a217c03279",
+      "current_source_tree_sha256": "42e0db51c6e604697b1c6f3778bf34f1250f84d7117d33906717b2ef00271651",
       "example_id": "arbiter",
-      "notes": "Approved as part of the v1.0.2 validated Examples portfolio baseline.",
+      "notes": "Approved public example variant selected for public export.",
       "public_channels": [
         "repo",
         "docs",
@@ -1089,15 +1157,18 @@
       "publication_status": "approved"
     }
   ],
-  "ledger_type": "nxuskit-examples-publication-readiness-ledger",
+  "ledger_type": "nxuskit-examples-approved-public-publication-ledger",
   "policy": {
     "approved_variant_selection": "current source when content_hash matches; held changes reconstruct from approved_source_ref.kind=local_tree; otherwise fail closed",
     "default_for_missing_examples": "candidate",
+    "legacy_content_hash_role": "compatibility and editorial staleness metadata; not exact publication source identity",
     "public_clearance_authority": "leadership_team",
     "public_clearance_required_for_approved_examples": true,
     "public_clearance_state": "approved_public",
     "publication_readiness_is_separate_from_tier": true,
-    "sdk_coupling": "Examples consumes SDK releases; SDK may use a validated Examples portfolio snapshot as QA/provenance but does not include or depend on the Examples runtime package."
+    "sdk_coupling": "Examples consumes SDK releases; SDK may use a validated Examples portfolio snapshot as QA/provenance but does not include or depend on the Examples runtime package.",
+    "tree_digest_algorithm": "nxuskit-source-tree-sha256-v1",
+    "tree_digest_publication_identity": "source_tree_sha256"
   },
   "public_channels": [
     "repo",
@@ -1105,5 +1176,5 @@
     "celerat",
     "website"
   ],
-  "schema_version": "1.0.0"
+  "schema_version": "1.1.0"
 }
