@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import importlib.util
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -1091,6 +1092,79 @@ class TreeDigestMigrationTests(unittest.TestCase):
         self.assertEqual(first, second)
 
 
+class StagedExportAttestationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="staged-public-export-")
+        self.root = Path(self.temp.name)
+        self.export = self.root / "export"
+        self.repo = self.root / "public"
+        materialize_entries(
+            (
+                TreeEntry(b".gitignore", "100644", "blob", b".env.*\n"),
+                TreeEntry(b"README.md", "100644", "blob", b"# Public\n"),
+                TreeEntry(b"README-link", "120000", "blob", b"README.md"),
+                TreeEntry(
+                    b"examples/.env.example",
+                    "100644",
+                    "blob",
+                    b"OPENAI_API_KEY=\n",
+                ),
+                TreeEntry(
+                    b"scripts/check.sh", "100755", "blob", b"#!/bin/sh\nexit 0\n"
+                ),
+            ),
+            self.export,
+        )
+        self.repo.mkdir()
+        self.git("init", "-q")
+        self.git("config", "user.email", "mirror-test@example.invalid")
+        self.git("config", "user.name", "Mirror Test")
+        (self.repo / ".gitignore").write_text(".env.*\n", encoding="utf-8")
+        self.git("add", ".gitignore")
+        self.git("commit", "-qm", "baseline")
+        shutil.copytree(self.export, self.repo, dirs_exist_ok=True, symlinks=True)
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def git(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(self.repo), *args],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+    def test_force_stage_includes_ignored_export_path_and_matches_exactly(self) -> None:
+        self.git("add", "-A")
+        self.assertNotIn(
+            "examples/.env.example",
+            self.git("ls-files").stdout.splitlines(),
+        )
+        with self.assertRaisesRegex(
+            TreeIdentityError, "staged public tree does not match attested export"
+        ):
+            tree_module.attest_staged_export(self.repo, self.export)
+
+        self.git("add", "--all", "--force")
+
+        self.assertEqual(
+            tree_module.attest_staged_export(self.repo, self.export),
+            {"ok": True, "tracked_paths_count": 5},
+        )
+
+    def test_staged_extra_path_is_rejected(self) -> None:
+        self.git("add", "--all", "--force")
+        (self.repo / "unexpected.txt").write_text("unexpected\n", encoding="utf-8")
+        self.git("add", "--force", "unexpected.txt")
+
+        with self.assertRaisesRegex(
+            TreeIdentityError, "staged public tree does not match attested export"
+        ):
+            tree_module.attest_staged_export(self.repo, self.export)
+
+
 class WorkflowContractTests(unittest.TestCase):
     SAFE_COMMANDS = (
         "set -euo pipefail",
@@ -1101,11 +1175,20 @@ class WorkflowContractTests(unittest.TestCase):
         'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA" --filter-export "$EXPORT"',
         'python3 scripts/examples_publication_tree.py attest-public-export --export-root "$EXPORT"',
     )
+    SAFE_PUBLISH_COMMANDS = (
+        "set -eu -o pipefail",
+        "EXPORT=/tmp/nxusKit-examples-export",
+        "git add --all --force",
+        'python3 "$EXPORT/scripts/examples_publication_tree.py" attest-staged-export --repo . --export-root "$EXPORT"',
+    )
 
     @classmethod
     def workflow(cls, commands: tuple[str, ...] | None = None) -> str:
         body = "\n".join(
             f"          {line}" for line in (commands or cls.SAFE_COMMANDS)
+        )
+        publish_body = "\n".join(
+            f"          {line}" for line in cls.SAFE_PUBLISH_COMMANDS
         )
         return f"""name: Safe publication fixture
 jobs:
@@ -1122,6 +1205,9 @@ jobs:
         run: |
           set -euo pipefail
           echo complete
+      - name: Merge into public repo
+        run: |
+{publish_body}
 """
 
     def setUp(self) -> None:
@@ -1185,6 +1271,38 @@ jobs:
             self.assertEqual(self.errors(private_workflow.read_text()), [])
         else:
             self.assertEqual(self.checker.validate_layout(REPO, "public"), [])
+
+    def test_public_merge_requires_force_stage_then_exact_attestation(self) -> None:
+        safe = self.workflow()
+        unsafe_variants = (
+            safe.replace("git add --all --force", "git add -A", 1),
+            safe.replace(" --force", "", 1),
+            safe.replace(
+                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
+                'attest-staged-export --repo . --export-root "$EXPORT"\n',
+                "",
+                1,
+            ),
+            safe.replace(
+                "          git add --all --force\n"
+                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
+                'attest-staged-export --repo . --export-root "$EXPORT"\n',
+                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
+                'attest-staged-export --repo . --export-root "$EXPORT"\n'
+                "          git add --all --force\n",
+                1,
+            ),
+            safe.replace(
+                "          git add --all --force\n",
+                "          git add --all --force\n          git add README.md\n",
+                1,
+            ),
+        )
+
+        self.assertEqual(self.errors(safe), [])
+        for unsafe in unsafe_variants:
+            with self.subTest(unsafe=unsafe):
+                self.assertTrue(self.errors(unsafe))
 
 
 class IntegrationWiringTests(unittest.TestCase):

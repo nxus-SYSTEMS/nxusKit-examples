@@ -254,6 +254,36 @@ def git_tree_entries(
     return _parse_ls_tree(resolved_repo, root, source_ref)
 
 
+def git_index_tree_entries(repo: Path) -> tuple[TreeEntry, ...]:
+    """Read every stage-zero entry and blob from a Git index."""
+
+    resolved_repo = repo.resolve()
+    output = _git(resolved_repo, ["ls-files", "-s", "-z"])
+    entries: list[TreeEntry] = []
+    for record in output.split(b"\0"):
+        if not record:
+            continue
+        try:
+            header, path_bytes = record.split(b"\t", 1)
+            mode_bytes, object_id, stage = header.split(b" ", 2)
+            mode = mode_bytes.decode("ascii")
+            object_text = object_id.decode("ascii")
+        except (UnicodeError, ValueError) as exc:
+            raise TreeIdentityError("malformed git ls-files record") from exc
+        if stage != b"0":
+            raise TreeIdentityError(f"unmerged tracked path: {path_bytes!r}")
+        _validate_path(path_bytes)
+        entries.append(
+            TreeEntry(
+                path_bytes=path_bytes,
+                mode=mode,
+                git_type="blob",
+                content=_git(resolved_repo, ["cat-file", "blob", object_text]),
+            )
+        )
+    return validate_tree_entries(entries)
+
+
 def digest_git_tree(repo: Path, tree_root: str, source_ref: str | None) -> str:
     """Return the canonical digest for a Git-backed example tree."""
 
@@ -535,6 +565,16 @@ def attest_public_export(export_root: Path) -> dict[str, object]:
     }
 
 
+def attest_staged_export(repo: Path, export_root: Path) -> dict[str, object]:
+    """Prove that a destination Git index exactly represents one export."""
+
+    staged_entries = git_index_tree_entries(repo)
+    export_entries = filesystem_tree_entries(export_root.resolve())
+    if staged_entries != export_entries:
+        raise TreeIdentityError("staged public tree does not match attested export")
+    return {"ok": True, "tracked_paths_count": len(staged_entries)}
+
+
 def run_self_test() -> dict[str, object]:
     """Validate the portable canonical tree vector."""
 
@@ -575,6 +615,12 @@ def parse_args() -> argparse.Namespace:
         "attest-public-export", help="Attest a filtered public export."
     )
     attest.add_argument("--export-root", type=Path, required=True)
+    staged = subparsers.add_parser(
+        "attest-staged-export",
+        help="Attest that a Git index exactly represents a public export.",
+    )
+    staged.add_argument("--repo", type=Path, required=True)
+    staged.add_argument("--export-root", type=Path, required=True)
     return parser.parse_args()
 
 
@@ -602,6 +648,15 @@ def main() -> int:
             print(
                 json.dumps(
                     attest_public_export(args.export_root), indent=2, sort_keys=True
+                )
+            )
+            return 0
+        if args.command == "attest-staged-export":
+            print(
+                json.dumps(
+                    attest_staged_export(args.repo, args.export_root),
+                    indent=2,
+                    sort_keys=True,
                 )
             )
             return 0

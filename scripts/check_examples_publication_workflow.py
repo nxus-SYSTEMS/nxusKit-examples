@@ -13,6 +13,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CRITICAL_STEP = "Export approved tracked content"
+PUBLISH_STEP = "Merge into public repo"
 REQUIRED_COMMANDS = (
     "set -euo pipefail",
     "EXPORT=/tmp/nxusKit-examples-export",
@@ -22,6 +23,12 @@ REQUIRED_COMMANDS = (
     'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA" --filter-export "$EXPORT"',
     'python3 scripts/examples_publication_tree.py attest-public-export --export-root "$EXPORT"',
 )
+FORCE_STAGE_COMMAND = "git add --all --force"
+STAGED_ATTESTATION_COMMAND = (
+    'python3 "$EXPORT/scripts/examples_publication_tree.py" '
+    'attest-staged-export --repo . --export-root "$EXPORT"'
+)
+GIT_ADD_PATTERN = re.compile(r"(?:^|\b)git\s+add(?:\s|$)")
 PROHIBITED_COPY_PATTERNS = (
     re.compile(r"(?:^|[;&|]\s*)cp\s+(?:-[^ ]*\s+)*(?:-a|-R)(?:\s|$)"),
     re.compile(r"(?:^|[;&|]\s*)rsync(?:\s|$)"),
@@ -180,11 +187,41 @@ def validate_private_workflow(text: str) -> list[str]:
                 errors.append(
                     f"pre-attestation step {step.name!r} uses an ambient copy command"
                 )
+
+    publish_steps = [step for step in steps if step.name == PUBLISH_STEP]
+    if len(publish_steps) != 1:
+        errors.append(f"expected exactly one {PUBLISH_STEP!r} run step")
+        return errors
+    publish_step = publish_steps[0]
+    add_commands = tuple(
+        command for command in publish_step.commands if GIT_ADD_PATTERN.search(command)
+    )
+    if add_commands != (FORCE_STAGE_COMMAND,):
+        errors.append(f"{PUBLISH_STEP!r} must use exactly one force-stage command")
+    try:
+        force_index = publish_step.commands.index(FORCE_STAGE_COMMAND)
+        attest_index = publish_step.commands.index(STAGED_ATTESTATION_COMMAND)
+    except ValueError:
+        errors.append(f"{PUBLISH_STEP!r} must attest the exact staged export")
+    else:
+        if attest_index != force_index + 1:
+            errors.append(
+                f"{PUBLISH_STEP!r} must attest immediately after force-staging"
+            )
     return errors
 
 
 def _safe_fixture() -> str:
     body = "\n".join(f"          {command}" for command in REQUIRED_COMMANDS)
+    publish_body = "\n".join(
+        f"          {command}"
+        for command in (
+            "set -eu -o pipefail",
+            "EXPORT=/tmp/nxusKit-examples-export",
+            FORCE_STAGE_COMMAND,
+            STAGED_ATTESTATION_COMMAND,
+        )
+    )
     return f"""name: Safe publication fixture
 jobs:
   mirror:
@@ -192,6 +229,9 @@ jobs:
       - name: Export approved tracked content
         run: |
 {body}
+      - name: Merge into public repo
+        run: |
+{publish_body}
 """
 
 
@@ -205,6 +245,12 @@ def run_self_test() -> dict[str, object]:
             raise RuntimeError(f"missing command mutation was accepted: {command}")
     if not validate_private_workflow(safe.replace('"$GITHUB_SHA"', '"$OTHER_SHA"', 1)):
         raise RuntimeError("non-exact source ref mutation was accepted")
+    for command in (FORCE_STAGE_COMMAND, STAGED_ATTESTATION_COMMAND):
+        mutated = safe.replace(f"          {command}\n", "", 1)
+        if not validate_private_workflow(mutated):
+            raise RuntimeError(
+                f"missing public staging command was accepted: {command}"
+            )
     return {"ok": True, "workflow_contract_mutations_rejected": True}
 
 
