@@ -58,6 +58,31 @@ def _category(config: dict[str, Any], filename: str) -> tuple[str, bool, str]:
     return ("safe-built-in", True, "Offline fixture evaluation is available.")
 
 
+def _expanded_test_count(config: dict[str, Any]) -> int:
+    """Count the concrete test variants represented by a configuration."""
+
+    count = 0
+    for test in config.get("tests") or []:
+        matrix = test.get("matrix") if isinstance(test, dict) else None
+        variants = 1
+        if isinstance(matrix, dict):
+            for values in matrix.values():
+                variants *= len(values) if isinstance(values, list) and values else 1
+        count += variants
+    return count
+
+
+def _configured_engines(config: dict[str, Any]) -> list[str]:
+    """Return only reasoning engines explicitly selected by this config."""
+
+    engines = []
+    if (config.get("policy") or {}).get("engine") == "nxuskit-clips":
+        engines.append("clips")
+    if (config.get("bayesian") or {}).get("engine") == "nxuskit-bn":
+        engines.append("bn")
+    return engines
+
+
 def build_config_catalog(root: Path = ROOT) -> list[dict[str, object]]:
     """Return every checked-in config exactly once with safe UI truth fields."""
 
@@ -70,6 +95,11 @@ def build_config_catalog(root: Path = ROOT) -> list[dict[str, object]]:
                 "id": path.name,
                 "filename": path.name,
                 "label": str(config.get("id") or path.stem),
+                "description": str(
+                    config.get("description") or "No description supplied."
+                ),
+                "test_count": _expanded_test_count(config),
+                "configured_engines": _configured_engines(config),
                 "category": category,
                 "visible": True,
                 "enabled": enabled,

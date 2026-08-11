@@ -77,7 +77,7 @@ def workbench_controls(
             "allow_external",
             "write_reports",
         ],
-        "primary_action": {"id": "run-evaluation", "label": "Run evaluation"},
+        "primary_action": {"id": "run-evaluation", "label": "Run Evaluation"},
         "inspection_sections": INSPECTION_SECTIONS,
     }
 

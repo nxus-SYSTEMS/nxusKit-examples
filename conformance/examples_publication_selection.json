@@ -839,7 +839,7 @@
           "name": "synthetic-claims-audit"
         }
       ],
-      "source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
+      "source_tree_sha256": "12129fc6ea5a5af02ee266e378d5728973f0501ddf0131512133a51f6a29c667",
       "tagline": "Catch plausible but impossible LLM recommendations by turning answers into facts, firing rules, and repairing failures with auditable prompts.",
       "tech_tags": [
         "LLM",
@@ -924,7 +924,7 @@
     {
       "blurb": "The model-research-harness example gives teams a practical way to compare model and provider fitness through nxusKit instead of one-off scripts. Python owns config loading, Promptfoo import, provider execution, scoring, CLIPS-style policy checks, Bayesian confidence aggregation, reports, and dry-run lifecycle recommendations. Mock mode runs without credentials, Promptfoo, Ollama, or Pro entitlement, while live mode can use configured Ollama, LM Studio, OpenAI, Claude, Groq, or xAI Grok providers. Software-development fixtures cover analysis, bug finding, bugfixing, generation, refactoring, and review.",
       "category": "integrations",
-      "content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
+      "content_hash": "70821d852f8c0911117d5730c1fe6fc9806be607d7569100154c49aad2408e65",
       "description": "Python-first harness for provider-neutral model research, Promptfoo import, CLIPS policy, Bayesian scoring, and dry-run lifecycle recommendations",
       "difficulty": "advanced",
       "difficulty_override": true,
@@ -989,7 +989,7 @@
           "name": "software-dev"
         }
       ],
-      "source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
+      "source_tree_sha256": "5c6d382b1ddf626da32eb4ef76f23a22535a0a7d99d3cad959ddb38e1e9273a7",
       "tagline": "Research model fitness with provider-neutral runs, Promptfoo import, deterministic policy checks, Bayesian confidence, and dry-run lifecycle recommendations.",
       "tech_tags": [
         "LLM",
@@ -2212,8 +2212,8 @@
       },
       {
         "approved_content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
-        "approved_release": "v1.0.5-coupon-live-containment",
-        "approved_source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
+        "approved_release": "v1.0.5-marimo-sibling-ui-refinement",
+        "approved_source_tree_sha256": "12129fc6ea5a5af02ee266e378d5728973f0501ddf0131512133a51f6a29c667",
         "example_id": "common-sense-guardrails",
         "public_channels": [
           "repo",
@@ -2236,13 +2236,13 @@
         "selected_source": {
           "content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
           "kind": "current_source",
-          "source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88"
+          "source_tree_sha256": "12129fc6ea5a5af02ee266e378d5728973f0501ddf0131512133a51f6a29c667"
         }
       },
       {
-        "approved_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
-        "approved_release": "v1.0.5-interactive-reasoning-workbenches",
-        "approved_source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
+        "approved_content_hash": "70821d852f8c0911117d5730c1fe6fc9806be607d7569100154c49aad2408e65",
+        "approved_release": "v1.0.5-marimo-sibling-ui-refinement",
+        "approved_source_tree_sha256": "5c6d382b1ddf626da32eb4ef76f23a22535a0a7d99d3cad959ddb38e1e9273a7",
         "example_id": "model-research-harness",
         "public_channels": [
           "repo",
@@ -2263,9 +2263,9 @@
         },
         "publication_status": "approved",
         "selected_source": {
-          "content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
+          "content_hash": "70821d852f8c0911117d5730c1fe6fc9806be607d7569100154c49aad2408e65",
           "kind": "current_source",
-          "source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4"
+          "source_tree_sha256": "5c6d382b1ddf626da32eb4ef76f23a22535a0a7d99d3cad959ddb38e1e9273a7"
         }
       },
       {

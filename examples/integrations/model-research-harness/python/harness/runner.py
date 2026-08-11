@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from .activity import EvaluationTrace
 from .bayesian_score import posterior_confidence
 from .clips_policy import evaluate_policy
 from .external_command import run_external_test
@@ -22,6 +23,7 @@ def run_config(
     output_dir: Path | None = None,
     allow_external_commands: bool = False,
     allow_lifecycle_mutations: bool = False,
+    trace: EvaluationTrace | None = None,
 ) -> tuple[
     list[dict[str, Any]], dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]
 ]:
@@ -61,8 +63,14 @@ def run_config(
         for provider_id in provider_ids:
             provider = providers[provider_id]
             response = call_provider(
-                provider, test, mode, provider_override, model_override
+                provider,
+                test,
+                mode,
+                provider_override,
+                model_override,
+                trace=trace,
             )
+            interaction_id = response.pop("_trace_interaction_id", None)
             effective_provider_id = str(response.get("provider_id") or provider_id)
             parsed, parse_error = parse_jsonish(response["content"])
             assertions = evaluate_assertions(
@@ -90,6 +98,14 @@ def run_config(
             )
             if item["policy"]["status"] == "fail":
                 item["status"] = "fail"
+            if trace is not None and interaction_id is not None:
+                trace.evaluate_interaction(
+                    str(interaction_id),
+                    parsed=parsed,
+                    parse_error=parse_error,
+                    assertions=assertions,
+                    policy=item["policy"],
+                )
             results.append(item)
             observed_provider = {
                 **provider,
@@ -117,6 +133,17 @@ def run_config(
         config.get("bayesian"),
         config_dir=Path(str(config.get("_config_dir", "."))),
     )
+    if trace is not None:
+        trace.event(
+            phase="bayesian",
+            status="completed",
+            summary="Completed Bayesian confidence aggregation.",
+            details={
+                key: bayesian[key]
+                for key in ("engine", "mean_confidence", "uncertainty")
+                if key in bayesian
+            },
+        )
     recommendations = recommend(results, config.get("actions"))
     return results, bayesian, recommendations, dedupe_truth(truth)
 

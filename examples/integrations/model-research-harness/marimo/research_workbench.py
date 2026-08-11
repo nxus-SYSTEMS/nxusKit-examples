@@ -6,207 +6,160 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    def mode_guidance() -> str:
-        """Describe the submitted modes in the same vocabulary as the control."""
-
-        return """**Mode guidance**
-
-Changing controls has no effect. After explicit Run evaluation:
-
-- Mock (Fixture) — deterministic synthetic evidence; it does not call a provider.
-- Auto — may attempt a compatible enabled live provider, then falls back only where supported.
-- Live — runs the selected enabled provider.
-"""
-
-    return (mode_guidance,)
-
-
-@app.cell
-def _():
     import json
     import os
 
     import marimo as mo
 
     from availability import released_license_status
-    from frontend_core import run_evaluation
+    from frontend_core import EvaluationSubmissionGate, run_evaluation
+    from harness.providers import ProviderError
+    from model_discovery import ProviderDiscoveryCoordinator
     from presenters import report_charts, report_tables
-    from workbench_contract import (
-        availability_markdown,
-        normalise_filters,
-        safe_report_json,
-        workbench_controls,
-    )
+    from research_activity import ResearchActivity
+    from workbench_contract import safe_report_json
+    from workbench_controls import WorkbenchControls
 
     return (
-        availability_markdown,
+        EvaluationSubmissionGate,
+        ProviderError,
+        ProviderDiscoveryCoordinator,
+        ResearchActivity,
+        WorkbenchControls,
         json,
         mo,
-        normalise_filters,
         os,
+        released_license_status,
         report_charts,
         report_tables,
         run_evaluation,
         safe_report_json,
-        workbench_controls,
-        released_license_status,
     )
 
 
 @app.cell
-def _(os, released_license_status, workbench_controls):
+def _(os, released_license_status):
     license_status = released_license_status(environ=os.environ)
-    controls = workbench_controls(license_status=license_status)
-    provider_availability = list(controls["providers"].values())
-    return controls, provider_availability
+    return (license_status,)
 
 
 @app.cell
-def _(availability_markdown, controls, mo, mode_guidance):
-    config_entries = controls["configs"]
-    enabled_config_ids = [
-        config_id for config_id, item in config_entries.items() if item["enabled"]
-    ]
-    disabled_configs = [
-        f"{config_id}: {item['reason']}"
-        for config_id, item in config_entries.items()
-        if not item["enabled"]
-    ]
-    provider_entries = controls["providers"]
-    enabled_providers = [
-        provider_id for provider_id, item in provider_entries.items() if item["enabled"]
-    ]
-    unavailable_providers = [
-        f"{provider_id}: {item['reason']}"
-        for provider_id, item in provider_entries.items()
-        if not item["enabled"]
-    ]
-    engine_truth = [
-        f"{engine_id}: {item['tier']} / {item['status']} / {item['reason']}"
-        for engine_id, item in controls["engines"].items()
-    ]
-
-    config_id = mo.ui.dropdown(
-        options=enabled_config_ids,
-        value="nxuskit-harness-basic.yaml",
-        label="Checked-in config",
+def _(
+    ProviderDiscoveryCoordinator,
+    ResearchActivity,
+    WorkbenchControls,
+    license_status,
+    mo,
+    os,
+):
+    discovery_coordinator = ProviderDiscoveryCoordinator()
+    workbench_widget = WorkbenchControls(
+        coordinator=discovery_coordinator,
+        environ=os.environ,
+        license_status=license_status,
     )
-    mode = mo.ui.dropdown(options=controls["modes"], value="mock", label="Mode")
-    provider = mo.ui.dropdown(
-        options=enabled_providers,
-        value=None,
-        allow_select_none=True,
-        label="Provider",
-        disabled=not enabled_providers,
-    )
-    model = mo.ui.text(value="", label="Model", disabled=not enabled_providers)
-    include_tests = mo.ui.text(value="", label="Include test IDs (comma-separated)")
-    exclude_tests = mo.ui.text(value="", label="Exclude test IDs (comma-separated)")
-    allow_external = mo.ui.checkbox(
-        label="I explicitly acknowledge the external-adapter trust gate", value=False
-    )
-    write_reports = mo.ui.checkbox(
-        label="Write bounded local reports after submission", value=False
-    )
-    configuration = mo.ui.dictionary(
-        {
-            "config_id": config_id,
-            "mode": mode,
-            "provider": provider,
-            "model": model,
-            "include_tests": include_tests,
-            "exclude_tests": exclude_tests,
-            "allow_external": allow_external,
-            "write_reports": write_reports,
-        },
-        label="Configure",
-    )
-    request_form = mo.ui.form(
-        configuration,
-        submit_button_label="Run evaluation",
-        label="Configure the fixture-first workbench",
-    )
-    mo.vstack(
-        [
-            mo.md(
-                "# nxusKit Model Research Workbench\n"
-                "Community fixture/mock evaluation by default. Changing controls does "
-                "not call a provider, adapter, engine, or filesystem writer."
-            ),
-            mo.md(mode_guidance()),
-            request_form,
-            mo.md(availability_markdown(controls)),
-            mo.ui.multiselect(
-                options=disabled_configs,
-                label="Unavailable config options — disabled (reason shown)",
-                disabled=True,
-            ),
-            mo.ui.multiselect(
-                options=unavailable_providers,
-                label="Unavailable provider options — disabled (reason shown)",
-                disabled=True,
-            ),
-            mo.ui.multiselect(
-                options=engine_truth,
-                label="Engine tier and execution truth",
-                disabled=True,
-            ),
-        ]
-    )
-    return (request_form,)
+    activity_widget = ResearchActivity()
+    controls = mo.ui.anywidget(workbench_widget)
+    activity_view = mo.ui.anywidget(activity_widget)
+    mo.vstack([mo.md("# nxusKit Model Research Workbench"), controls])
+    return activity_view, activity_widget, controls, workbench_widget
 
 
 @app.cell
-def _(normalise_filters, provider_availability, request_form, run_evaluation):
-    submitted_request = request_form.value
-    if submitted_request is None:
+def _(EvaluationSubmissionGate, run_evaluation):
+    evaluation_gate = EvaluationSubmissionGate(evaluate=run_evaluation)
+    return (evaluation_gate,)
+
+
+@app.cell
+def _(
+    ProviderError,
+    activity_widget,
+    controls,
+    evaluation_gate,
+    run_evaluation,
+    workbench_widget,
+):
+    control_state = controls.value
+    provider_availability = list(control_state.get("providers", []))
+    submit_generation = int(control_state.get("submit_generation", 0))
+    submitted_request = dict(control_state.get("submitted_request", {}))
+    draft_request = {
+        "config_id": str(
+            control_state.get("selected_config", "nxuskit-harness-basic.yaml")
+        ),
+        "mode": str(control_state.get("selected_mode", "mock")),
+        "provider": control_state.get("selected_provider"),
+        "model": control_state.get("selected_model"),
+        "include_tests": [],
+        "exclude_tests": [],
+        "allow_external": bool(control_state.get("allow_external", False)),
+        "write_reports": bool(control_state.get("write_reports", False)),
+    }
+    if submit_generation < 1 or not submitted_request:
         response = run_evaluation(
-            {
-                "config_id": "nxuskit-harness-basic.yaml",
-                "mode": "mock",
-                "provider": None,
-                "model": None,
-                "include_tests": [],
-                "exclude_tests": [],
-                "allow_external": False,
-                "write_reports": False,
-            },
+            draft_request,
             submitted=False,
             provider_availability=provider_availability,
         )
     else:
-        request = {
-            **submitted_request,
-            "include_tests": normalise_filters(submitted_request.get("include_tests")),
-            "exclude_tests": normalise_filters(submitted_request.get("exclude_tests")),
-        }
+        activity_widget.begin_run(submit_generation)
         try:
-            response = run_evaluation(
-                request,
-                submitted=True,
+            response = evaluation_gate.evaluate(
+                submit_generation,
+                submitted_request,
                 provider_availability=provider_availability,
+                event_sink=activity_widget.append_event,
+                interaction_sink=activity_widget.append_interaction_update,
             )
-        except ValueError as exc:
-            response = {"report": None, "message": str(exc), "report_path": None}
+            activity_widget.complete_run(
+                response["report"] or {"final_status": "not-run"}
+            )
+            workbench_widget.completion_state = "completed"
+        except (ValueError, ProviderError) as exc:
+            safe_message = (
+                "The provider evaluation stopped safely. Review the retained activity "
+                "evidence, provider, and model before trying again."
+                if isinstance(exc, ProviderError)
+                else str(exc)
+            )
+            activity_widget.fail_run(safe_message)
+            response = {
+                "report": None,
+                "message": safe_message,
+                "report_path": None,
+            }
+            workbench_widget.completion_state = "failed"
+        workbench_widget.completed_generation = submit_generation
     return (response,)
 
 
 @app.cell
-def _(json, mo, report_charts, report_tables, response, safe_report_json):
+def _(
+    activity_view,
+    json,
+    mo,
+    report_charts,
+    report_tables,
+    response,
+    safe_report_json,
+):
     report = response["report"]
     if report is None:
-        result_view = mo.callout(str(response["message"]), kind="info")
+        result_view = mo.vstack(
+            [mo.callout(str(response["message"]), kind="info"), activity_view]
+        )
     else:
         tables = report_tables(report)
         charts = report_charts(report)
         summary = mo.md(
             f"""## Summary
 
-- **Config:** {report["config_id"]}
+- **Configuration:** {report["config_id"]}
 - **Final status:** {report["final_status"]}
 - **Report writing:** {response["report_path"] or "not requested"}
 
-Only submitted evaluation can execute the canonical harness.
+Only an explicitly submitted evaluation can execute the canonical harness.
 """
         )
         visual_evidence = mo.vstack(
@@ -235,7 +188,8 @@ Only submitted evaluation can execute the canonical harness.
         result_view = mo.vstack(
             [
                 summary,
-                mo.md("## Inspect evidence"),
+                activity_view,
+                mo.md("## Inspect Evidence"),
                 inspections,
                 visual_evidence,
                 mo.accordion(

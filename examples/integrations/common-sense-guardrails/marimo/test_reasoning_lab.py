@@ -95,6 +95,12 @@ def test_import_exposes_an_ordinary_marimo_app_without_running_analysis() -> Non
     assert "Analyze" in response["message"]
 
 
+def test_reasoning_lab_has_the_sibling_product_heading() -> None:
+    """Catches the Reasoning Lab lacking the same product identity as MRH."""
+
+    assert "# nxusKit Reasoning Lab" in SCRIPT.read_text(encoding="utf-8")
+
+
 def test_submission_gate_executes_once_per_generation() -> None:
     """Catches Marimo reactivity repeating an already-submitted analysis."""
 

@@ -12,6 +12,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PY_DIR = ROOT / "python"
+if str(PY_DIR) not in sys.path:
+    sys.path.insert(0, str(PY_DIR))
+
+from harness.config import load_config  # noqa: E402
 
 
 def run_py(*args: str) -> subprocess.CompletedProcess[str]:
@@ -37,6 +41,19 @@ def test_basic_mock_json_passes() -> None:
     assert report["final_status"] == "pass"
     assert report["capability_truth_table"][0]["harness_validated"] is True
     assert report["bayesian_confidence"]["mean_confidence"] > 0.5
+
+
+def test_structured_output_prompt_declares_required_schema_fields() -> None:
+    """Catches a Live prompt omitting fields enforced by its output assertion."""
+
+    config = load_config(ROOT / "configs/nxuskit-harness-structured-output.yaml")
+    test = config["tests"][0]
+    prompt = test["prompt"]
+    required = test["assertions"][0]["schema"]["required"]
+
+    assert required == ["label", "confidence", "rationale"]
+    assert all(field in prompt for field in required)
+    assert "confidence as a number" in prompt
 
 
 def test_promptfoo_basic_import_runs() -> None:

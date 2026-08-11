@@ -46,9 +46,119 @@ def test_unsubmitted_evaluation_has_no_runner_or_writer_effect(monkeypatch) -> N
     monkeypatch.setattr(
         core, "write_reports", lambda *args, **kwargs: calls.append("write")
     )
-    result = core.run_evaluation(request(), submitted=False)
+    events: list[dict[str, object]] = []
+    interactions: list[dict[str, object]] = []
+    result = core.run_evaluation(
+        request(),
+        submitted=False,
+        event_sink=events.append,
+        interaction_sink=interactions.append,
+        clock=lambda: "2026-08-07T20:00:00.000Z",
+    )
     assert result["report"] is None
     assert calls == []
+    assert events == []
+    assert interactions == []
+
+
+def test_submission_gate_executes_once_per_generation() -> None:
+    """Catches Marimo reactivity rerunning an already-submitted evaluation."""
+
+    core = load_core()
+    calls: list[tuple[dict[str, object], dict[str, object]]] = []
+    gate = core.EvaluationSubmissionGate(
+        evaluate=lambda submitted_request, **_kwargs: (
+            calls.append((submitted_request, _kwargs))
+            or {"report": None, "message": "done", "report_path": None}
+        )
+    )
+
+    events: list[dict[str, object]] = []
+    interactions: list[dict[str, object]] = []
+
+    def clock() -> str:
+        return "2026-08-07T20:00:00.000Z"
+
+    first = gate.evaluate(
+        1,
+        request(),
+        provider_availability=[],
+        event_sink=events.append,
+        interaction_sink=interactions.append,
+        clock=clock,
+    )
+    second = gate.evaluate(
+        1,
+        request(config_id="nxuskit-harness-bn-engine.yaml"),
+        provider_availability=[{"id": "ollama", "enabled": True}],
+        event_sink=lambda _event: pytest.fail("cached run emitted an event"),
+        interaction_sink=lambda _interaction: pytest.fail(
+            "cached run emitted an interaction"
+        ),
+        clock=lambda: pytest.fail("cached run consulted the clock"),
+    )
+
+    assert second is first
+    assert len(calls) == 1
+    submitted_request, forwarded = calls[0]
+    assert submitted_request == request()
+    assert forwarded["event_sink"] == events.append
+    assert forwarded["interaction_sink"] == interactions.append
+    assert forwarded["clock"] is clock
+
+
+def test_new_generation_resets_activity_before_its_first_event() -> None:
+    """Catches a new submitted run appending into stale activity evidence."""
+
+    core = load_core()
+    from research_activity import ResearchActivity
+
+    activity = ResearchActivity()
+    observed: list[tuple[int, int]] = []
+
+    def evaluate(_request, *, event_sink, interaction_sink, **_kwargs):
+        assert interaction_sink == activity.append_interaction_update
+        observed.append((activity.generation, len(activity.events)))
+        event_sink(
+            {
+                "id": "event-0001",
+                "timestamp": "2026-08-07T20:00:00.000Z",
+                "phase": "configuration",
+                "status": "completed",
+                "summary": "Loaded configuration.",
+            }
+        )
+        return {"report": {"final_status": "pass"}}
+
+    gate = core.EvaluationSubmissionGate(evaluate=evaluate)
+    activity.begin_run(1)
+    first = gate.evaluate(
+        1,
+        request(),
+        provider_availability=[],
+        event_sink=activity.append_event,
+        interaction_sink=activity.append_interaction_update,
+    )
+    cached = gate.evaluate(
+        1,
+        request(config_id="nxuskit-harness-bn-engine.yaml"),
+        provider_availability=[],
+        event_sink=activity.append_event,
+        interaction_sink=activity.append_interaction_update,
+    )
+    activity.begin_run(2)
+    second = gate.evaluate(
+        2,
+        request(),
+        provider_availability=[],
+        event_sink=activity.append_event,
+        interaction_sink=activity.append_interaction_update,
+    )
+
+    assert cached is first
+    assert second is not first
+    assert observed == [(1, 0), (2, 0)]
+    assert len(activity.events) == 1
 
 
 def test_mock_request_delegates_to_the_existing_runner_without_writing() -> None:
@@ -166,6 +276,42 @@ def test_basic_live_prompt_declares_the_exact_label_vocabulary() -> None:
     assert '"technical"' in prompt
     assert '"account"' in prompt
     assert '"other"' in prompt
+
+
+def test_structured_output_live_prompt_requests_every_required_field(
+    monkeypatch,
+) -> None:
+    """Catches the rendered Live request omitting fields the harness will score."""
+
+    core = load_core()
+    from harness import providers
+
+    prompts: list[str] = []
+    monkeypatch.setattr(
+        providers,
+        "call_live_provider",
+        lambda _provider, _test, prompt, _provider_override, model_override: {
+            "content": '{"label":"technical","confidence":0.9,"rationale":"API failure"}',
+            "source": "live",
+            "model": model_override,
+            "metadata": prompts.append(prompt) or {},
+        },
+    )
+    config = core.load_config(
+        core.ROOT / "configs" / "nxuskit-harness-structured-output.yaml"
+    )
+
+    providers.call_provider(
+        config["providers"][0],
+        config["tests"][0],
+        "live",
+        provider_override="claude",
+        model_override="claude-sonnet-4-6",
+    )
+
+    assert len(prompts) == 1
+    assert all(field in prompts[0] for field in ("label", "confidence", "rationale"))
+    assert "confidence as a number" in prompts[0]
 
 
 def test_lifecycle_config_is_rejected_before_any_runner_call(monkeypatch) -> None:

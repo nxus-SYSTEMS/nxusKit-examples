@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+from .activity import EvaluationTrace
 from .templating import render_template
 
 
@@ -41,30 +42,69 @@ def call_provider(
     mode: str,
     provider_override: str | None = None,
     model_override: str | None = None,
+    trace: EvaluationTrace | None = None,
 ) -> dict[str, Any]:
     prompt = render_template(test["prompt"], test.get("vars") or {})
-    if mode == "mock" or (
+    fixture_response = mode == "mock" or (
         not provider_override and provider.get("provider") in {"mock", "loopback"}
-    ):
-        mock = test.get("mock_response", {})
-        if isinstance(mock, dict):
-            content = json.dumps(mock, sort_keys=True)
-        else:
-            content = str(mock)
-        return {
-            "content": content,
-            "source": "mock",
-            "model": provider.get("model", "fixture"),
-            "latency_ms": 0,
-            "metadata": test.get("metadata") or {},
-        }
-
+    )
     if mode == "auto" and not live_provider_available(
         provider_override or provider.get("provider")
     ):
-        return call_provider(provider, test, "mock", provider_override, model_override)
+        fixture_response = True
 
-    return call_live_provider(provider, test, prompt, provider_override, model_override)
+    interaction_id: str | None = None
+    if trace is not None:
+        interaction_id = trace.begin_interaction(
+            test_id=str(test["id"]),
+            source="mock" if fixture_response else "live",
+            provider=str(
+                provider_override or provider.get("provider") or provider.get("id", "")
+            ),
+            model=str(model_override or provider.get("model", "")),
+            system_prompt=(
+                None
+                if not (test.get("system_prompt") or provider.get("system_prompt"))
+                else str(test.get("system_prompt") or provider.get("system_prompt"))
+            ),
+            user_prompt=prompt,
+        )
+
+    try:
+        if fixture_response:
+            response = _mock_response(provider, test)
+        else:
+            response = call_live_provider(
+                provider, test, prompt, provider_override, model_override
+            )
+    except Exception as exc:
+        if trace is not None and interaction_id is not None:
+            trace.fail_interaction(interaction_id, error_message=str(exc))
+        raise
+
+    if trace is not None and interaction_id is not None:
+        trace.receive_interaction(
+            interaction_id, response_content=str(response.get("content", ""))
+        )
+        response["_trace_interaction_id"] = interaction_id
+    return response
+
+
+def _mock_response(provider: dict[str, Any], test: dict[str, Any]) -> dict[str, Any]:
+    """Build the existing deterministic fixture response."""
+
+    mock = test.get("mock_response", {})
+    if isinstance(mock, dict):
+        content = json.dumps(mock, sort_keys=True)
+    else:
+        content = str(mock)
+    return {
+        "content": content,
+        "source": "mock",
+        "model": provider.get("model", "fixture"),
+        "latency_ms": 0,
+        "metadata": test.get("metadata") or {},
+    }
 
 
 def live_provider_available(provider_name: str | None) -> bool:

@@ -784,17 +784,17 @@
     },
     {
       "approved_content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
-      "approved_release": "v1.0.5-coupon-live-containment",
+      "approved_release": "v1.0.5-marimo-sibling-ui-refinement",
       "approved_source_ref": {
         "kind": "current_source",
         "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
-      "approved_source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
+      "approved_source_tree_sha256": "12129fc6ea5a5af02ee266e378d5728973f0501ddf0131512133a51f6a29c667",
       "current_changes_public_ready": true,
       "current_content_hash": "9f0c519aeb1583358b84a0d4cbf35fd453e99d10f716bf3f5b2ed3279e510542",
-      "current_source_tree_sha256": "0fdff2cec171139bc5ad5cade8ceb43eaf28719db436b92911f055ec70039d88",
+      "current_source_tree_sha256": "12129fc6ea5a5af02ee266e378d5728973f0501ddf0131512133a51f6a29c667",
       "example_id": "common-sense-guardrails",
       "notes": "Approved public example variant selected for public export.",
       "public_channels": [
@@ -817,18 +817,18 @@
       "publication_status": "approved"
     },
     {
-      "approved_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
-      "approved_release": "v1.0.5-interactive-reasoning-workbenches",
+      "approved_content_hash": "70821d852f8c0911117d5730c1fe6fc9806be607d7569100154c49aad2408e65",
+      "approved_release": "v1.0.5-marimo-sibling-ui-refinement",
       "approved_source_ref": {
         "kind": "current_source",
         "notes": "Public export contains the approved selected source for this example.",
         "public_safe": true,
         "ref": "conformance/examples_manifest.json"
       },
-      "approved_source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
+      "approved_source_tree_sha256": "5c6d382b1ddf626da32eb4ef76f23a22535a0a7d99d3cad959ddb38e1e9273a7",
       "current_changes_public_ready": true,
-      "current_content_hash": "ef5e6f364cabe54dbe858d4b5c798ceacf5ab9f5aacb214f8887f05f626c87fd",
-      "current_source_tree_sha256": "1bdc7b09dea5a890d3fd1e83afe6da8792f42b882c0ab3bdb2be364b988437e4",
+      "current_content_hash": "70821d852f8c0911117d5730c1fe6fc9806be607d7569100154c49aad2408e65",
+      "current_source_tree_sha256": "5c6d382b1ddf626da32eb4ef76f23a22535a0a7d99d3cad959ddb38e1e9273a7",
       "example_id": "model-research-harness",
       "notes": "Approved public example variant selected for public export.",
       "public_channels": [

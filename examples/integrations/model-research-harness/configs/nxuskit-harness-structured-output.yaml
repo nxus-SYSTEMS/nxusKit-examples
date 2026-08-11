@@ -19,7 +19,7 @@
   "tests": [
     {
       "id": "schema-validated-output",
-      "prompt": "Extract a JSON ticket label for: {{ ticket }}",
+      "prompt": "Extract a JSON object for this synthetic support ticket with exactly these required fields: label as a string, confidence as a number from 0 to 1, and rationale as a concise string. Ticket: {{ ticket }}",
       "vars": { "ticket": "The API returns 500 errors for all checkout calls." },
       "provider_ids": ["json-fixture"],
       "mock_response": { "label": "application", "confidence": 0.91, "rationale": "API failure" },

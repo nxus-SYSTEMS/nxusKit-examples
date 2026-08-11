@@ -1,0 +1,308 @@
+.research-activity-card {
+  margin: 0.8rem 0 1rem;
+  width: 100%;
+}
+
+.research-split {
+  --activity-width: 42%;
+  --interaction-width: 58%;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, var(--activity-width)) 0.3rem minmax(0, var(--interaction-width));
+  min-height: 24rem;
+  overflow: hidden;
+  transition: grid-template-columns 160ms ease;
+}
+
+.activity-pane,
+.interaction-pane {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.research-split[data-pane="collapsed"] .interaction-pane {
+  visibility: hidden;
+}
+
+.pane-header {
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.65rem;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.pane-title {
+  color: #172033;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.run-state,
+.activity-status,
+.interaction-status,
+.interaction-count {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.12rem 0.42rem;
+  text-transform: uppercase;
+}
+
+.pane-separator {
+  background: #dbe4ee;
+  border: 0;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0;
+  padding: 0;
+}
+
+.pane-separator:focus-visible {
+  box-shadow: inset 0 0 0 3px #2563eb;
+  outline: none;
+}
+
+.research-split[data-pane="collapsed"] .pane-separator {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.3rem;
+  text-orientation: mixed;
+  writing-mode: vertical-rl;
+}
+
+.activity-viewport,
+.interaction-viewport {
+  max-height: 34rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0.75rem;
+}
+
+.activity-viewport:focus-visible,
+.interaction-viewport:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: -3px;
+}
+
+.event-list,
+.interaction-list {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-event {
+  align-items: baseline;
+  border-left: 0.25rem solid #64748b;
+  display: grid;
+  gap: 0.3rem 0.5rem;
+  grid-template-areas:
+    "time status link"
+    "phase phase phase"
+    "summary summary summary";
+  grid-template-columns: 6.7rem 5rem minmax(0, 1fr);
+  padding: 0.4rem 0.55rem;
+}
+
+.research-split[data-pane="expanded"] .activity-event {
+  grid-template-areas: "time summary";
+  grid-template-columns: 6.7rem minmax(0, 1fr);
+}
+
+.research-split[data-pane="expanded"] .activity-status,
+.research-split[data-pane="expanded"] .activity-link,
+.research-split[data-pane="expanded"] .activity-unlinked,
+.research-split[data-pane="expanded"] .activity-phase {
+  display: none;
+}
+
+.research-split[data-pane="expanded"] .activity-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-time,
+.activity-phase,
+.activity-link {
+  color: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+}
+
+.activity-time { grid-area: time; }
+.activity-status { grid-area: status; }
+.activity-link,
+.activity-unlinked { grid-area: link; }
+.activity-phase { grid-area: phase; }
+.activity-summary { grid-area: summary; }
+
+.activity-link {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.activity-unlinked,
+.empty-state {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.activity-event[data-interaction-id] { cursor: pointer; }
+
+.activity-event:focus-visible,
+.interaction-card:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.active-pair {
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1px #60a5fa;
+}
+
+.interaction-card {
+  border: 1px solid #cbd5e1;
+  border-left: 0.3rem solid #2563eb;
+  border-radius: 0.55rem;
+  overflow: clip;
+}
+
+.interaction-card.active-pair {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+.interaction-summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 0.7rem;
+  justify-content: space-between;
+  padding: 0.65rem 0.75rem;
+}
+
+.interaction-title {
+  color: #172033;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.interaction-body {
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.interaction-provenance {
+  color: #475569;
+  margin: 0;
+}
+
+.interaction-section {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.interaction-section-title {
+  color: #27364a;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.interaction-text {
+  background: #f1f5f9;
+  border-radius: 0.35rem;
+  color: #172033;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  margin: 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.6rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.interaction-waiting .interaction-text {
+  color: #8a5a13;
+}
+
+.assertion-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.status-accepted,
+.status-pass,
+.status-completed {
+  border-color: #16835d;
+  color: #0f6b4b;
+}
+
+.status-rejected,
+.status-fail,
+.status-failed,
+.status-error {
+  border-color: #c2413b;
+  color: #9b2f2b;
+}
+
+.status-requested,
+.status-received,
+.status-parsed,
+.status-started,
+.status-running {
+  border-color: #64748b;
+  color: #475569;
+}
+
+.status-skipped,
+.status-unsupported {
+  border-color: #b7791f;
+  color: #8a5a13;
+}
+
+.jump-live {
+  background: #fff;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+}
+
+.jump-live[hidden] { display: none; }
+
+@media (max-width: 760px) {
+  .research-split {
+    grid-template-columns: minmax(0, var(--activity-width)) 1.8rem minmax(0, var(--interaction-width));
+  }
+
+  .research-split[data-pane="collapsed"] .pane-separator,
+  .research-split[data-pane="expanded"] .pane-separator {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    text-orientation: mixed;
+    writing-mode: vertical-rl;
+  }
+
+  .research-split[data-pane="expanded"] .activity-pane {
+    visibility: hidden;
+  }
+}

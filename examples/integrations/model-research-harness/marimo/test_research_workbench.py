@@ -11,6 +11,9 @@ from types import ModuleType
 ROOT = Path(__file__).resolve().parents[1]
 MODULE = ROOT / "marimo" / "workbench_contract.py"
 APP = ROOT / "marimo" / "research_workbench.py"
+WIDGET = ROOT / "marimo" / "workbench_controls.py"
+WIDGET_JS = ROOT / "marimo" / "workbench_controls.js"
+ACTIVITY = ROOT / "marimo" / "research_activity.py"
 
 
 def load_contract() -> ModuleType:
@@ -68,7 +71,7 @@ def test_contract_has_one_submit_boundary_and_all_inspection_surfaces() -> None:
     controls = load_contract().workbench_controls()
     assert controls["primary_action"] == {
         "id": "run-evaluation",
-        "label": "Run evaluation",
+        "label": "Run Evaluation",
     }
     assert controls["modes"] == [
         "mock",
@@ -95,8 +98,9 @@ def test_contract_has_one_submit_boundary_and_all_inspection_surfaces() -> None:
         "exclude_tests",
         "allow_external",
     } <= set(controls["form_fields"])
-    source = APP.read_text(encoding="utf-8")
-    assert source.count('submit_button_label="Run evaluation"') == 1
+    widget_source = WIDGET_JS.read_text(encoding="utf-8")
+    assert widget_source.count('run.addEventListener("click"') == 1
+    assert widget_source.count('model.set("submit_generation", generation)') == 1
 
 
 def test_validated_license_status_is_passed_to_model_research_controls() -> None:
@@ -117,7 +121,7 @@ def test_validated_license_status_is_passed_to_model_research_controls() -> None
     assert "must-not-reach-controls" not in str(controls)
     source = APP.read_text(encoding="utf-8")
     assert "released_license_status" in source
-    assert "workbench_controls(license_status=license_status)" in source
+    assert "license_status=license_status" in source
 
 
 def test_controls_project_only_safe_license_status_to_engine_inspection(
@@ -181,24 +185,49 @@ def test_research_workbench_uses_responsive_ui_tabs_and_explains_safe_modes() ->
     assert "Unavailable providers (visible, disabled)" not in source
     assert 'properties(width="container")' in source
     assert (
-        'mo.md("## Inspect evidence"),\n                inspections,\n'
+        'mo.md("## Inspect Evidence"),\n                inspections,\n'
         "                visual_evidence,"
     ) in source
     assert "\\\\n" not in source
 
 
-def test_research_mode_guidance_uses_the_visible_mock_mode_vocabulary() -> None:
-    """Catches Fixture guidance that does not map to the visible mock control."""
+def test_research_workbench_uses_the_dedicated_sibling_control_surface() -> None:
+    """Catches the chatty prototype controls returning in place of the sibling UI."""
 
     source = APP.read_text(encoding="utf-8")
-    assert "Changing controls has no effect." in source
-    assert "After explicit Run evaluation:" in source
-    assert (
-        "Mock (Fixture) — deterministic synthetic evidence; it does not call a provider."
-        in source
-    )
-    assert (
-        "Auto — may attempt a compatible enabled live provider, then falls back only where supported."
-        in source
-    )
-    assert "Live — runs the selected enabled provider." in source
+    assert WIDGET.is_file(), "missing dedicated Model Research control bridge"
+    assert WIDGET_JS.is_file(), "missing dedicated Model Research control renderer"
+    assert "from workbench_controls import WorkbenchControls" in source
+    assert "# nxusKit Model Research Workbench" in source
+    widget_source = WIDGET_JS.read_text(encoding="utf-8")
+    assert "Configure the Workbench ..." in widget_source
+    assert "Community fixture/mock evaluation" not in source
+    assert "Mode guidance" not in source
+    assert "Changing controls has no effect" not in source
+    assert "Availability and execution truth" not in source
+    assert "mo.ui.multiselect(" not in source
+
+
+def test_research_workbench_wires_exact_generation_activity_before_inspection() -> None:
+    """Catches activity evidence being absent, late, or detached from submission."""
+
+    source = APP.read_text(encoding="utf-8")
+    assert ACTIVITY.is_file(), "missing dedicated Model Research activity bridge"
+    assert "from research_activity import ResearchActivity" in source
+    assert "activity_widget = ResearchActivity()" in source
+    assert "activity_view = mo.ui.anywidget(activity_widget)" in source
+    assert "activity_widget.begin_run(submit_generation)" in source
+    assert "event_sink=activity_widget.append_event" in source
+    assert "interaction_sink=activity_widget.append_interaction_update" in source
+    assert "activity_widget.complete_run(" in source
+    assert 'response["report"] or {"final_status": "not-run"}' in source
+    assert "activity_widget.fail_run(" in source
+    assert source.index("activity_view,") < source.index('mo.md("## Inspect Evidence")')
+
+
+def test_partial_activity_remains_visible_when_no_report_is_available() -> None:
+    """Catches provider failures replacing the trace with a lone callout."""
+
+    source = APP.read_text(encoding="utf-8")
+    report_none_branch = source.split("if report is None:", 1)[1].split("else:", 1)[0]
+    assert "activity_view" in report_none_branch

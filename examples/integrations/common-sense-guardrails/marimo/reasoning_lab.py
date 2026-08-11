@@ -72,7 +72,7 @@ def _(
     run_activity_widget = RunActivity()
     controls = mo.ui.anywidget(reasoning_widget)
     activity_view = mo.ui.anywidget(run_activity_widget)
-    controls
+    mo.vstack([mo.md("# nxusKit Reasoning Lab"), controls])
     return (
         activity_view,
         controls,

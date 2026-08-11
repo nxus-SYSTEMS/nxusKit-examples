@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 import uuid
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +14,7 @@ if str(PYTHON_ROOT) not in sys.path:
     sys.path.insert(0, str(PYTHON_ROOT))
 
 from config_catalog import build_config_catalog  # noqa: E402
+from harness.activity import EvaluationTrace  # noqa: E402
 from harness.config import ConfigError, load_config  # noqa: E402
 from harness.promptfoo_import import import_promptfoo  # noqa: E402
 from harness.reports import build_report, write_reports  # noqa: E402
@@ -66,6 +67,9 @@ def run_evaluation(
     *,
     submitted: bool,
     provider_availability: Sequence[Mapping[str, object]] | None = None,
+    event_sink: Callable[[dict[str, Any]], None] | None = None,
+    interaction_sink: Callable[[dict[str, Any]], None] | None = None,
+    clock: Callable[[], str] | None = None,
 ) -> dict[str, object]:
     """Run one canonical harness evaluation only after explicit submission."""
 
@@ -82,6 +86,7 @@ def run_evaluation(
             "report_path": None,
             "message": "Configure inputs, then press Run evaluation.",
         }
+    trace = EvaluationTrace(event_sink, interaction_sink, clock)
     if entry["enabled"] is not True:
         raise ValueError(str(entry["reason"]))
     if entry["category"] == "external-adapter" and not allow_external:
@@ -115,10 +120,22 @@ def run_evaluation(
         except ConfigError as exc:
             raise ValueError(f"config unavailable for this mode: {exc}") from exc
         config["_config_dir"] = str(config_path.parent)
+    trace.event(
+        phase="configuration",
+        status="completed",
+        summary=f"Loaded configuration {config_id} for {mode} evaluation.",
+        details={"config_id": config_id, "mode": mode},
+    )
 
     include = _filter_values(_request_value(request, "include_tests"))
     exclude = _filter_values(_request_value(request, "exclude_tests"))
     filter_tests(config, include=include, exclude=exclude)
+    trace.event(
+        phase="filter",
+        status="completed",
+        summary="Applied submitted test filters.",
+        details={"included": include, "excluded": exclude},
+    )
     runner_mode = "mock" if mode in {"dry-run-policy", "import-promptfoo"} else mode
     results, bayesian, recommendations, truth = run_config(
         config,
@@ -128,9 +145,16 @@ def run_evaluation(
         output_dir=OUTPUT_ROOT,
         allow_external_commands=allow_external,
         allow_lifecycle_mutations=False,
+        trace=trace,
     )
     report = build_report(
         config, results, bayesian, recommendations, truth, compatibility
+    )
+    trace.event(
+        phase="report",
+        status="completed",
+        summary="Assembled the canonical evaluation report.",
+        details={"final_status": report["final_status"]},
     )
     report_path: str | None = None
     if write_requested:
@@ -138,8 +162,52 @@ def run_evaluation(
         run_root.resolve().relative_to(OUTPUT_ROOT.resolve())
         write_reports(report, run_root)
         report_path = str(run_root / "result.json")
+        trace.event(
+            phase="report_write",
+            status="completed",
+            summary="Wrote the explicitly requested local report artifacts.",
+        )
     return {
         "report": report,
         "report_path": report_path,
         "message": "Canonical report built after explicit Run evaluation.",
     }
+
+
+class EvaluationSubmissionGate:
+    """Execute the canonical evaluator at most once per submitted generation."""
+
+    def __init__(
+        self,
+        evaluate: Callable[..., dict[str, object]] | None = None,
+    ) -> None:
+        self._evaluate = evaluate or run_evaluation
+        self._generation = 0
+        self._response: dict[str, object] | None = None
+
+    def evaluate(
+        self,
+        generation: int,
+        request: Mapping[str, object],
+        *,
+        provider_availability: Sequence[Mapping[str, object]],
+        event_sink: Callable[[dict[str, Any]], None] | None = None,
+        interaction_sink: Callable[[dict[str, Any]], None] | None = None,
+        clock: Callable[[], str] | None = None,
+    ) -> dict[str, object]:
+        if generation < 1:
+            raise ValueError("submission generation must be positive")
+        if generation == self._generation and self._response is not None:
+            return self._response
+        if generation < self._generation:
+            raise ValueError("submission generation cannot move backwards")
+        self._response = self._evaluate(
+            dict(request),
+            submitted=True,
+            provider_availability=provider_availability,
+            event_sink=event_sink,
+            interaction_sink=interaction_sink,
+            clock=clock,
+        )
+        self._generation = generation
+        return self._response

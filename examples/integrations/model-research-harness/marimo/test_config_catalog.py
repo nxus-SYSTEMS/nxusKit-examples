@@ -34,6 +34,37 @@ def test_catalog_covers_every_checked_in_config_once() -> None:
     assert len(catalog) == len(loaded)
 
 
+def test_catalog_exposes_descriptions_and_expanded_test_counts() -> None:
+    """Catches configuration context or matrix variants disappearing from the UI."""
+
+    catalog = {
+        entry["filename"]: entry for entry in load_catalog().build_config_catalog(ROOT)
+    }
+    structured = catalog["nxuskit-harness-structured-output.yaml"]
+    assert (
+        structured["description"]
+        == "Distinguish native JSON mode from harness-side validation."
+    )
+    assert structured["test_count"] == 1
+    assert all(str(entry["description"]).strip() for entry in catalog.values())
+    assert catalog["nxuskit-harness-matrix-template.yaml"]["test_count"] == 4
+
+
+def test_catalog_identifies_only_engines_configured_for_each_run() -> None:
+    """Catches runtime availability being mistaken for configured engine use."""
+
+    catalog = {
+        entry["id"]: entry for entry in load_catalog().build_config_catalog(ROOT)
+    }
+    assert catalog["nxuskit-harness-clips-engine.yaml"]["configured_engines"] == [
+        "clips"
+    ]
+    assert catalog["nxuskit-harness-bn-engine.yaml"]["configured_engines"] == ["bn"]
+    assert catalog["nxuskit-harness-basic.yaml"]["configured_engines"] == []
+    assert all("solver" not in item["configured_engines"] for item in catalog.values())
+    assert all("zen" not in item["configured_engines"] for item in catalog.values())
+
+
 def test_catalog_disables_lifecycle_and_marks_external_or_promptfoo_truthfully() -> (
     None
 ):
