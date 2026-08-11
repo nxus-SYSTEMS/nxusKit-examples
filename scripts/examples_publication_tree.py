@@ -560,16 +560,31 @@ def attest_public_export(export_root: Path) -> dict[str, object]:
         raise TreeIdentityError(str(exc)) from exc
     return {
         "ok": True,
+        "export_tree_sha256": source_tree_sha256(
+            filesystem_tree_entries(export_root.resolve())
+        ),
         "selected_examples_count": len(digests),
         "source_tree_sha256_by_example": dict(sorted(digests.items())),
     }
 
 
-def attest_staged_export(repo: Path, export_root: Path) -> dict[str, object]:
+def attest_staged_export(
+    repo: Path,
+    export_root: Path,
+    expected_export_sha256: str,
+) -> dict[str, object]:
     """Prove that a destination Git index exactly represents one export."""
 
-    staged_entries = git_index_tree_entries(repo)
     export_entries = filesystem_tree_entries(export_root.resolve())
+    if len(expected_export_sha256) != 64 or any(
+        char not in "0123456789abcdef" for char in expected_export_sha256
+    ):
+        raise TreeIdentityError(
+            "expected export SHA-256 must be 64 lowercase hexadecimal characters"
+        )
+    if source_tree_sha256(export_entries) != expected_export_sha256:
+        raise TreeIdentityError("final public export changed after attestation")
+    staged_entries = git_index_tree_entries(repo)
     if staged_entries != export_entries:
         raise TreeIdentityError("staged public tree does not match attested export")
     return {"ok": True, "tracked_paths_count": len(staged_entries)}
@@ -621,6 +636,7 @@ def parse_args() -> argparse.Namespace:
     )
     staged.add_argument("--repo", type=Path, required=True)
     staged.add_argument("--export-root", type=Path, required=True)
+    staged.add_argument("--expected-export-sha256", required=True)
     return parser.parse_args()
 
 
@@ -654,7 +670,11 @@ def main() -> int:
         if args.command == "attest-staged-export":
             print(
                 json.dumps(
-                    attest_staged_export(args.repo, args.export_root),
+                    attest_staged_export(
+                        args.repo,
+                        args.export_root,
+                        args.expected_export_sha256,
+                    ),
                     indent=2,
                     sort_keys=True,
                 )

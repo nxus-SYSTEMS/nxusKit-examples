@@ -880,6 +880,10 @@ class PublicMaterializerTests(unittest.TestCase):
 
         self.assertEqual(receipt["selected_examples_count"], 1)
         self.assertEqual(set(receipt["source_tree_sha256_by_example"]), {"demo"})
+        self.assertEqual(
+            receipt["export_tree_sha256"],
+            source_tree_sha256(filesystem_tree_entries(self.output)),
+        )
 
 
 class TreeDigestMigrationTests(unittest.TestCase):
@@ -1136,6 +1140,27 @@ class StagedExportAttestationTests(unittest.TestCase):
             text=True,
         )
 
+    @staticmethod
+    def export_digest(export_root: Path) -> str:
+        return source_tree_sha256(filesystem_tree_entries(export_root))
+
+    def attest_staged(
+        self, export_root: Path, expected_export_sha256: str | None = None
+    ) -> dict[str, object]:
+        expected = (
+            self.export_digest(export_root)
+            if expected_export_sha256 is None
+            else expected_export_sha256
+        )
+        try:
+            return tree_module.attest_staged_export(
+                self.repo,
+                export_root,
+                expected_export_sha256=expected,
+            )
+        except TypeError as exc:
+            self.fail(f"staged attestor lacks frozen export identity: {exc}")
+
     def test_force_stage_includes_ignored_export_path_and_matches_exactly(self) -> None:
         self.git("add", "-A")
         self.assertNotIn(
@@ -1145,12 +1170,12 @@ class StagedExportAttestationTests(unittest.TestCase):
         with self.assertRaisesRegex(
             TreeIdentityError, "staged public tree does not match attested export"
         ):
-            tree_module.attest_staged_export(self.repo, self.export)
+            self.attest_staged(self.export)
 
         self.git("add", "--all", "--force")
 
         self.assertEqual(
-            tree_module.attest_staged_export(self.repo, self.export),
+            self.attest_staged(self.export),
             {"ok": True, "tracked_paths_count": 5},
         )
 
@@ -1162,33 +1187,150 @@ class StagedExportAttestationTests(unittest.TestCase):
         with self.assertRaisesRegex(
             TreeIdentityError, "staged public tree does not match attested export"
         ):
-            tree_module.attest_staged_export(self.repo, self.export)
+            self.attest_staged(self.export)
+
+    def test_validation_artifacts_do_not_enter_fresh_publish_export(self) -> None:
+        validation_export = self.root / "validation-export"
+        publish_export = self.root / "publish-export"
+        shutil.copytree(self.export, validation_export, symlinks=True)
+        generated = (
+            validation_export / "scripts" / "__pycache__" / "check.cpython-312.pyc"
+        )
+        generated.parent.mkdir(parents=True)
+        generated.write_bytes(b"generated validation bytecode")
+
+        materialize_entries(filesystem_tree_entries(self.export), publish_export)
+
+        self.assertTrue(generated.is_file())
+        self.assertFalse(
+            (publish_export / "scripts" / "__pycache__" / generated.name).exists()
+        )
+        self.assertTrue((publish_export / "examples" / ".env.example").is_file())
+
+    def test_post_attestation_export_mutation_is_rejected_even_when_staged(
+        self,
+    ) -> None:
+        publish_export = self.root / "publish-export"
+        materialize_entries(filesystem_tree_entries(self.export), publish_export)
+        expected_digest = self.export_digest(publish_export)
+
+        generated = publish_export / "scripts" / "__pycache__" / "check.cpython-312.pyc"
+        generated.parent.mkdir(parents=True)
+        generated.write_bytes(b"post-attestation mutation")
+        staged_generated = self.repo / generated.relative_to(publish_export)
+        staged_generated.parent.mkdir(parents=True)
+        staged_generated.write_bytes(generated.read_bytes())
+        self.git("add", "--all", "--force")
+
+        with self.assertRaisesRegex(
+            TreeIdentityError, "final public export changed after attestation"
+        ):
+            self.attest_staged(publish_export, expected_digest)
+
+    def test_invalid_frozen_export_digest_is_rejected(self) -> None:
+        self.git("add", "--all", "--force")
+
+        for invalid in ("", "0" * 63, "A" * 64, "g" * 64):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(
+                    TreeIdentityError,
+                    "expected export SHA-256 must be 64 lowercase hexadecimal characters",
+                ):
+                    self.attest_staged(self.export, invalid)
 
 
 class WorkflowContractTests(unittest.TestCase):
-    SAFE_COMMANDS = (
+    SAFE_VALIDATION_COMMANDS = (
         "set -euo pipefail",
-        "EXPORT=/tmp/nxusKit-examples-export",
-        'rm -rf "$EXPORT"',
+        "VALIDATION_EXPORT=/tmp/nxusKit-examples-validation-export",
+        'rm -rf "$VALIDATION_EXPORT"',
         'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA"',
-        'python3 scripts/examples_publication_tree.py materialize-public-export --repo . --source-ref "$GITHUB_SHA" --output "$EXPORT"',
-        'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA" --filter-export "$EXPORT"',
-        'python3 scripts/examples_publication_tree.py attest-public-export --export-root "$EXPORT"',
+        'python3 scripts/examples_publication_tree.py materialize-public-export --repo . --source-ref "$GITHUB_SHA" --output "$VALIDATION_EXPORT"',
+        'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA" --filter-export "$VALIDATION_EXPORT"',
+        'python3 scripts/examples_publication_tree.py attest-public-export --export-root "$VALIDATION_EXPORT"',
+    )
+    SAFE_RELEASE_VALIDATION_COMMANDS = (
+        "set -eu -o pipefail",
+        "VALIDATION_EXPORT=/tmp/nxusKit-examples-validation-export",
+        "export PYTHONDONTWRITEBYTECODE=1",
+        "(",
+        'cd "$VALIDATION_EXPORT"',
+        "python3 scripts/examples_publication_tree.py self-test",
+        "python3 scripts/test_examples_publication_tree.py",
+        ")",
+    )
+    SAFE_BOUNDARY_COMMANDS = (
+        "set -eu -o pipefail",
+        "VALIDATION_EXPORT=/tmp/nxusKit-examples-validation-export",
+        'test -f "$VALIDATION_EXPORT/NOTICE"',
+    )
+    SAFE_PUBLISH_EXPORT_COMMANDS = (
+        "set -euo pipefail",
+        "VALIDATION_EXPORT=/tmp/nxusKit-examples-validation-export",
+        "PUBLISH_EXPORT=/tmp/nxusKit-examples-publish-export",
+        'rm -rf "$VALIDATION_EXPORT" "$PUBLISH_EXPORT"',
+        'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA"',
+        'python3 scripts/examples_publication_tree.py materialize-public-export --repo . --source-ref "$GITHUB_SHA" --output "$PUBLISH_EXPORT"',
+        'python3 scripts/generate-examples-publication-selection.py --check --source-ref "$GITHUB_SHA" --filter-export "$PUBLISH_EXPORT"',
+        'EXPORT_RECEIPT=$(python3 scripts/examples_publication_tree.py attest-public-export --export-root "$PUBLISH_EXPORT")',
+        'EXPORT_TREE_SHA256=$(python3 -c \'import json, sys; print(json.load(sys.stdin)["export_tree_sha256"])\' <<<"$EXPORT_RECEIPT")',
+        'echo "export_tree_sha256=$EXPORT_TREE_SHA256" >> "$GITHUB_OUTPUT"',
     )
     SAFE_PUBLISH_COMMANDS = (
         "set -eu -o pipefail",
-        "EXPORT=/tmp/nxusKit-examples-export",
+        "PUBLISH_EXPORT=/tmp/nxusKit-examples-publish-export",
+        'if [[ -z "${PUBLIC_REPO_URL:-}" ]] || [[ -z "${PUBLIC_REPO_TOKEN:-}" ]]; then',
+        'echo "::notice::Public repo secrets not configured — skipping push."',
+        'echo "Configure EXAMPLES_PUBLIC_REPO_URL and EXAMPLES_PUBLIC_REPO_TOKEN to enable."',
+        "exit 0",
+        "fi",
+        'REMOTE_URL="https://x-access-token:${PUBLIC_REPO_TOKEN}@${PUBLIC_REPO_URL}"',
+        'git clone --depth=1 "$REMOTE_URL" /tmp/nxusKit-examples-public',
+        "cd /tmp/nxusKit-examples-public",
+        "rsync -a --delete \\",
+        "--exclude='.git' \\",
+        '"$PUBLISH_EXPORT/" /tmp/nxusKit-examples-public/',
         "git add --all --force",
-        'python3 "$EXPORT/scripts/examples_publication_tree.py" attest-staged-export --repo . --export-root "$EXPORT"',
+        'python3 "$GITHUB_WORKSPACE/scripts/examples_publication_tree.py" attest-staged-export --repo . --export-root "$PUBLISH_EXPORT" --expected-export-sha256 "${{ steps.publish-export.outputs.export_tree_sha256 }}"',
+        "if git diff --cached --quiet; then",
+        'echo "No changes to publish."',
+        "exit 0",
+        "fi",
+        'git -c user.name="nxusKit Mirror" \\',
+        '-c user.email="mirror@nxuskit.local" \\',
+        'commit -m "$COMMIT_MSG"',
+        "git push origin main",
+        'echo "Successfully pushed to public repository."',
     )
 
     @classmethod
-    def workflow(cls, commands: tuple[str, ...] | None = None) -> str:
-        body = "\n".join(
-            f"          {line}" for line in (commands or cls.SAFE_COMMANDS)
+    def workflow(
+        cls,
+        validation_commands: tuple[str, ...] | None = None,
+        release_commands: tuple[str, ...] | None = None,
+        boundary_commands: tuple[str, ...] | None = None,
+        publish_export_commands: tuple[str, ...] | None = None,
+        publish_commands: tuple[str, ...] | None = None,
+    ) -> str:
+        validation_body = "\n".join(
+            f"          {line}"
+            for line in (validation_commands or cls.SAFE_VALIDATION_COMMANDS)
+        )
+        release_body = "\n".join(
+            f"          {line}"
+            for line in (release_commands or cls.SAFE_RELEASE_VALIDATION_COMMANDS)
+        )
+        boundary_body = "\n".join(
+            f"          {line}"
+            for line in (boundary_commands or cls.SAFE_BOUNDARY_COMMANDS)
+        )
+        publish_export_body = "\n".join(
+            f"          {line}"
+            for line in (publish_export_commands or cls.SAFE_PUBLISH_EXPORT_COMMANDS)
         )
         publish_body = "\n".join(
-            f"          {line}" for line in cls.SAFE_PUBLISH_COMMANDS
+            f"          {line}"
+            for line in (publish_commands or cls.SAFE_PUBLISH_COMMANDS)
         )
         return f"""name: Safe publication fixture
 jobs:
@@ -1198,13 +1340,19 @@ jobs:
         run: |
           set -euo pipefail
           echo prepare
-      - name: Export approved tracked content
+      - name: Materialize validation export
         run: |
-{body}
-      - name: Post-attestation read
+{validation_body}
+      - name: Release contract assertion — exported workflow
         run: |
-          set -euo pipefail
-          echo complete
+{release_body}
+      - name: Boundary assertion — forbidden dirs absent from validation export
+        run: |
+{boundary_body}
+      - name: Materialize pristine publish export
+        id: publish-export
+        run: |
+{publish_export_body}
       - name: Merge into public repo
         run: |
 {publish_body}
@@ -1219,38 +1367,90 @@ jobs:
     def test_safe_contract_passes(self) -> None:
         self.assertEqual(self.errors(self.workflow()), [])
 
-    def test_each_required_command_is_mandatory_and_exact_sha_bound(self) -> None:
-        for command in self.SAFE_COMMANDS[2:]:
+    def test_validation_copy_is_mandatory_sha_bound_and_nonpublishing(self) -> None:
+        for command in self.SAFE_VALIDATION_COMMANDS[2:]:
             with self.subTest(command=command):
-                commands = tuple(item for item in self.SAFE_COMMANDS if item != command)
-                self.assertTrue(self.errors(self.workflow(commands)))
+                commands = tuple(
+                    item for item in self.SAFE_VALIDATION_COMMANDS if item != command
+                )
+                self.assertTrue(
+                    self.errors(self.workflow(validation_commands=commands))
+                )
         unsafe = self.workflow().replace(
             '--source-ref "$GITHUB_SHA"', '--source-ref "$OTHER_SHA"', 1
         )
         self.assertTrue(self.errors(unsafe))
+        self.assertTrue(
+            self.errors(
+                self.workflow(
+                    validation_commands=tuple(
+                        command.replace("$VALIDATION_EXPORT", "$PUBLISH_EXPORT")
+                        for command in self.SAFE_VALIDATION_COMMANDS
+                    )
+                )
+            )
+        )
 
-    def test_order_duplicates_and_extra_export_writes_are_rejected(self) -> None:
-        swapped = list(self.SAFE_COMMANDS)
-        swapped[-1], swapped[-2] = swapped[-2], swapped[-1]
-        self.assertTrue(self.errors(self.workflow(tuple(swapped))))
-        for command in self.SAFE_COMMANDS[3:]:
-            with self.subTest(duplicate=command):
-                duplicated = (*self.SAFE_COMMANDS, command)
-                self.assertTrue(self.errors(self.workflow(duplicated)))
-        duplicate_step = self.workflow().replace(
-            "      - name: Post-attestation read",
-            "      - name: Export approved tracked content\n"
+    def test_validation_is_defensive_and_discarded_before_final_export(self) -> None:
+        self.assertTrue(
+            self.errors(
+                self.workflow(
+                    release_commands=tuple(
+                        command
+                        for command in self.SAFE_RELEASE_VALIDATION_COMMANDS
+                        if command != "export PYTHONDONTWRITEBYTECODE=1"
+                    )
+                )
+            )
+        )
+
+    def test_required_step_order_uniqueness_and_adjacency_are_enforced(self) -> None:
+        safe = self.workflow()
+        duplicate = safe.replace(
+            "      - name: Merge into public repo",
+            "      - name: Materialize pristine publish export\n"
+            "        id: publish-export-duplicate\n"
             "        run: |\n"
             "          set -euo pipefail\n"
             "          echo duplicate\n"
-            "      - name: Post-attestation read",
+            "      - name: Merge into public repo",
+            1,
         )
-        self.assertTrue(self.errors(duplicate_step))
-        prewrite = self.workflow().replace(
-            "          echo prepare",
-            '          echo unsafe > "$EXPORT"',
+        intervening = safe.replace(
+            "      - name: Merge into public repo",
+            "      - name: Post-attestation export mutation\n"
+            "        run: |\n"
+            "          set -euo pipefail\n"
+            '          echo unsafe > "$PUBLISH_EXPORT/generated.pyc"\n'
+            "      - name: Merge into public repo",
+            1,
         )
-        self.assertTrue(self.errors(prewrite))
+        validation_start = safe.index("      - name: Materialize validation export")
+        publish_start = safe.index("      - name: Materialize pristine publish export")
+        merge_start = safe.index("      - name: Merge into public repo")
+        reordered = (
+            safe[:validation_start]
+            + safe[publish_start:merge_start]
+            + safe[validation_start:publish_start]
+            + safe[merge_start:]
+        )
+
+        for unsafe in (duplicate, intervening, reordered):
+            with self.subTest(unsafe=unsafe):
+                self.assertTrue(self.errors(unsafe))
+        self.assertTrue(
+            self.errors(
+                self.workflow(
+                    publish_export_commands=tuple(
+                        command.replace(
+                            'rm -rf "$VALIDATION_EXPORT" "$PUBLISH_EXPORT"',
+                            'rm -rf "$PUBLISH_EXPORT"',
+                        )
+                        for command in self.SAFE_PUBLISH_EXPORT_COMMANDS
+                    )
+                )
+            )
+        )
 
     def test_ambient_copy_mechanisms_are_rejected(self) -> None:
         for unsafe in (
@@ -1262,8 +1462,45 @@ jobs:
             'git archive HEAD > "$EXPORT/tree.tar"',
         ):
             with self.subTest(unsafe=unsafe):
-                commands = (*self.SAFE_COMMANDS[:-1], unsafe, self.SAFE_COMMANDS[-1])
-                self.assertTrue(self.errors(self.workflow(commands)))
+                commands = (
+                    *self.SAFE_PUBLISH_EXPORT_COMMANDS[:-3],
+                    unsafe,
+                    *self.SAFE_PUBLISH_EXPORT_COMMANDS[-3:],
+                )
+                self.assertTrue(
+                    self.errors(self.workflow(publish_export_commands=commands))
+                )
+
+    def test_final_export_is_fresh_frozen_and_immutable_before_rsync(self) -> None:
+        safe = self.workflow()
+        unsafe_variants = (
+            safe.replace(
+                '          EXPORT_RECEIPT=$(python3 scripts/examples_publication_tree.py attest-public-export --export-root "$PUBLISH_EXPORT")\n',
+                '          EXPORT_RECEIPT=$(python3 scripts/examples_publication_tree.py attest-public-export --export-root "$PUBLISH_EXPORT")\n'
+                '          echo unsafe > "$PUBLISH_EXPORT/generated.pyc"\n',
+                1,
+            ),
+            safe.replace(
+                'echo "export_tree_sha256=$EXPORT_TREE_SHA256" >> "$GITHUB_OUTPUT"',
+                "echo receipt omitted",
+                1,
+            ),
+            safe.replace(
+                '"$PUBLISH_EXPORT/" /tmp/nxusKit-examples-public/',
+                '"$VALIDATION_EXPORT/" /tmp/nxusKit-examples-public/',
+                1,
+            ),
+            safe.replace(
+                '--expected-export-sha256 "${{ steps.publish-export.outputs.export_tree_sha256 }}"',
+                "",
+                1,
+            ),
+        )
+
+        self.assertEqual(self.errors(safe), [])
+        for unsafe in unsafe_variants:
+            with self.subTest(unsafe=unsafe):
+                self.assertTrue(self.errors(unsafe))
 
     def test_live_layout_matches_contract(self) -> None:
         private_workflow = REPO / ".github" / "workflows" / "publish-to-public.yml"
@@ -1274,27 +1511,34 @@ jobs:
 
     def test_public_merge_requires_force_stage_then_exact_attestation(self) -> None:
         safe = self.workflow()
+        attestation = next(
+            command
+            for command in self.SAFE_PUBLISH_COMMANDS
+            if "attest-staged-export" in command
+        )
         unsafe_variants = (
             safe.replace("git add --all --force", "git add -A", 1),
             safe.replace(" --force", "", 1),
+            safe.replace(f"          {attestation}\n", "", 1),
             safe.replace(
-                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
-                'attest-staged-export --repo . --export-root "$EXPORT"\n',
-                "",
-                1,
-            ),
-            safe.replace(
-                "          git add --all --force\n"
-                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
-                'attest-staged-export --repo . --export-root "$EXPORT"\n',
-                '          python3 "$EXPORT/scripts/examples_publication_tree.py" '
-                'attest-staged-export --repo . --export-root "$EXPORT"\n'
-                "          git add --all --force\n",
+                f"          git add --all --force\n          {attestation}\n",
+                f"          {attestation}\n          git add --all --force\n",
                 1,
             ),
             safe.replace(
                 "          git add --all --force\n",
                 "          git add --all --force\n          git add README.md\n",
+                1,
+            ),
+            safe.replace(
+                f"          {attestation}\n",
+                f"          {attestation}\n"
+                "          git update-index --add --cacheinfo 100644,deadbeef,unexpected.pyc\n",
+                1,
+            ),
+            safe.replace(
+                '          commit -m "$COMMIT_MSG"\n',
+                '          commit -am "$COMMIT_MSG"\n',
                 1,
             ),
         )
